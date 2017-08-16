@@ -2,6 +2,7 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
+from flask_sqlalchemy import SQLAlchemy
 
 from helpers import *
 from errorHandling import *
@@ -11,6 +12,8 @@ from formattingHelpers import *
 # configure application
 application = Flask(__name__)
 app = application
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(username="admin", password="y94D6NDeTColiQDZAEWp", server="aa13t6f8mueycaj.cy9bm4pmzdu7.us-east-1.rds.amazonaws.com", port="3306", db="ebdb")
+db2 = SQLAlchemy(app)
 
 # set up filters for use in displaying text
 app.jinja_env.filters["title"] = title
