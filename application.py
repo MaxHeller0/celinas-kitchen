@@ -53,21 +53,22 @@ def newClient():
     clientType = request.form.get("clientType")
     return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
 
-@app.route("/client", methods=["GET", "POST"])
-def client():
+@app.route("/client/", methods=["POST"])
+@app.route("/client/<name>", methods=["GET"])
+def client(name = None):
     """
     Renders a page to edit or view client details
     pass in existing details so that users can build off of them
     """
-    if request.method == "GET":
-        return(redirect(url_for("index")))
-    source = request.form.get("source")
-    name = removeExcess(request.form.get("name"), "-'")
-    destination = str
+    if not name:
+        name = removeExcess(request.form.get("name"), "-'")
+        source = request.form.get("source")
+    else:
+        source = "GET"
     message = ''
     destination = "viewClient.html"
 
-    if source == "viewButton":
+    if source in ["viewButton", "GET"]:
         message = "Client details"
     elif source in ["newClient", "editClient"]:
         if source == "newClient":

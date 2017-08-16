@@ -4,11 +4,14 @@ import os
 from formattingHelpers import sortDict, removeExcess, invertDict
 
 # configure CS50 Library to use Amazon RDS MySQL Database
-db = SQL("mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(username=os.environ["RDS_USERNAME"],
+try:
+    db = SQL("mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(username=os.environ["RDS_USERNAME"],
                                                                             password=os.environ["RDS_PASSWORD"],
                                                                             server=os.environ["RDS_HOSTNAME"],
                                                                             port=os.environ["RDS_PORT"],
                                                                             db=os.environ["RDS_DB_NAME"]))
+except:
+    db = SQL("mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(username="admin", password="y94D6NDeTColiQDZAEWp", server="aa13t6f8mueycaj.cy9bm4pmzdu7.us-east-1.rds.amazonaws.com", port="3306", db="ebdb"))
 
 def baseClient(request, clientType = 0):
     """
