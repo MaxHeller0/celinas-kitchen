@@ -2,9 +2,9 @@ import urllib.request
 from flask import redirect, render_template, request, session, url_for
 from functools import wraps
 
-def apology(message=""):
+def apology(top="", bottom=""):
     """Renders message as an apology to user."""
-    return render_template("apology.html", message=message)
+    return render_template("apology.html", top=top, bottom=bottom)
 
 # Not currently used
 # def login_required(f):
