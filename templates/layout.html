@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta -->
+        <meta charset="utf-8"/>
+        <meta content="initial-scale=1, width=device-width" name="viewport"/>
+
+        <!-- documentation at http://getbootstrap.com/, alternative themes at https://www.bootstrapcdn.com/bootswatch/ -->
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+
+        <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet"/>
+
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+        <title>Celina's Kitchen: {% block title %}{% endblock %}</title>
+
+    </head>
+
+    <body>
+
+        <div class="container">
+
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button aria-expanded="false" class="navbar-toggle collapsed" data-target="#navbar" data-toggle="collapse" type="button">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="{{ url_for('index') }}"><span class="red">Celina's Kitchen</span></a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="navbar">
+                            <ul class="nav navbar-nav">
+                                <li class="dropdown">
+                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Clients <span class="caret"></span></a>
+                                  <ul class="dropdown-menu">
+                                    <form action="{{ url_for('newClient') }}" method="POST" class="navbar-form navbar-left">
+                                        <div class="form-group">
+                                            <h5>
+                                                New Client
+                                            </h5>
+                                            {% for type in clientTypes %}
+                                                <label><input type="radio" name="clientType" value={{clientTypes[type]}}> {{ type }}</label><br>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="form-group">
+                                            <button class="btn btn-default" name="source" value="newClient" type="submit">Create</button>
+                                        </div>
+                                    </form>
+                                    <form action="{{ url_for('client') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
+                                      <div class="form-group">
+                                        <input class="form-control" list="clientNames" name="name" placeholder="Client Name">
+                                        <datalist name="clientNames" id="clientNames">
+                                            {% for client in clientNameList %}
+                                                <option value="{{client.name|title}}">
+                                            {% endfor %}
+                                        </datalist>
+                                        <button name="source" value="viewButton" class="btn btn-default" type="submit">View</button>
+                                        <button name="source" value="editButton" class="btn btn-default" type="submit">Edit</button>
+                                      </div>
+                                    </form>
+                                  </ul>
+                                </li>
+                                <li><a href="{{ url_for('index') }}">BUTTON</a></li>
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li><a href="{{ url_for('index') }}">BUTTON</a></li>
+                            </ul>
+                    </div>
+                </div>
+            </nav>
+
+            {% if get_flashed_messages() %}
+                <header>
+                    <div class="alert alert-info" role="alert">
+                        {{ get_flashed_messages() | join(" ") }}
+                    </div>
+                </header>
+            {% endif %}
+
+            <main>
+                {% block main %}{% endblock %}
+            </main>
+
+        </div>
+
+    </body>
+
+</html>
