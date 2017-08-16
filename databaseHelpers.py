@@ -21,16 +21,16 @@ def baseClient(request, clientType = 0):
     name = removeExcess(request.form.get("name").lower(), "-'")
     phone = removeExcess(request.form.get("phone"))
     address = request.form.get("address").lower()
-    deliveryNotes = request.form.get("deliveryNotes")
+    generalNotes = request.form.get("generalNotes")
     if getClient(name):
         user_id = getClientId(request.form.get("name"))
-        db.execute("UPDATE clients SET phone=:phone, address=:address, name=:name, deliveryNotes=:deliveryNotes WHERE id=:user_id",
-                                        phone=phone, address=address, name=name, user_id=user_id, deliveryNotes=deliveryNotes)
+        db.execute("UPDATE clients SET phone=:phone, address=:address, name=:name, generalNotes=:generalNotes WHERE id=:user_id",
+                                        phone=phone, address=address, name=name, user_id=user_id, generalNotes=generalNotes)
     else:
-        db.execute("INSERT INTO clients (phone, name, clientType, address, deliveryNotes) VALUES (:phone, :name, :clientType, :address, :deliveryNotes)",
-                                        phone=phone, name=name, clientType=clientType, address=address, deliveryNotes=deliveryNotes)
+        db.execute("INSERT INTO clients (phone, name, clientType, address, generalNotes) VALUES (:phone, :name, :clientType, :address, :generalNotes)",
+                                        phone=phone, name=name, clientType=clientType, address=address, generalNotes=generalNotes)
 
-def saladService(request):
+def standingOrder(request):
     """
     Adds or edits salad service level client information
     Inputs: request from HTTP POST form
@@ -38,15 +38,18 @@ def saladService(request):
     baseClient(request, 1)
     name = removeExcess(request.form.get("name").lower(), "-'")
     user_id = getClientId(name)
-    likes, dislikes, allergies = request.form.get("likes").lower(), request.form.get("dislikes").lower(), request.form.get("allergies").lower()
-    loves, mp, tp = request.form.get("loves").lower(), request.form.get("mp"), request.form.get("tp")
+    saladLikes, saladDislikes = request.form.get("saladLikes").lower(), request.form.get("saladDislikes").lower()
+    saladLoves, mondaySalads, thursdaySalads = request.form.get("saladLoves").lower(), request.form.get("mondaySalads"), request.form.get("thursdaySalads")
     saladNotes = request.form.get("saladNotes")
+    hotplateLikes, hotplateDislikes = request.form.get("hotplateLikes").lower(), request.form.get("hotplateDislikes").lower()
+    hotplateLoves, weeklyHotplates, weeklySoups = request.form.get("hotplateLoves").lower(), request.form.get("weeklyHotplates"), request.form.get("weeklySoups")
+    hotplateNotes = request.form.get("hotplateNotes")
     if getClient(name):
-        db.execute("UPDATE saladService SET likes=:likes, dislikes=:dislikes, allergies=:allergies, loves=:loves, mp=:mp, tp=:tp, saladNotes=:saladNotes WHERE id=:user_id",
-                                        likes=likes, dislikes=dislikes, allergies=allergies, loves=loves, mp=mp, tp=tp, saladNotes=saladNotes, user_id=user_id)
+        db.execute("UPDATE standingOrder SET saladLikes=:saladLikes, saladDislikes=:saladDislikes, saladLoves=:saladLoves, mondaySalads=:mondaySalads, thursdaySalads=:thursdaySalads, saladNotes=:saladNotes, hotplateLikes=:hotplateLikes, hotplateDislikes=:hotplateDislikes, hotplateLoves=:hotplateLoves, hotplateNotes=:hotplateNotes, weeklyHotplates=:weeklyHotplates, weeklySoups=:weeklySoups WHERE id=:user_id",
+                                                saladLikes=saladLikes, saladDislikes=saladDislikes, saladLoves=saladLoves, mondaySalads=mondaySalads, thursdaySalads=thursdaySalads, saladNotes=saladNotes, hotplateLikes=hotplateLikes, hotplateDislikes=hotplateDislikes, hotplateLoves=hotplateLoves, hotplateNotes=hotplateNotes, weeklyHotplates=weeklyHotplates, weeklySoups=weeklySoups, user_id=user_id)
     else:
-        db.execute("INSERT INTO saladService (id, likes, dislikes, allergies, loves, mp, tp, saladNotes) VALUES (:user_id, :likes, :dislikes, :allergies, :loves, :mp, :tp, :saladNotes)",
-                                        user_id=user_id, likes=likes, dislikes=dislikes, allergies=allergies, loves=loves, mp=mp, tp=tp, saladNotes=saladNotes)
+        db.execute("INSERT INTO standingOrder (id, saladLikes, saladDislikes, saladLoves, mondaySalads, thursdaySalads, saladNotes, hotplateLikes, hotplateDislikes, hotplateLoves, hotplateNotes, weeklyHotplates, weeklySoups) VALUES (:user_id, :saladLikes, :saladDislikes, :saladLoves, :mondaySalads, :thursdaySalads, :saladNotes, :hotplateLikes, :hotplateDislikes, :hotplateLoves, :hotplateNotes, :weeklyHotplates, :weeklySoups)",
+                                        user_id=user_id, saladLikes=saladLikes, saladDislikes=saladDislikes, saladLoves=saladLoves, mondaySalads=mondaySalads, thursdaySalads=thursdaySalads, saladNotes=saladNotes, hotplateLikes=hotplateLikes, hotplateDislikes=hotplateDislikes, hotplateLoves=hotplateLoves, hotplateNotes=hotplateNotes, weeklyHotplates=weeklyHotplates, weeklySoups=weeklySoups)
 
 def getClient(name):
     """Takes a name and returns the associated client details as a sorted dictionary, or None if no client exists"""
@@ -77,16 +80,16 @@ def getClientType(name):
     except:
         return None
 
-initDict = {"0": baseClient, "1": saladService}
-tableNames = {"0": "clients", "1": "saladService"}
-clientTypes = sortDict({"Base": "0", "Salad service": "1"}, "clientTypes")
+initDict = {"0": baseClient, "1": standingOrder}
+tableNames = {"0": "clients", "1": "standingOrder"}
+clientTypes = sortDict({"Base": "0", "Standing Order": "1"}, "clientTypes")
 clientAttributes = {
-                    "0": ["name", "phone", "address", "deliveryNotes"],
-                    "1": ["name", "phone", "address", "mp", "tp", "likes", "dislikes", "loves", "allergies", "deliveryNotes", "saladNotes"]
+                    "0": ["name", "phone", "address", "generalNotes"],
+                    "1": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "saladLikes", "saladDislikes", "saladLoves", "generalNotes", "saladNotes", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "hotplateNotes", "weeklyHotplates", "weeklySoups"]
                     }
 inputTypes = {
-            "defaultText": ["name", "phone", "address", "mp", "tp"],
-            "opinionText": ["likes", "dislikes", "loves", "allergies"],
-            "noteText": ["deliveryNotes", "saladNotes"]
+            "defaultText": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "weeklyHotplates", "weeklySoups"],
+            "opinionText": ["saladLikes", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "allergies"],
+            "noteText": ["generalNotes", "saladNotes", "hotplateNotes"]
             }
 cssClass = invertDict(inputTypes)
