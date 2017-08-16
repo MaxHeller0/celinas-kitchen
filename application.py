@@ -61,8 +61,10 @@ def client(name = None):
     pass in existing details so that users can build off of them
     """
     if name == None:
-        name = removeExcess(request.form.get("name"), "-'")
-        if name in [None, ""]:
+        try:
+            name = removeExcess(request.form.get("name"), "-'")
+            assert len(name) > 0
+        except:
             return redirect(url_for("index"))
         source = request.form.get("source")
     else:
