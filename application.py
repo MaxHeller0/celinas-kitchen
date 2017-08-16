@@ -7,11 +7,12 @@ from helpers import *
 from errorHandling import *
 from databaseHelpers import *
 from formattingHelpers import *
-    
+
 # configure application
 application = Flask(__name__)
 app = application
 
+# Just a test
 # set up filters for use in displaying text
 app.jinja_env.filters["title"] = title
 app.jinja_env.filters["capitalize"] = capitalize
@@ -50,7 +51,7 @@ def newClient():
     global clientType
     clientType = request.form.get("clientType")
     return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
-        
+
 @app.route("/client", methods=["POST"])
 def client():
     """
@@ -62,7 +63,7 @@ def client():
     destination = str
     message = ''
     destination = "viewClient.html"
-    
+
     if source == "viewButton":
         message = "Client details"
     elif source in ["newClient", "editClient"]:
@@ -80,7 +81,7 @@ def client():
         initDict[clientType](request)
     else:
         destination = "editClient.html"
-    
+
     # refresh client data in case changes were made
     clientData = getClient(name)
     if clientData == None:
