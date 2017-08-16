@@ -53,15 +53,17 @@ def newClient():
     clientType = request.form.get("clientType")
     return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
 
-@app.route("/client/", methods=["POST"])
+@app.route("/client/", methods=["GET", "POST"])
 @app.route("/client/<name>", methods=["GET"])
 def client(name = None):
     """
     Renders a page to edit or view client details
     pass in existing details so that users can build off of them
     """
-    if not name:
+    if name == None:
         name = removeExcess(request.form.get("name"), "-'")
+        if name in [None, ""]:
+            return redirect(url_for("index"))
         source = request.form.get("source")
     else:
         source = "GET"
