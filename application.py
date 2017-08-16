@@ -12,7 +12,6 @@ from formattingHelpers import *
 application = Flask(__name__)
 app = application
 
-# Just a test
 # set up filters for use in displaying text
 app.jinja_env.filters["title"] = title
 app.jinja_env.filters["capitalize"] = capitalize
