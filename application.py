@@ -54,7 +54,10 @@ def newClient():
         return(redirect(url_for("index")))
     global clientType
     clientType = request.form.get("clientType")
-    return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
+    if not clientType:
+        return redirect("/")
+    else:
+        return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
 
 @app.route("/client/", methods=["GET", "POST"])
 @app.route("/client/<name>", methods=["GET"])

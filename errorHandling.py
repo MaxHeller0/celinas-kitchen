@@ -1,14 +1,20 @@
 from helpers import apology
-from databaseHelpers import clientAttributes
+from databaseHelpers import clientAttributes, BaseClient
 from formattingHelpers import removeExcess
 
 def clientInputCheck(request, clientType):
+    # check if client already exists so details aren't overwritten from newClient
+    name = removeExcess(request.form.get("name"), "-'")
+    client = BaseClient.query.filter_by(name=name).first()
+    if client:
+        return (True, ["Client already exists in database", ""])
+
     # make sure client type was provided (client exists)
     if clientType == None:
         return (True, ["Client doesn't exist in database or retrieval failed", ''])
     try:
         # make sure the client has a name
-        if request.form.get("name") == '':
+        if name == '':
             return (True, ["All clients must have a name", ''])
 
         # make sure the phone numyber in a 10 digit number

@@ -1,5 +1,5 @@
-from cs50 import SQL
 import os
+from cs50 import SQL
 from application import db2
 
 from formattingHelpers import sortDict, removeExcess, invertDict
@@ -34,13 +34,14 @@ class BaseClient(db2.Model):
 
 def baseClient(request, clientType = 0):
     name = removeExcess(request.form.get("name").lower(), "-'")
-    if getClient(name):
-        client = BaseClient.query.filter_by(name=name).first()
+    client = BaseClient.query.filter_by(name=name).first()
+    if client:
         client.__init__(request, clientType)
     else:
         client = BaseClient(request, clientType)
         db2.session.add(client)
     db2.session.commit()
+    return client.id
 
 class StandingOrderClient(db2.Model):
     __tablename__ = "standingOrder"
@@ -75,10 +76,9 @@ class StandingOrderClient(db2.Model):
 
 def standingOrderClient(request):
     name = removeExcess(request.form.get("name").lower(), "-'")
-    baseClient(request, 1)
-    clientId = getClientId(name)
-    if getClient(name):
-        client = StandingOrderClient.query.get(clientId)
+    clientId = baseClient(request, 1)
+    client = StandingOrderClient.query.get(clientId)
+    if client:
         client.__init__(request, clientId)
     else:
         client = StandingOrderClient(request, clientId)
@@ -91,7 +91,8 @@ def getClient(name):
         name = removeExcess(name.lower(), "-'")
         client = db.execute("SELECT * FROM clients WHERE name LIKE :name", name=name)
         if client[0]["clientType"] != "0":
-            client = db.execute("SELECT * FROM {table} JOIN clients ON {table}.id = clients.id WHERE name LIKE :name".format(table=tableNames[client[0]["clientType"]]), name=name)
+            table = tableNames[client[0]["clientType"]]
+            client = db.execute("SELECT * FROM {table} JOIN clients ON {table}.id = clients.id WHERE name LIKE :name".format(table=table), name=name)
         return sortDict(client[0], "clientAttributes")
     except:
         return None
