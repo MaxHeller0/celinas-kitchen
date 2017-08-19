@@ -34,6 +34,7 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def injectNavbarData():
+    db.init_app(app)
     return dict(clientTypes=clientTypes, clientNameList=getClientNames())
 
 
