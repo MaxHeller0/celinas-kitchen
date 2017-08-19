@@ -1,19 +1,20 @@
-from flask import Flask, flash, redirect, render_template, request, session, url_for
-from flask_session import Session
-from passlib.apps import custom_app_context as pwd_context
-from tempfile import mkdtemp
-from flask_sqlalchemy import SQLAlchemy
+from cs50 import SQL
+from flask import Flask, redirect, render_template, request, url_for
 
-from helpers import *
-from errorHandling import *
-from databaseHelpers import *
-from formattingHelpers import *
+from databaseHelpers import (db2, getClient, getClientNames, getClientType,
+                             initDict)
+from errorHandling import clientInputCheck
+from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
+                               formatValue, title, viewFormatValue)
+from hardcodedShit import clientAttributes, clientTypes, dbConfig
+from helpers import apology
 
 # configure application
 application = Flask(__name__)
 app = application
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(username="admin", password="y94D6NDeTColiQDZAEWp", server="aa13t6f8mueycaj.cy9bm4pmzdu7.us-east-1.rds.amazonaws.com", port="3306", db="ebdb")
-db2 = SQLAlchemy(app)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = dbConfig
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 # set up filters for use in displaying text
 app.jinja_env.filters["title"] = title
@@ -31,9 +32,11 @@ if app.config["DEBUG"]:
         response.headers["Pragma"] = "no-cache"
         return response
 
+
 @app.context_processor
 def injectNavbarData():
     return dict(clientTypes=clientTypes, clientNameList=getClientNames())
+
 
 @app.route("/")
 def index():
@@ -44,6 +47,7 @@ def index():
     """
     return render_template("index.html")
 
+
 @app.route("/newClient", methods=["GET", "POST"])
 def newClient():
     """
@@ -51,24 +55,24 @@ def newClient():
     pass in list of required attributes for the client type from the clientAttributes dictionary
     """
     if request.method == "GET":
-        return(redirect(url_for("index")))
+        return redirect(url_for("index"))
     global clientType
     clientType = request.form.get("clientType")
     if not clientType:
         return redirect("/")
-    else:
-        return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
+    return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
+
 
 @app.route("/client/", methods=["GET", "POST"])
 @app.route("/client/<name>", methods=["GET"])
-def client(name = None):
+def client(name=None):
     """
     Renders a page to edit or view client details
     pass in existing details so that users can build off of them
     """
-    if name == None:
+    if name is None:
         try:
-            name = removeExcess(request.form.get("name"), "-'")
+            name = formatName(request.form.get("name"))
             assert len(name) > 0
         except:
             return redirect(url_for("index"))
@@ -83,13 +87,11 @@ def client(name = None):
     elif source in ["newClient", "editClient"]:
         if source == "newClient":
             message = "Client added to the database"
-            operation = "new"
             global clientType
         elif source == "editClient":
             message = "Client details updated"
-            operation = "edit"
             clientType = getClientType(name)
-        inputCheckResults = clientInputCheck(request, clientType)
+        inputCheckResults = clientInputCheck(request, source)
         if inputCheckResults[0]:
             return apology(inputCheckResults[1][0], inputCheckResults[1][1])
         initDict[clientType](request)
@@ -98,9 +100,11 @@ def client(name = None):
 
     # refresh client data in case changes were made
     clientData = getClient(name)
-    if clientData == None:
+    if clientData is None:
         return apology("Could not retrieve client with name {}".format(name), '')
     return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
 
+
 if __name__ == "__main__":
+    db2.init_app(app)
     app.run()

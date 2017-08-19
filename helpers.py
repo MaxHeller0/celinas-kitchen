@@ -1,6 +1,8 @@
 import urllib.request
-from flask import redirect, render_template, request, session, url_for
 from functools import wraps
+
+from flask import redirect, render_template, request, session, url_for
+
 
 def apology(top="", bottom=""):
     """Renders message as an apology to user."""

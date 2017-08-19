@@ -1,18 +1,15 @@
-import os
 from cs50 import SQL
-from application import db2
+from flask_sqlalchemy import SQLAlchemy
 
-from formattingHelpers import sortDict, removeExcess, invertDict
+from formattingHelpers import forceNum, formatName, removeExcess, sortDict
+from hardcodedShit import clientTypes, dbConfig, tableNames
 
-# configure CS50 Library to use Amazon RDS MySQL Database
-try:
-    db = SQL("mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(username=os.environ["RDS_USERNAME"],
-                                                                            password=os.environ["RDS_PASSWORD"],
-                                                                            server=os.environ["RDS_HOSTNAME"],
-                                                                            port=os.environ["RDS_PORT"],
-                                                                            db=os.environ["RDS_DB_NAME"]))
-except:
-    db = SQL("mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(username="admin", password="y94D6NDeTColiQDZAEWp", server="aa13t6f8mueycaj.cy9bm4pmzdu7.us-east-1.rds.amazonaws.com", port="3306", db="ebdb"))
+# configure CS50 Library to use Amazon RDS MySQL Database for raw SQL capabilities
+db = SQL(dbConfig)
+
+# configure connection for ORM capabilities
+db2 = SQLAlchemy()
+
 
 class BaseClient(db2.Model):
     __tablename__ = "clients"
@@ -24,16 +21,17 @@ class BaseClient(db2.Model):
     generalNotes = db2.Column(db2.String())
     allergies = db2.Column(db2.String())
 
-    def __init__(self, request, clientType = 0):
-        self.name = removeExcess(request.form.get("name").lower(), "-'")
+    def __init__(self, request, clientType=0):
+        self.name = formatName(request.form.get("name"))
         self.phone = removeExcess(request.form.get("phone"))
         self.address = request.form.get("address").lower()
         self.allergies = request.form.get("allergies").lower()
         self.generalNotes = request.form.get("generalNotes")
         self.clientType = clientType
 
-def baseClient(request, clientType = 0):
-    name = removeExcess(request.form.get("name").lower(), "-'")
+
+def baseClient(request, clientType=0):
+    name = formatName(request.form.get("name"))
     client = BaseClient.query.filter_by(name=name).first()
     if client:
         client.__init__(request, clientType)
@@ -42,6 +40,7 @@ def baseClient(request, clientType = 0):
         db2.session.add(client)
     db2.session.commit()
     return client.id
+
 
 class StandingOrderClient(db2.Model):
     __tablename__ = "standingOrder"
@@ -67,63 +66,70 @@ class StandingOrderClient(db2.Model):
         self.hotplateLikes = request.form.get("hotplateLikes").lower()
         self.hotplateDislikes = request.form.get("hotplateDislikes").lower()
         self.hotplateLoves = request.form.get("hotplateLoves").lower()
-        self.mondaySalads = request.form.get("mondaySalads")
-        self.thursdaySalads = request.form.get("thursdaySalads")
-        self.weeklyHotplates = request.form.get("weeklyHotplates")
-        self.weeklySoups = request.form.get("weeklySoups")
+        self.mondaySalads = forceNum(request.form.get("mondaySalads"))
+        self.thursdaySalads = forceNum(request.form.get("thursdaySalads"))
+        self.weeklyHotplates = forceNum(request.form.get("weeklyHotplates"))
+        self.weeklySoups = forceNum(request.form.get("weeklySoups"))
         self.saladNotes = request.form.get("saladNotes")
         self.hotplateNotes = request.form.get("hotplateNotes")
 
+    def update(self, request):
+        self.__init__(request, self.id)
+
+
 def standingOrderClient(request):
-    name = removeExcess(request.form.get("name").lower(), "-'")
     clientId = baseClient(request, 1)
     client = StandingOrderClient.query.get(clientId)
     if client:
-        client.__init__(request, clientId)
+        client.update(request)
     else:
         client = StandingOrderClient(request, clientId)
         db2.session.add(client)
     db2.session.commit()
 
+
 def getClient(name):
-    """Takes a name and returns the associated client details as a sorted dictionary, or None if no client exists"""
+    """
+    Input: name
+    Returns: associated client details as a sorted dictionary, or None if no client exists
+    """
     try:
-        name = removeExcess(name.lower(), "-'")
-        client = db.execute("SELECT * FROM clients WHERE name LIKE :name", name=name)
+        name = formatName(name)
+        client = db.execute(
+            "SELECT * FROM clients WHERE name LIKE :name", name=name)
         if client[0]["clientType"] != "0":
             table = tableNames[client[0]["clientType"]]
-            client = db.execute("SELECT * FROM {table} JOIN clients ON {table}.id = clients.id WHERE name LIKE :name".format(table=table), name=name)
+            client = db.execute(
+                "SELECT * FROM {table} JOIN clients ON {table}.id = clients.id WHERE name LIKE :name".format(table=table), name=name)
         return sortDict(client[0], "clientAttributes")
     except:
         return None
 
+
 def getClientNames():
     """Returns a list of client names from the database as a list of dicts of form {"name":name}"""
+    # orm implementation if we want it
+    # return BaseClient.query.order_by(BaseClient.name).all()
     return db.execute("SELECT name FROM clients")
+
 
 def getClientId(name):
     """Returns a client's id given a name"""
-    try:
-        return db.execute("SELECT id FROM clients WHERE name LIKE :name", name=name.lower())[0]["id"]
-    except:
-        return None
+    name = formatName(name)
+    client = BaseClient.query.filter_by(name=name).first()
+    if client:
+        return client.id
+    return None
+
 
 def getClientType(name):
     """Returns a client's clientType given a name"""
-    try:
-        return db.execute("SELECT clientType FROM clients WHERE name LIKE :name", name=name.lower())[0]["clientType"]
-    except:
-        return None
+    name = formatName(name)
+    client = BaseClient.query.filter_by(name=name).first()
+    if client:
+        return client.clientType
+    return None
+
 
 initDict = {"0": baseClient, "1": standingOrderClient}
-tableNames = {"0": "clients", "1": "standingOrder"}
-clientTypes = sortDict({"Base": "0", "Standing Order": "1"}, "clientTypes")
-clientAttributes = {}
-clientAttributes["0"] = ["name", "phone", "address", "allergies", "generalNotes"]
-clientAttributes["1"] = clientAttributes["0"] + ["mondaySalads", "thursdaySalads", "saladLikes", "saladDislikes", "saladLoves", "saladNotes", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "hotplateNotes", "weeklyHotplates", "weeklySoups"]
-inputTypes = {
-            "defaultText": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "weeklyHotplates", "weeklySoups"],
-            "opinionText": ["saladLikes", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "allergies"],
-            "noteText": ["generalNotes", "saladNotes", "hotplateNotes"]
-            }
-cssClass = invertDict(inputTypes)
+clientTypes = sortDict(clientTypes, dictName="clientTypes")
