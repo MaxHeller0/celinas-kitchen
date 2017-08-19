@@ -1,7 +1,6 @@
 Flask
-Flask-Session
+Flask-SQLAlchemy
 SQLAlchemy
+Flask-Session
 mysqlclient
-flask_sqlalchemy
-sqlalchemy
 collections
