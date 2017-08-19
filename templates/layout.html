@@ -65,9 +65,11 @@
                       <div class="form-group">
                         <input class="form-control" list="clientNames" name="name" placeholder="Client Name">
                         <datalist name="clientNames" id="clientNames">
-                          {% for client in clientNameList %}
-                            <option value="{{client.name|title}}">
-                            {% endfor %}
+                          {% if clientNameList %}
+                            {% for client in clientNameList %}
+                              <option value="{{client.name|title}}">
+                              {% endfor %}
+                            {% endif %}
                           </datalist>
                           <button name="source" value="viewButton" class="btn btn-default" type="submit">View</button>
                           <button name="source" value="editButton" class="btn btn-default" type="submit">Edit</button>

@@ -17,6 +17,7 @@ app = application
 app.config["SQLALCHEMY_DATABASE_URI"] = dbConfig
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
+# configure session
 app.secret_key = "XL94IAlZqcRbt5BJF2J3mM4Gz8LaAi"
 app.config["SESSION_TYPE"] = "filesystem"
 
@@ -39,11 +40,7 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def injectNavbarData():
-    try:
-        return dict(clientTypes=clientTypes, clientNameList=getClientNames())
-    except:
-        # initialize database
-        db.init_app(app)
+    return dict(clientTypes=clientTypes, clientNameList=getClientNames())
 
 
 @app.route("/")
@@ -216,6 +213,5 @@ def register():
 
 
 if __name__ == "__main__":
+    db.init_app(app)
     app.run()
-    # initialize session
-    session.init_app(app)
