@@ -10,7 +10,7 @@
   </h1>
   <p>
     {% for attribute in clientData %}
-    {% if clientData[attribute] != None and clientData[attribute] != '' and attribute != 'id' and attribute != 'clientType' %}
+    {% if clientData[attribute] != None and clientData[attribute] != '' and attribute != 'id' and attribute != 'clientType' and attribute != 'name' %}
       {{attribute|formatKey}}: {{clientData[attribute]|viewFormatValue}} <br>
     {% endif %}
     {% endfor %}

@@ -1,42 +1,46 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Client Details
+  Client Details
 {% endblock %}
 
 {% block main %}
-    <h1>
-        Details for {{ clientData["name"]|title }}
-    </h1>
-    <form action="{{ url_for('client') }}" method="POST">
-        <fieldset>
-            {% for attribute in clientData %}
-            {% if attribute != 'id' and attribute != 'clientType' and attribute != 'hash' %}
-                {%if cssClass[attribute] == "defaultText" %}
-                    <div class="form-group">
-                        {{attribute|formatKey}}: <input class="form-control" type="text" name={{attribute}} value="{{clientData[attribute]|formatValue}}"><br>
-                    </div>
-                {% elif cssClass[attribute] == "opinionText" %}
-                    <div class="form-group">
-                        {{attribute|formatKey}}: <textarea class="opinionText" name={{attribute}}>{{clientData[attribute]|formatValue}}</textarea><br>
-                    </div>
-                {% elif cssClass[attribute] == "noteText" %}
-                    <div class="form-group">
-                        {{attribute|formatKey}}: <textarea class="noteText" name={{attribute}}>{{clientData[attribute]|formatValue}}</textarea><br>
-                    </div>
-                {% endif %}
-            {% endif %}
-            {% endfor %}  
+  <h1>
+    Details for
+    {{ clientData["name"]|title }}
+  </h1>
+  <form action="{{ url_for('client') }}" method="POST">
+    <fieldset>
+      {% for attribute in clientData %}
+        {% if attribute != 'id' and attribute != 'clientType' and attribute != 'hash' %}
+          {%if cssClass[attribute] == "defaultText" %}
             <div class="form-group">
-                <button name="source" value="editClient" class="btn btn-default" type="submit">Save</button>
+              {{attribute|formatKey}}:
+              <input class="form-control" type="text" name={{attribute}} value="{{clientData[attribute]|formatValue}}"><br>
             </div>
-        </fieldset>
-    </form>
-    <form action="{{ url_for('index') }}" method="GET">
-        <fieldset>
+          {% elif cssClass[attribute] == "opinionText" %}
             <div class="form-group">
-                <button class="btn btn-default" type="submit">Back to home page</button>
+              {{attribute|formatKey}}:
+              <textarea class="opinionText" name={{attribute}}>{{clientData[attribute]|formatValue}}</textarea><br>
             </div>
-        </fieldset>
-    </form>
+          {% elif cssClass[attribute] == "noteText" %}
+            <div class="form-group">
+              {{attribute|formatKey}}:
+              <textarea class="noteText" name={{attribute}}>{{clientData[attribute]|formatValue}}</textarea><br>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      <div class="form-group">
+        <button name="source" value="editClient" class="btn btn-default" type="submit">Save</button>
+      </div>
+    </fieldset>
+  </form>
+  <form action="{{ url_for('index') }}" method="GET">
+    <fieldset>
+      <div class="form-group">
+        <button class="btn btn-default" type="submit">Back to home page</button>
+      </div>
+    </fieldset>
+  </form>
 {% endblock %}
