@@ -1,19 +1,24 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, session, url_for
 
-from databaseHelpers import (db, getClient, getClientNames, getClientType,
-                             initDict)
+from databaseHelpers import (adminCheck, db, getAdmin, getClient,
+                             getClientNames, getClientType, initDict, newAdmin,
+                             updateAdmin)
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, viewFormatValue)
 from hardcodedShit import clientAttributes, clientTypes, dbConfig
-from helpers import apology
+from helpers import apology, login_required, root_login_required
 
 # configure application
 application = Flask(__name__)
 app = application
 
+# configure database
 app.config["SQLALCHEMY_DATABASE_URI"] = dbConfig
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+
+app.secret_key = "XL94IAlZqcRbt5BJF2J3mM4Gz8LaAi"
+app.config["SESSION_TYPE"] = "filesystem"
 
 # set up filters for use in displaying text
 app.jinja_env.filters["title"] = title
@@ -37,6 +42,7 @@ def injectNavbarData():
     try:
         return dict(clientTypes=clientTypes, clientNameList=getClientNames())
     except:
+        # initialize database
         db.init_app(app)
 
 
@@ -44,13 +50,12 @@ def injectNavbarData():
 def index():
     """
     Renders home page
-    pass in clientTypes dictionary to enable radio buttons for client creation
-    pass in clientNameList dictionary to enable datalist containing all clients
     """
     return render_template("index.html")
 
 
 @app.route("/newClient", methods=["GET", "POST"])
+@login_required
 def newClient():
     """
     Renders client creation page
@@ -67,6 +72,7 @@ def newClient():
 
 @app.route("/client/", methods=["GET", "POST"])
 @app.route("/client/<name>", methods=["GET"])
+@login_required
 def client(name=None):
     """
     Renders a page to edit or view client details
@@ -107,7 +113,109 @@ def client(name=None):
     return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
 
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in."""
+
+    # forget any user_id
+    session.clear()
+
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # ensure username was submitted
+        if not request.form.get("name"):
+            return apology("must provide name")
+
+        # ensure password was submitted
+        elif not request.form.get("password"):
+            return apology("must provide password")
+
+        adminId = adminCheck(request)
+
+        # ensure username exists and password is correct
+        if adminId is None:
+            return apology("invalid username and/or password")
+
+        # remember which user has logged in
+        session["adminId"] = adminId
+
+        # redirect user to home page
+        return redirect(url_for("index"))
+
+    # else if user reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("login.html")
+
+
+@app.route("/change_pwd", methods=["GET", "POST"])
+@login_required
+def change_pwd():
+    """Allows admins to change their passwords"""
+    if request.method == "POST":
+
+        if not request.form.get("password_old"):
+            return apology("must enter old password")
+
+        if not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
+            return apology("must enter the same new password twice")
+
+        # query database for admin
+        admin = getAdmin(session["adminId"])
+
+        # change password
+        if not updateAdmin(admin, request):
+            return apology("old password invalid")
+
+        logout()
+
+        # redirect user to login page
+        return redirect(url_for("login"))
+
+    # else if user reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("change_pwd.html")
+
+
+@app.route("/logout")
+def logout():
+    """Log user out."""
+
+    # forget any user_id
+    session.clear()
+
+    # redirect user to login form
+    return redirect(url_for("login"))
+
+
+@app.route("/register", methods=["GET", "POST"])
+@root_login_required
+def register():
+    """Register user."""
+
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # ensure username was submitted
+        if not request.form.get("name"):
+            return apology("must provide name")
+
+        # ensure passwords were entered and match
+        elif not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
+            return apology("must enter the same password twice")
+
+        # insert the user into the database
+        newAdmin(request)
+
+        # redirect user to login page
+        return redirect(url_for("index"))
+
+    # else if user reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("register.html")
+
+
 if __name__ == "__main__":
-    # initialize database
-    db.init_app(app)
     app.run()
+    # initialize session
+    session.init_app(app)
