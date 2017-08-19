@@ -13,7 +13,7 @@ class Admin(db.Model):
     __tablename__ = "admins"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True)
-    hash = db.Column(db.String())
+    hash = db.Column(db.Text)
 
     def __init__(self, request):
         self.name = formatName(request.form.get("name"))
@@ -65,17 +65,17 @@ class BaseClient(db.Model):
     name = db.Column(db.String(100), unique=True)
     phone = db.Column(db.String(10), unique=True)
     clientType = db.Column(db.Integer)
-    address = db.Column(db.String())
-    generalNotes = db.Column(db.String())
-    allergies = db.Column(db.String())
+    address = db.Column(db.Text)
+    allergies = db.Column(db.Text)
+    generalNotes = db.Column(db.Text)
 
     def __init__(self, request, clientType=0):
         self.name = formatName(request.form.get("name"))
         self.phone = removeExcess(request.form.get("phone"))
+        self.clientType = clientType
         self.address = request.form.get("address").lower()
         self.allergies = request.form.get("allergies").lower()
         self.generalNotes = request.form.get("generalNotes")
-        self.clientType = clientType
 
     def update(self, request):
         self.__init__(request, self.clientType)
@@ -100,18 +100,18 @@ def baseClient(request, clientType=0):
 class StandingOrderClient(db.Model):
     __tablename__ = "standingOrder"
     id = db.Column(db.Integer, primary_key=True)
-    saladLikes = db.Column(db.String())
-    saladDislikes = db.Column(db.String())
-    saladLoves = db.Column(db.String())
-    hotplateLikes = db.Column(db.String())
-    hotplateDislikes = db.Column(db.String())
-    hotplateLoves = db.Column(db.String())
+    saladLikes = db.Column(db.Text)
+    saladDislikes = db.Column(db.Text)
+    saladLoves = db.Column(db.Text)
+    hotplateLikes = db.Column(db.Text)
+    hotplateDislikes = db.Column(db.Text)
+    hotplateLoves = db.Column(db.Text)
     mondaySalads = db.Column(db.Integer)
     thursdaySalads = db.Column(db.Integer)
     weeklyHotplates = db.Column(db.Integer)
     weeklySoups = db.Column(db.Integer)
-    saladNotes = db.Column(db.String())
-    hotplateNotes = db.Column(db.String())
+    saladNotes = db.Column(db.Text)
+    hotplateNotes = db.Column(db.Text)
 
     def __init__(self, request, clientId):
         self.id = clientId
@@ -152,16 +152,16 @@ def getClient(name):
     Input: name
     Returns: associated client details as a sorted dictionary, or None if no client exists
     """
-    tableNames = {"0": "clients", "1": "standingOrder"}
+    tableNames = {0: "clients", 1: "standingOrder"}
     try:
         name = formatName(name)
         t = text("SELECT * FROM clients WHERE name LIKE :name")
-        client = db.engine.execute(t, name=name).fetchall()[0]
-        if client["clientType"] != "0":
+        client = db.engine.execute(t, name=name).first()
+        if client["clientType"] != 0:
             table = tableNames[client["clientType"]]
             t = text(
                 "SELECT * FROM {table} JOIN clients ON {table}.id = clients.id WHERE name LIKE :name".format(table=table))
-            client = db.engine.execute(t, name=name).fetchall()[0]
+            client = db.engine.execute(t, name=name).first()
         return sortDict(client, "clientAttributes")
     except:
         return None
