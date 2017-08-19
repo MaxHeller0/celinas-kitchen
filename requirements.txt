@@ -3,3 +3,4 @@ Flask-SQLAlchemy
 SQLAlchemy
 Flask-Session
 mysqlclient
+passlib

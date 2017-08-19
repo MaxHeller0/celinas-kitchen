@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy import text
 
 from formattingHelpers import forceNum, formatName, removeExcess, sortDict
@@ -6,6 +7,56 @@ from hardcodedShit import clientTypes, dbConfig
 
 # prepare database object for connection
 db = SQLAlchemy()
+
+
+class Admin(db.Model):
+    __tablename__ = "admins"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True)
+    hash = db.Column(db.String())
+
+    def __init__(self, request):
+        self.name = formatName(request.form.get("name"))
+        self.hash = pwd_context.hash(request.form.get("password"))
+
+    def update(self, request):
+        self.hash = pwd_context.hash(request.form.get("password"))
+
+
+def newAdmin(request):
+    name = formatName(request.form.get("name"))
+    admin = Admin.query.filter_by(name=name).first()
+    if not admin:
+        admin = Admin(request)
+        db.session.add(admin)
+        db.session.commit()
+
+
+def adminCheck(request):
+    name = formatName(request.form.get("name"))
+    admin = Admin.query.filter_by(name=name).first()
+    if admin is None or not pwd_context.verify(request.form.get("password"), admin.hash):
+        return None
+    return admin.id
+
+
+def getAdmin(id):
+    """
+    Input: id number
+    Returns: admin object or None
+    """
+    try:
+        return Admin.query.get(id)
+    except:
+        return None
+
+
+def updateAdmin(admin, request):
+    if not pwd_context.verify(request.form.get("password_old"), admin.hash):
+        return False
+    admin.update(request)
+    db.session.commit()
+    return True
 
 
 class BaseClient(db.Model):
