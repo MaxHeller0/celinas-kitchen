@@ -16,20 +16,13 @@ def capitalize(val):
 
 
 def formatKey(key):
-    if key == "mondaySalads":
-        return "# of Monday Salads"
-    elif key == "thursdaySalads":
-        return "# of Thursday Salads"
-    elif key == "weeklySoups":
-        return "# of Weekly Soups"
-    elif key == "weeklyHotplates":
-        return "# of Weekly Hotplates"
-    elif key == "saladNotes":
-        return "Salad Notes"
-    elif key == "generalNotes":
-        return "General Notes"
-    elif key == "hotplateNotes":
-        return "Hotplate Notes"
+    formatDict = {"mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
+                  "weeklySoups": "# of Weekly Soups", "weeklyHotplates": "# of Weekly Hotplates",
+                  "saladNotes": "Salad Notes", "generalNotes": "General Notes", "hotplateNotes": "Hotplate Notes",
+                  "saladLikes": "Salad Likes", "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
+                  "hotplateLikes": "Hotplate Likes", "hotplateDislikes": "Hotplate Dislikes", "hotplateLoves": "Hotplate Loves"}
+    if key in formatDict:
+        return formatDict[key]
     return key.title()
 
 

@@ -1,6 +1,5 @@
 import os
 
-tableNames = {"0": "clients", "1": "standingOrder"}
 clientTypes = {"Base": "0", "Standing Order": "1"}
 clientAttributeOrder = ["id", "clientType", "name", "phone", "address", "hash", "mondaySalads", "thursdaySalads", "weeklySoups", "weeklyHotplates",
                         "allergies", "saladLikes", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves",

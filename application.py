@@ -1,7 +1,6 @@
-from cs50 import SQL
 from flask import Flask, redirect, render_template, request, url_for
 
-from databaseHelpers import (db2, getClient, getClientNames, getClientType,
+from databaseHelpers import (db, getClient, getClientNames, getClientType,
                              initDict)
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
@@ -91,7 +90,7 @@ def client(name=None):
         elif source == "editClient":
             message = "Client details updated"
             clientType = getClientType(name)
-        inputCheckResults = clientInputCheck(request, source)
+        inputCheckResults = clientInputCheck(request, clientType, source)
         if inputCheckResults[0]:
             return apology(inputCheckResults[1][0], inputCheckResults[1][1])
         initDict[clientType](request)
@@ -106,5 +105,6 @@ def client(name=None):
 
 
 if __name__ == "__main__":
-    db2.init_app(app)
+    # initialize database
+    db.init_app(app)
     app.run()

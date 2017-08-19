@@ -3,7 +3,7 @@ from formattingHelpers import formatName, removeExcess
 from hardcodedShit import clientAttributes
 
 
-def clientInputCheck(request, source):
+def clientInputCheck(request, clientType, source):
     name = formatName(request.form.get("name"))
     client = BaseClient.query.filter_by(name=name).first()
 
@@ -11,7 +11,6 @@ def clientInputCheck(request, source):
     if client and source == "newClient":
         return (True, ["Client already exists in database", ""])
 
-    clientType = client.clientType
     # make sure client type was provided (client exists)
     if clientType is None:
         return (True, ["Client doesn't exist in database or retrieval failed", ''])
@@ -22,7 +21,7 @@ def clientInputCheck(request, source):
             raise ValueError
 
         # make sure the phone numyber in a 10 digit number
-        phoneStr = request.form.get("phone")
+        phoneStr = removeExcess(request.form.get("phone"))
         try:
             int(removeExcess(phoneStr))
         except:

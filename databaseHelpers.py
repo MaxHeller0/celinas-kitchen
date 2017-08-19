@@ -1,25 +1,22 @@
-from cs50 import SQL
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 from formattingHelpers import forceNum, formatName, removeExcess, sortDict
-from hardcodedShit import clientTypes, dbConfig, tableNames
+from hardcodedShit import clientTypes, dbConfig
 
-# configure CS50 Library to use Amazon RDS MySQL Database for raw SQL capabilities
-db = SQL(dbConfig)
-
-# configure connection for ORM capabilities
-db2 = SQLAlchemy()
+# prepare database object for connection
+db = SQLAlchemy()
 
 
-class BaseClient(db2.Model):
+class BaseClient(db.Model):
     __tablename__ = "clients"
-    id = db2.Column(db2.Integer, primary_key=True)
-    name = db2.Column(db2.String(100), unique=True)
-    phone = db2.Column(db2.String(10), unique=True)
-    clientType = db2.Column(db2.Integer)
-    address = db2.Column(db2.String())
-    generalNotes = db2.Column(db2.String())
-    allergies = db2.Column(db2.String())
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True)
+    phone = db.Column(db.String(10), unique=True)
+    clientType = db.Column(db.Integer)
+    address = db.Column(db.String())
+    generalNotes = db.Column(db.String())
+    allergies = db.Column(db.String())
 
     def __init__(self, request, clientType=0):
         self.name = formatName(request.form.get("name"))
@@ -29,34 +26,41 @@ class BaseClient(db2.Model):
         self.generalNotes = request.form.get("generalNotes")
         self.clientType = clientType
 
+    def update(self, request):
+        self.__init__(request, self.clientType)
+
+    def toDict(self):
+        return dict((key, value) for key, value in self.__dict__.items()
+                    if not callable(value) and not key.startswith('_'))
+
 
 def baseClient(request, clientType=0):
     name = formatName(request.form.get("name"))
     client = BaseClient.query.filter_by(name=name).first()
     if client:
-        client.__init__(request, clientType)
+        client.update(request)
     else:
         client = BaseClient(request, clientType)
-        db2.session.add(client)
-    db2.session.commit()
+        db.session.add(client)
+    db.session.commit()
     return client.id
 
 
-class StandingOrderClient(db2.Model):
+class StandingOrderClient(db.Model):
     __tablename__ = "standingOrder"
-    id = db2.Column(db2.Integer, primary_key=True)
-    saladLikes = db2.Column(db2.String())
-    saladDislikes = db2.Column(db2.String())
-    saladLoves = db2.Column(db2.String())
-    hotplateLikes = db2.Column(db2.String())
-    hotplateDislikes = db2.Column(db2.String())
-    hotplateLoves = db2.Column(db2.String())
-    mondaySalads = db2.Column(db2.Integer)
-    thursdaySalads = db2.Column(db2.Integer)
-    weeklyHotplates = db2.Column(db2.Integer)
-    weeklySoups = db2.Column(db2.Integer)
-    saladNotes = db2.Column(db2.String())
-    hotplateNotes = db2.Column(db2.String())
+    id = db.Column(db.Integer, primary_key=True)
+    saladLikes = db.Column(db.String())
+    saladDislikes = db.Column(db.String())
+    saladLoves = db.Column(db.String())
+    hotplateLikes = db.Column(db.String())
+    hotplateDislikes = db.Column(db.String())
+    hotplateLoves = db.Column(db.String())
+    mondaySalads = db.Column(db.Integer)
+    thursdaySalads = db.Column(db.Integer)
+    weeklyHotplates = db.Column(db.Integer)
+    weeklySoups = db.Column(db.Integer)
+    saladNotes = db.Column(db.String())
+    hotplateNotes = db.Column(db.String())
 
     def __init__(self, request, clientId):
         self.id = clientId
@@ -76,6 +80,10 @@ class StandingOrderClient(db2.Model):
     def update(self, request):
         self.__init__(request, self.id)
 
+    def toDict(self):
+        return dict((key, value) for key, value in self.__dict__.items()
+                    if not callable(value) and not key.startswith('_'))
+
 
 def standingOrderClient(request):
     clientId = baseClient(request, 1)
@@ -84,8 +92,8 @@ def standingOrderClient(request):
         client.update(request)
     else:
         client = StandingOrderClient(request, clientId)
-        db2.session.add(client)
-    db2.session.commit()
+        db.session.add(client)
+    db.session.commit()
 
 
 def getClient(name):
@@ -93,24 +101,24 @@ def getClient(name):
     Input: name
     Returns: associated client details as a sorted dictionary, or None if no client exists
     """
+    tableNames = {"0": "clients", "1": "standingOrder"}
     try:
         name = formatName(name)
-        client = db.execute(
-            "SELECT * FROM clients WHERE name LIKE :name", name=name)
-        if client[0]["clientType"] != "0":
-            table = tableNames[client[0]["clientType"]]
-            client = db.execute(
-                "SELECT * FROM {table} JOIN clients ON {table}.id = clients.id WHERE name LIKE :name".format(table=table), name=name)
-        return sortDict(client[0], "clientAttributes")
+        t = text("SELECT * FROM clients WHERE name LIKE :name")
+        client = db.engine.execute(t, name=name).fetchall()[0]
+        if client["clientType"] != "0":
+            table = tableNames[client["clientType"]]
+            t = text(
+                "SELECT * FROM {table} JOIN clients ON {table}.id = clients.id WHERE name LIKE :name".format(table=table))
+            client = db.engine.execute(t, name=name).fetchall()[0]
+        return sortDict(client, "clientAttributes")
     except:
         return None
 
 
 def getClientNames():
     """Returns a list of client names from the database as a list of dicts of form {"name":name}"""
-    # orm implementation if we want it
-    # return BaseClient.query.order_by(BaseClient.name).all()
-    return db.execute("SELECT name FROM clients")
+    return BaseClient.query.order_by(BaseClient.name).all()
 
 
 def getClientId(name):
