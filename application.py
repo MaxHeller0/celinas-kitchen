@@ -34,8 +34,10 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def injectNavbarData():
-    db.init_app(app)
-    return dict(clientTypes=clientTypes, clientNameList=getClientNames())
+    try:
+        return dict(clientTypes=clientTypes, clientNameList=getClientNames())
+    except:
+        db.init_app(app)
 
 
 @app.route("/")
