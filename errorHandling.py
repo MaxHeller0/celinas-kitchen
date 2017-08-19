@@ -1,4 +1,4 @@
-from databaseHelpers import BaseClient
+from clients import BaseClient
 from formattingHelpers import formatName, removeExcess
 from hardcodedShit import clientAttributes
 

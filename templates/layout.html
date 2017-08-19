@@ -77,7 +77,33 @@
                       </form>
                     </ul>
                   </li>
-                </ul>
+                  <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Recipes
+                      <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                      <form action="{{ url_for('recipe') }}" method="GET" class="navbar-form navbar-left">
+                        <div class="form-group">
+                          <button class="btn btn-default" type="submit">New Recipe</button>
+                        </div>
+                      </form>
+                      <form action="{{ url_for('recipe') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
+                        <div class="form-group">
+                          <input class="form-control" list="recipes" name="name" placeholder="Recipe Name">
+                          <datalist name="recipes" id="recipes">
+                            {% if recipes %}
+                              {% for recipe in recipes %}
+                                <option value="{{recipe.name|title}}">
+                              {% endfor %}
+                            {% endif %}
+                          </datalist>
+                          <button name="source" value="viewButton" class="btn btn-default" type="submit">View</button>
+                          <button name="source" value="editButton" class="btn btn-default" type="submit">Edit</button>
+                        </div>
+                      </form>
+                    </ul>
+                  </li>
+              </ul>
               {% endif %}
               {% if session.adminId == 1 %}
                 <ul class="nav navbar-nav navbar-right">

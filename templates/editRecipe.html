@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Recipe
+{% endblock %}
+
+{% block main %}
+  <h1>
+    Recipe Editing
+  </h1>
+  <form action="{{ url_for('recipe') }}" method="POST">
+    <fieldset>
+      <div class="form-group">
+        Recipe Name: <input class="form-control" type="text" name="name" value="{{recipe.name|title}}"/>
+      </div>
+      <div class="form-group">
+        Base Price: <input class="form-control" type="number" name="basePrice" step=".01" value="{{recipe.basePrice}}"/>
+      </div>
+      <div class="form-group">
+        Customized Price: <input class="form-control" type="number" name="customPrice" step=".01" value="{{recipe.customPrice}}"/>
+      </div>
+      <div class="form-group">
+        Recipe Description: <textarea class="opinionText" name="description">{{recipe.description}}</textarea>
+      </div>
+      <div class="form-group">
+        <button name="source" value="newButton" class="btn btn-default" type="submit">Save</button>
+      </div>
+    </fieldset>
+  </form>
+{% endblock %}

@@ -1,13 +1,13 @@
 from flask import Flask, redirect, render_template, request, session, url_for
 
-from databaseHelpers import (adminCheck, db, getAdmin, getClient,
-                             getClientNames, getClientType, initDict, newAdmin,
-                             updateAdmin)
+from clients import (adminCheck, db, getAdmin, getClient, getClientNames,
+                     getClientType, initDict, newAdmin, updateAdmin)
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
-                               formatValue, title, viewFormatValue)
+                               formatValue, title, usd, viewFormatValue)
 from hardcodedShit import clientAttributes, clientTypes, dbConfig
 from helpers import apology, login_required, root_login_required
+from recipes import Recipe
 
 # configure application
 application = Flask(__name__)
@@ -27,6 +27,7 @@ app.jinja_env.filters["capitalize"] = capitalize
 app.jinja_env.filters["formatValue"] = formatValue
 app.jinja_env.filters["viewFormatValue"] = viewFormatValue
 app.jinja_env.filters["formatKey"] = formatKey
+app.jinja_env.filters["usd"] = usd
 
 # ensure responses aren't cached
 if app.config["DEBUG"]:
@@ -40,7 +41,7 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def injectNavbarData():
-    return dict(clientTypes=clientTypes, clientNameList=getClientNames())
+    return dict(clientTypes=clientTypes, clientNameList=getClientNames(), recipes=Recipe.query.order_by(Recipe.name).all())
 
 
 @app.route("/")
@@ -49,6 +50,38 @@ def index():
     Renders home page
     """
     return render_template("index.html")
+
+
+@app.route("/recipe/", methods=["GET", "POST"])
+@app.route("/recipe/<name>", methods=["GET"])
+@login_required
+def recipe(name=None):
+    if request.method == "POST" or name is not None:
+        if name is None:
+            name = request.form.get("name")
+        try:
+            name = formatName(name)
+            if name in [None, ""]:
+                return apology("Recipes must have a name")
+            recipe = Recipe.query.filter_by(name=name).first()
+            source = request.form.get("source")
+            if source == "viewButton":
+                destination = "viewRecipe.html"
+            elif source == "newButton":
+                destination = "viewRecipe.html"
+                if recipe:
+                    recipe.update(request)
+                else:
+                    recipe = Recipe(request)
+                    db.session.add(recipe)
+                db.session.commit()
+            elif source == "editButton" or (source is None and name is not None and request.method == "POST"):
+                destination = "editRecipe.html"
+            return render_template(destination, recipe=recipe)
+        except:
+            return redirect(url_for("index"))
+    else:
+        return render_template("editRecipe.html", recipe=None)
 
 
 @app.route("/newClient", methods=["GET", "POST"])

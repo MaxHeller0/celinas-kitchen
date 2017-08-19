@@ -41,22 +41,24 @@ def formatValue(val, prettyPhone=False):
 def viewFormatValue(val):
     return formatValue(val, prettyPhone=True)
 
-# def usd(value):
-#     """Formats value as USD."""
-#     return "${:,.2f}".format(value)
+
+def usd(value):
+    """Formats value as USD."""
+    return "${:,.2f}".format(value)
 
 
 def formatName(name):
     return removeExcess(name.lower(), "-'")
 
 
-def forceNum(string):
+def forceNum(string, output="int"):
     """
-    Input: string that ideally can be converted to an int
-    Returns: converted int or 0 if conversion isn't possible
+    Input: string that ideally can be converted to a number
+    Returns: converted number or 0 if conversion isn't possible
     """
+    convertDict = {"int": int, "float": float}
     try:
-        return int(string)
+        return convertDict[output](string)
     except:
         return 0
 
