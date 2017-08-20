@@ -3,9 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from dbconfig import db
 from formattingHelpers import forceNum, formatName
 
-# # prepare database object for connection
-# db = SQLAlchemy()
-
 
 class Recipe(db.Model):
     __tablename__ = "recipes"

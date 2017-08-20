@@ -1,5 +1,4 @@
 from flask import Flask, redirect, render_template, request, session, url_for
-from sqlalchemy import text
 
 from clients import (adminCheck, deleteClient, getAdmin, getClient,
                      getClientNames, getClientType, initDict, newAdmin,
@@ -59,26 +58,36 @@ def index():
 @app.route("/recipe/<name>", methods=["GET"])
 @login_required
 def recipe(name=None):
-    if request.method == "POST" or name is not None:
+    if request.method == "POST" or name:
+
+        # accessed via post, get name from form
         if name is None:
             name = request.form.get("name")
+
         try:
             name = formatName(name)
-            if name in [None, ""]:
-                return apology("Recipes must have a name")
             recipe = getRecipe(name)
             source = request.form.get("source")
-            if source == "newButton":
-                destination = "viewRecipe.html"
-                recipe = newRecipe(request)
-            elif source == "viewButton":
-                destination = "viewRecipe.html"
-            elif source == "editButton" or (source is None and name is not None and request.method == "POST"):
-                destination = "editRecipe.html"
+
+            if request.method == "GET":
+                return render_template("viewRecipe.html", recipe=recipe)
+
+            elif source in ["newButton", "viewButton"]:
+                if source == "newButton":
+                    if name in [None, ""]:
+                        # trying to create new recipe without a name
+                        return apology("Recipes must have a name")
+                    recipe = newRecipe(request)
+                return redirect("/recipe/{name}".format(name=name))
+
             elif source == "deleteButton":
                 deleteRecipe(name)
                 return render_template(url_for("index"))
-            return render_template(destination, recipe=recipe)
+
+            else:
+                # source must have been an edit button
+                return render_template("editRecipe.html", recipe=recipe)
+
         except:
             return redirect(url_for("index"))
     else:
