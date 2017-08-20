@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Recipe Details
+{% endblock %}
+
+{% block main %}
+  <h1>
+    Recipe Details: {{ recipe.name|title }}
+  </h1>
+  <p>
+    Description: {{ recipe.description }}<br/>
+    Base Price: {{ recipe.basePrice|usd }}<br/>
+    Customized Price: {{ recipe.customPrice|usd }}<br/>
+  </p>
+  <form action="{{ url_for('recipe') }}" method="POST">
+    <div class="form-group">
+      <button name="name" value="{{recipe.name}}" class="btn btn-default" type="submit">Edit</button>
+    </div>
+  </form>
+  <form action="{{ url_for('index') }}" method="GET">
+    <fieldset>
+      <div class="form-group">
+        <button class="btn btn-default" type="submit">Back to home page</button>
+      </div>
+    </fieldset>
+  </form>
+{% endblock %}

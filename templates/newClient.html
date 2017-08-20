@@ -10,15 +10,15 @@
       {% for attribute in attributes %}
         {%if cssClass[attribute] == "defaultText" %}
           <div class="form-group">
-            <input class="form-control" type="text" name={{attribute}} placeholder="{{attribute|formatKey}}"><br>
+            {{attribute|formatKey}}: <input class="form-control" type="text" name={{attribute}}><br>
           </div>
         {% elif cssClass[attribute] == "opinionText" %}
           <div class="form-group">
-            <textarea class="opinionText" name={{attribute}} placeholder="{{attribute|formatKey}}"></textarea><br>
+            {{attribute|formatKey}}: <textarea class="opinionText" name={{attribute}}></textarea><br>
           </div>
         {% elif cssClass[attribute] == "noteText" %}
           <div class="form-group">
-            <textarea class="noteText" name={{attribute}} placeholder="{{attribute|formatKey}}"></textarea><br>
+            {{attribute|formatKey}}: <textarea class="noteText" name={{attribute}}></textarea><br>
           </div>
         {% endif %}
       {% endfor %}
