@@ -1,13 +1,16 @@
 from flask import Flask, redirect, render_template, request, session, url_for
+from sqlalchemy import text
 
-from clients import (adminCheck, db, getAdmin, getClient, getClientNames,
-                     getClientType, initDict, newAdmin, updateAdmin)
+from clients import (adminCheck, deleteClient, getAdmin, getClient,
+                     getClientNames, getClientType, initDict, newAdmin,
+                     updateAdmin)
+from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, usd, viewFormatValue)
 from hardcodedShit import clientAttributes, clientTypes, dbConfig
 from helpers import apology, login_required, root_login_required
-from recipes import Recipe
+from recipes import deleteRecipe, getRecipe, getRecipeList
 
 # configure application
 application = Flask(__name__)
@@ -41,7 +44,7 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def injectNavbarData():
-    return dict(clientTypes=clientTypes, clientNameList=getClientNames(), recipes=Recipe.query.order_by(Recipe.name).all())
+    return dict(clientTypes=clientTypes, clientNameList=getClientNames(), recipes=getRecipeList())
 
 
 @app.route("/")
@@ -56,6 +59,7 @@ def index():
 @app.route("/recipe/<name>", methods=["GET"])
 @login_required
 def recipe(name=None):
+    # TODO NOT EXACTLY WORKING
     if request.method == "POST" or name is not None:
         if name is None:
             name = request.form.get("name")
@@ -63,20 +67,19 @@ def recipe(name=None):
             name = formatName(name)
             if name in [None, ""]:
                 return apology("Recipes must have a name")
-            recipe = Recipe.query.filter_by(name=name).first()
+            recipe = getRecipe(name)
             source = request.form.get("source")
-            if source == "viewButton":
+            if source == "newButton":
                 destination = "viewRecipe.html"
-            elif source == "newButton":
+                recipe = newRecipe(request)
+            elif source == "viewButton":
                 destination = "viewRecipe.html"
-                if recipe:
-                    recipe.update(request)
-                else:
-                    recipe = Recipe(request)
-                    db.session.add(recipe)
-                db.session.commit()
             elif source == "editButton" or (source is None and name is not None and request.method == "POST"):
                 destination = "editRecipe.html"
+            elif source == "deleteButton":
+                # TODO NOT WORKING
+                deleteRecipe(name)
+                return render_template(url_for("index"))
             return render_template(destination, recipe=recipe)
         except:
             return redirect(url_for("index"))
@@ -122,6 +125,9 @@ def client(name=None):
 
     if source in ["viewButton", "GET"]:
         message = "Client details"
+    elif source == "deleteButton":
+        deleteClient(name)
+        return redirect(url_for('index'))
     elif source in ["newClient", "editClient"]:
         if source == "newClient":
             message = "Client added to the database"

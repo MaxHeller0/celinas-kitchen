@@ -1,12 +1,9 @@
-from flask_sqlalchemy import SQLAlchemy
 from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy import text
 
+from dbconfig import db
 from formattingHelpers import forceNum, formatName, removeExcess, sortDict
 from hardcodedShit import clientTypes, dbConfig
-
-# prepare database object for connection
-db = SQLAlchemy()
 
 
 class Admin(db.Model):
@@ -144,6 +141,19 @@ def standingOrderClient(request):
     else:
         client = StandingOrderClient(request, clientId)
         db.session.add(client)
+    db.session.commit()
+
+
+def deleteClient(name):
+    tableNames = {0: "clients", 1: "standingOrder"}
+    clientId = getClientId(name)
+    clientType = BaseClient.query.get(clientId).clientType
+    t = text("DELETE FROM clients WHERE id=:clientId")
+    db.engine.execute(t, clientId=clientId)
+    if clientType != 0:
+        table = tableNames[clientType]
+        t = text("DELETE FROM {table} WHERE id=:clientId".format(table=table))
+        db.engine.execute(t, clientId=clientId)
     db.session.commit()
 
 

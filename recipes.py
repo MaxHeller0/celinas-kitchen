@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
 
 from formattingHelpers import forceNum, formatName
 
@@ -26,3 +25,34 @@ class Recipe(db.Model):
 
     def update(self, request):
         self.__init__(request)
+
+
+def newRecipe(request):
+    name = formatName(request.form.get("name"))
+    recipe = getRecipe(name)
+    if recipe:
+        recipe.update(request)
+    else:
+        recipe = Recipe(request)
+        db.session.add(recipe)
+    db.session.commit()
+    return recipe
+
+
+def deleteRecipe(name):
+    recipeId = getRecipe(name).id
+    t = text("DELETE FROM recipes WHERE id=:recipeId")
+    db.engine.execute(t, recipeId=recipeId)
+    db.session.commit()
+
+
+def getRecipe(name):
+    t = text("SELECT * FROM recipes WHERE name LIKE :name")
+    recipes = db.engine.execute(t, name=name)
+    # Recipe.query.filter_by(name=name).first()
+    return recipes[0]
+
+
+def getRecipeList():
+    """Returns a list of recipe names from the database"""
+    return Recipe.query.order_by(Recipe.name).all()
