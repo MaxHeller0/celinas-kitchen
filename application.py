@@ -10,7 +10,7 @@ from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, usd, viewFormatValue)
 from hardcodedShit import clientAttributes, clientTypes, dbConfig
 from helpers import apology, login_required, root_login_required
-from recipes import deleteRecipe, getRecipe, getRecipeList
+from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
 
 # configure application
 application = Flask(__name__)
@@ -59,7 +59,6 @@ def index():
 @app.route("/recipe/<name>", methods=["GET"])
 @login_required
 def recipe(name=None):
-    # TODO NOT EXACTLY WORKING
     if request.method == "POST" or name is not None:
         if name is None:
             name = request.form.get("name")
@@ -77,7 +76,6 @@ def recipe(name=None):
             elif source == "editButton" or (source is None and name is not None and request.method == "POST"):
                 destination = "editRecipe.html"
             elif source == "deleteButton":
-                # TODO NOT WORKING
                 deleteRecipe(name)
                 return render_template(url_for("index"))
             return render_template(destination, recipe=recipe)

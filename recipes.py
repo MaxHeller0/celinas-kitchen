@@ -1,9 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
 
+from dbconfig import db
 from formattingHelpers import forceNum, formatName
 
-# prepare database object for connection
-db = SQLAlchemy()
+# # prepare database object for connection
+# db = SQLAlchemy()
 
 
 class Recipe(db.Model):
@@ -40,17 +41,13 @@ def newRecipe(request):
 
 
 def deleteRecipe(name):
-    recipeId = getRecipe(name).id
-    t = text("DELETE FROM recipes WHERE id=:recipeId")
-    db.engine.execute(t, recipeId=recipeId)
+    recipe = getRecipe(name)
+    db.session.delete(recipe)
     db.session.commit()
 
 
 def getRecipe(name):
-    t = text("SELECT * FROM recipes WHERE name LIKE :name")
-    recipes = db.engine.execute(t, name=name)
-    # Recipe.query.filter_by(name=name).first()
-    return recipes[0]
+    return Recipe.query.filter_by(name=name).first()
 
 
 def getRecipeList():
