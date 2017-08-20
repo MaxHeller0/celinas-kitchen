@@ -37,8 +37,8 @@ def clientInputCheck(request, clientType, source):
         # TODO address checking
 
         # standing order client form checking
-        if clientType == "1":
-            for attribute in clientAttributes["1"][3:6]:
+        if clientType == 1:
+            for attribute in clientAttributes[1][3:6]:
                 if any(c in ".\'\"!@#$%^&*()_+" for c in request.form.get(attribute)):
                     return (True, [("you entered an invalid character for " + attribute), ''])
     except ValueError:

@@ -200,5 +200,5 @@ def getClientType(name):
     return None
 
 
-initDict = {"0": baseClient, "1": standingOrderClient}
+initDict = {0: baseClient, 1: standingOrderClient}
 clientTypes = sortDict(clientTypes, dictName="clientTypes")

@@ -104,7 +104,7 @@ def newClient():
     if request.method == "GET":
         return redirect(url_for("index"))
     global clientType
-    clientType = request.form.get("clientType")
+    clientType = int(request.form.get("clientType"))
     if not clientType:
         return redirect("/")
     return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
@@ -128,9 +128,11 @@ def client(name=None):
     else:
         source = "GET"
     message = ''
-    destination = "viewClient.html"
+    destination = None
 
     if source in ["viewButton", "GET"]:
+        if source == "GET":
+            destination = "viewClient.html"
         message = "Client details"
     elif source == "deleteButton":
         deleteClient(name)
@@ -149,11 +151,14 @@ def client(name=None):
     else:
         destination = "editClient.html"
 
-    # refresh client data in case changes were made
-    clientData = getClient(name)
-    if clientData is None:
-        return apology("Could not retrieve client with name {}".format(name), '')
-    return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
+    if destination:
+        # refresh client data in case changes were made
+        clientData = getClient(name)
+        if clientData is None:
+            return apology("Could not retrieve client with name {}".format(name), '')
+        return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
+    else:
+        return redirect("/client/{name}".format(name=name))
 
 
 @app.route("/login", methods=["GET", "POST"])
