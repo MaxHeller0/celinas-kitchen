@@ -1,10 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
 
+from dbconfig import db
 from formattingHelpers import forceNum, formatName
 
-# prepare database object for connection
-db = SQLAlchemy()
+# # prepare database object for connection
+# db = SQLAlchemy()
 
 
 class Recipe(db.Model):
@@ -26,3 +26,30 @@ class Recipe(db.Model):
 
     def update(self, request):
         self.__init__(request)
+
+
+def newRecipe(request):
+    name = formatName(request.form.get("name"))
+    recipe = getRecipe(name)
+    if recipe:
+        recipe.update(request)
+    else:
+        recipe = Recipe(request)
+        db.session.add(recipe)
+    db.session.commit()
+    return recipe
+
+
+def deleteRecipe(name):
+    recipe = getRecipe(name)
+    db.session.delete(recipe)
+    db.session.commit()
+
+
+def getRecipe(name):
+    return Recipe.query.filter_by(name=name).first()
+
+
+def getRecipeList():
+    """Returns a list of recipe names from the database"""
+    return Recipe.query.order_by(Recipe.name).all()
