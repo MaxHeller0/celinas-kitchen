@@ -7,7 +7,7 @@ from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, usd, viewFormatValue)
-from hardcodedShit import clientAttributes, clientTypes, dbConfig
+from hardcodedShit import clientAttributes, clientTypes, dbConfig, saladServiceAttributes
 from helpers import apology, login_required, root_login_required
 from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
 
@@ -159,6 +159,25 @@ def client(name=None):
         return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
     else:
         return redirect("/client/{name}".format(name=name))
+
+
+@app.route("/saladServiceCard/<name>", methods=["GET"])
+def saladServiceCard(name=""):
+    # make sure there's a name
+    if name == "":
+        return redirect(url_for('index'))
+    
+    # make sure they're a client
+    elif name not in getClientNames():
+        return apology("Client not found")
+    
+    # make sure they're a salad service client
+    elif getClientType(name) != 1:
+        return apology("Client is not in the salad service")
+    
+    
+    clientData = getClient(name)
+    return render_template("saladServiceCard.html", clientData=clientData, attributes=saladServiceAttributes)
 
 
 @app.route("/login", methods=["GET", "POST"])
