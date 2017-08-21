@@ -8,6 +8,7 @@ clientTypeOrder = ["Base", "Standing Order"]
 clientAttributes = {}
 clientAttributes[0] = ["name", "phone",
                        "address", "allergies", "generalNotes"]
+saladServiceAttributes = ["mondaySalads", "thursdaySalads", "allergies","saladLikes", "saladDislikes", "saladLoves", "saladNotes"]
 clientAttributes[1] = sorted(clientAttributes[0] + ["mondaySalads", "thursdaySalads", "saladLikes", "saladDislikes", "saladLoves", "saladNotes",
                                                     "hotplateLikes", "hotplateDislikes", "hotplateLoves", "hotplateNotes", "weeklyHotplates", "weeklySoups"],
                              key=lambda x: clientAttributeOrder.index(x))
