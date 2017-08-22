@@ -101,13 +101,19 @@ def newClient():
     Renders client creation page
     pass in list of required attributes for the client type from the clientAttributes dictionary
     """
-    if request.method == "GET":
-        return redirect(url_for("index"))
     global clientType
-    clientType = int(request.form.get("clientType"))
+    clientType = request.form.get("clientType")
+    
+    # make sure clientType is defined
     if not clientType:
         return redirect("/")
+    
+    # block people from trying to GET newCLient
+    if request.method == "GET":
+        return redirect(url_for("index"))
+    
     return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
+
 
 
 @app.route("/client/", methods=["GET", "POST"])
@@ -118,47 +124,65 @@ def client(name=None):
     Renders a page to edit or view client details
     pass in existing details so that users can build off of them
     """
-    if name is None:
+    # check how the user got to the page
+    if request.methods == "GET":
+        source = "GET"
+    else:
         try:
             name = formatName(request.form.get("name"))
             assert len(name) > 0
+        
         except:
-            return redirect(url_for("index"))
+            return apology('Client must have a name','')
+            # return redirect(url_for("index"))
         source = request.form.get("source")
-    else:
-        source = "GET"
-    message = ''
-    destination = None
 
+
+    # set destination and message depending on source 
     if source in ["viewButton", "GET"]:
-        if source == "GET":
-            destination = "viewClient.html"
+        destination = "viewClient.html"
         message = "Client details"
-    elif source == "deleteButton":
-        deleteClient(name)
-        return redirect(url_for('index'))
+    
+    # handle new/edit client functions calling the appropriate function from 
+    # databaseHelpers 
     elif source in ["newClient", "editClient"]:
+        destination = "viewClient.html"
+        message = ''
+        
         if source == "newClient":
+            # get clientType defined earlier in /newClient
+            global clientType                
             message = "Client added to the database"
-            global clientType
+        
         elif source == "editClient":
-            message = "Client details updated"
             clientType = getClientType(name)
+            message = "Client details updated"
+        
+        # check for errors
         inputCheckResults = clientInputCheck(request, clientType, source)
         if inputCheckResults[0]:
             return apology(inputCheckResults[1][0], inputCheckResults[1][1])
+        
+        # appropriate fucntion for the client type, adding their information
+        # to the database
         initDict[clientType](request)
+    
     else:
+        # honestly not sure why this is here
+        message = ''
         destination = "editClient.html"
 
-    if destination:
-        # refresh client data in case changes were made
-        clientData = getClient(name)
-        if clientData is None:
-            return apology("Could not retrieve client with name {}".format(name), '')
-        return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
-    else:
-        return redirect("/client/{name}".format(name=name))
+    
+    # get client data for view client page
+    clientData = getClient(name)
+    if clientData is None:
+        return apology("Could not retrieve client with name {}".format(name), '')
+    
+    
+    # display page based on destination, passing in client data, message, 
+    # and cssClass to help with formatting
+    return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
+
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -201,10 +225,12 @@ def login():
 def change_pwd():
     """Allows admins to change their passwords"""
     if request.method == "POST":
-
+        
+        # make sure old password was entered
         if not request.form.get("password_old"):
             return apology("must enter old password")
-
+ 
+        # make sure passwords match
         if not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
             return apology("must enter the same new password twice")
 
@@ -212,7 +238,10 @@ def change_pwd():
         admin = getAdmin(session["adminId"])
 
         # change password
-        if not updateAdmin(admin, request):
+        try:
+            updateAdmin(admin, request)
+        
+        except:
             return apology("old password invalid")
 
         logout()
@@ -223,7 +252,6 @@ def change_pwd():
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("change_pwd.html")
-
 
 @app.route("/logout")
 def logout():
@@ -267,5 +295,6 @@ with app.app_context():
     db.init_app(app)
     db.create_all()
 
+# run the program
 if __name__ == "__main__":
     app.run()
