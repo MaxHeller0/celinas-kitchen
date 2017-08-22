@@ -7,7 +7,8 @@ from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, usd, viewFormatValue)
-from hardcodedShit import clientAttributes, clientTypes, dbConfig, saladServiceAttributes
+from hardcodedShit import (clientAttributes, clientTypes, dbConfig,
+                           saladServiceAttributes)
 from helpers import apology, login_required, root_login_required
 from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
 
@@ -105,7 +106,7 @@ def newClient():
         return redirect(url_for("index"))
     global clientType
     clientType = int(request.form.get("clientType"))
-    if not clientType:
+    if clientType in [None, ""]:
         return redirect("/")
     return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
 
@@ -162,21 +163,15 @@ def client(name=None):
 
 
 @app.route("/saladServiceCard/<name>", methods=["GET"])
-def saladServiceCard(name=""):
-    # make sure there's a name
-    if name == "":
+def saladServiceCard(name=None):
+    try:
+        # attempt to get client
+        clientData = getClient(name)
+
+        # make sure they're a salad service client
+        assert clientData["clientType"] == 1
+    except:
         return redirect(url_for('index'))
-    
-    # make sure they're a client
-    elif name not in getClientNames():
-        return apology("Client not found")
-    
-    # make sure they're a salad service client
-    elif getClientType(name) != 1:
-        return apology("Client is not in the salad service")
-    
-    
-    clientData = getClient(name)
     return render_template("saladServiceCard.html", clientData=clientData, attributes=saladServiceAttributes)
 
 

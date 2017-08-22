@@ -60,7 +60,7 @@ class BaseClient(db.Model):
     __tablename__ = "clients"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
-    phone = db.Column(db.String(10), unique=True)
+    phone = db.Column(db.String(10))
     clientType = db.Column(db.Integer)
     address = db.Column(db.Text)
     allergies = db.Column(db.Text)
