@@ -20,23 +20,23 @@ def clientInputCheck(request, clientType, source):
             message = ["All clients must have a name", '']
             raise ValueError
 
-        # make sure the phone numyber in a 10 digit number
+        # make sure that, if entered, the phone numyber in a 10 digit number
         phoneStr = removeExcess(request.form.get("phone"))
-        try:
-            int(removeExcess(phoneStr))
-        except:
-            message = ["Phone number must be number", '']
-            raise ValueError
-        if len(removeExcess(phoneStr)) == 7:
-            message = ["Must include area code for phone number", '']
-            raise ValueError
-        elif len(removeExcess(phoneStr)) != 10:
-            message = ["Not a valid phone number", '']
-            raise ValueError
-
-        # TODO address checking
+        if phoneStr:
+            try:
+                int(removeExcess(phoneStr))
+            except:
+                message = ["Phone number must be number", '']
+                raise ValueError
+            if len(removeExcess(phoneStr)) == 7:
+                message = ["Must include area code for phone number", '']
+                raise ValueError
+            elif len(removeExcess(phoneStr)) != 10:
+                message = ["Not a valid phone number", '']
+                raise ValueError
 
         # standing order client form checking
+        # TODO BROKEN
         if clientType == 1:
             for attribute in clientAttributes[1][3:6]:
                 if any(c in ".\'\"!@#$%^&*()_+" for c in request.form.get(attribute)):

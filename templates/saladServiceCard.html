@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Client Details
+{% endblock %}
+
+{% block main %}
+  <h1>
+    {{ clientData["name"]|title }}
+  </h1>
+  {% for attribute in attributes %}
+      <h3 class="saladServiceCard">
+      {{attribute|formatKey}}: {{clientData[attribute]|viewFormatValue}}
+      </h3>
+      <br>
+      <br>
+  {% endfor %}
+{% endblock %}

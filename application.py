@@ -7,7 +7,8 @@ from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, usd, viewFormatValue)
-from hardcodedShit import clientAttributes, clientTypes, dbConfig
+from hardcodedShit import (clientAttributes, clientTypes, dbConfig,
+                           saladServiceAttributes)
 from helpers import apology, login_required, root_login_required
 from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
 
@@ -101,17 +102,13 @@ def newClient():
     Renders client creation page
     pass in list of required attributes for the client type from the clientAttributes dictionary
     """
-    global clientType
-    clientType = int(request.form.get("clientType"))
-
-    # make sure clientType is defined
-    if not clientType:
-        return redirect("/")
-
     # block people from trying to GET newCLient
     if request.method == "GET":
         return redirect(url_for("index"))
-
+    global clientType
+    clientType = int(request.form.get("clientType"))
+    if clientType in [None, ""]:
+        return redirect("/")
     return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
 
 
@@ -178,6 +175,19 @@ def client(name=None):
     # display page based on destination, passing in client data, message,
     # and cssClass to help with formatting
     return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
+
+
+@app.route("/saladServiceCard/<name>", methods=["GET"])
+def saladServiceCard(name=None):
+    try:
+        # attempt to get client
+        clientData = getClient(name)
+
+        # make sure they're a salad service client
+        assert clientData["clientType"] == 1
+    except:
+        return redirect(url_for('index'))
+    return render_template("saladServiceCard.html", clientData=clientData, attributes=saladServiceAttributes)
 
 
 @app.route("/login", methods=["GET", "POST"])
