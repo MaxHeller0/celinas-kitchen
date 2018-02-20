@@ -16,6 +16,8 @@ from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
 application = Flask(__name__)
 app = application
 
+app.config["DEBUG"] = True
+
 # configure database
 app.config["SQLALCHEMY_DATABASE_URI"] = dbConfig
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True

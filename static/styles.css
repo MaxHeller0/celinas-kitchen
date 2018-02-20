@@ -84,3 +84,8 @@ main td, th {
   text-align: left;
   margin-left: 200px;
 }
+
+.homeImg {
+  border-radius: 4px;
+  padding: 0px;
+}
