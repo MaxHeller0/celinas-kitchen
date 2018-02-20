@@ -4,7 +4,7 @@ from sqlalchemy import text
 from dbconfig import db
 from formattingHelpers import forceNum, formatName, removeExcess, sortDict
 from hardcodedShit import clientTypes
-from transactions import Transaction
+from orders import OrderItem
 
 
 class Admin(db.Model):
@@ -66,7 +66,6 @@ class BaseClient(db.Model):
     address = db.Column(db.Text)
     allergies = db.Column(db.Text)
     generalNotes = db.Column(db.Text)
-    transactions = db.relationship('Transaction', backref='client')
 
     def __init__(self, request, clientType=0):
         self.name = formatName(request.form.get("name"))
@@ -146,19 +145,19 @@ def standingOrderClient(request):
     db.session.commit()
 
 
-class ALaCarteClient(db.Model):
-    __tablename__ = "aLaCarteClients"
-    id = db.Column(db.Integer, primary_key=True)
-
-    def __init__(self, request, clientId):
-        pass
-
-    def update(self, request):
-        self.__init__(request, self.id)
-
-    def toDict(self):
-        return dict((key, value) for key, value in self.__dict__.items()
-                    if not callable(value) and not key.startswith('_'))
+# class ALaCarteClient(db.Model):
+#     __tablename__ = "aLaCarteClients"
+#     id = db.Column(db.Integer, primary_key=True)
+#
+#     def __init__(self, request, clientId):
+#         pass
+#
+#     def update(self, request):
+#         self.__init__(request, self.id)
+#
+#     def toDict(self):
+#         return dict((key, value) for key, value in self.__dict__.items()
+#                     if not callable(value) and not key.startswith('_'))
 
 
 def deleteClient(name):
