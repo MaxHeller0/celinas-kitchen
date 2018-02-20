@@ -5,3 +5,6 @@
 
 Cache Files
 __pycache__/*
+
+credentials.csv
+gitcredentials.csv
