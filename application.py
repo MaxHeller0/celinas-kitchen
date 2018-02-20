@@ -158,7 +158,7 @@ def client(name=None):
         if inputCheckResults[0]:
             return apology(inputCheckResults[1][0], inputCheckResults[1][1])
 
-        # appropriate fucntion for the client type, adding their information
+        # appropriate function for the client type, adding their information
         # to the database
         initDict[clientType](request)
 
