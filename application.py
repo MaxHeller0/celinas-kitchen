@@ -85,7 +85,7 @@ def recipe(name=None):
 
             elif source == "deleteButton":
                 deleteRecipe(name)
-                return render_template(url_for("index"))
+                return redirect(url_for("index"))
 
             else:
                 # source must have been an edit button
@@ -159,6 +159,10 @@ def client(name=None):
 
         # add client to db using appropriate function
         initDict[clientType](request)
+
+    elif source == "deleteButton":
+        deleteClient(name)
+        return redirect(url_for("index"))
 
     else:
         # source must have been an edit button
