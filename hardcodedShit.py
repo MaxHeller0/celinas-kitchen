@@ -1,20 +1,20 @@
 import os
 
 clientTypes = {"Base": 0, "Standing Order": 1}
-clientAttributeOrder = ["id", "clientType", "name", "phone", "address", "hash", "mondaySalads", "thursdaySalads", "weeklySoups", "weeklyHotplates",
-                        "allergies", "saladLikes", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves",
+clientAttributeOrder = ["id", "clientType", "name", "phone", "address", "hash", "mondaySalads", "thursdaySalads", "saladDressings", "weeklySoups", "weeklyHotplates",
+                        "allergies", "dietaryPreferences", "protein", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves",
                         "generalNotes", "saladNotes", "generalNotes", "hotplateNotes"]
 clientTypeOrder = ["Base", "Standing Order"]
 clientAttributes = {}
 clientAttributes[0] = ["name", "phone",
-                       "address", "allergies", "generalNotes"]
-saladServiceAttributes = ["mondaySalads", "thursdaySalads", "allergies","saladLikes", "saladDislikes", "saladLoves", "saladNotes"]
-clientAttributes[1] = sorted(clientAttributes[0] + ["mondaySalads", "thursdaySalads", "saladLikes", "saladDislikes", "saladLoves", "saladNotes",
+                       "address", "allergies", "generalNotes", "dietaryPreferences"]
+saladServiceAttributes = ["mondaySalads", "thursdaySalads", "saladDressings", "allergies", "protein", "saladDislikes", "saladLoves", "saladNotes"]
+clientAttributes[1] = sorted(clientAttributes[0] + ["mondaySalads", "thursdaySalads", "saladDressings", "protein", "saladDislikes", "saladLoves", "saladNotes",
                                                     "hotplateLikes", "hotplateDislikes", "hotplateLoves", "hotplateNotes", "weeklyHotplates", "weeklySoups"],
                              key=lambda x: clientAttributeOrder.index(x))
 inputTypes = {
     "defaultText": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "weeklyHotplates", "weeklySoups"],
-    "opinionText": ["saladLikes", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "allergies"],
+    "opinionText": ["protein", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "allergies"],
     "noteText": ["generalNotes", "saladNotes", "hotplateNotes"]
 }
 try:

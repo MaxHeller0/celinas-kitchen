@@ -17,9 +17,10 @@ def capitalize(val):
 
 def formatKey(key):
     formatDict = {"mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
+                  "saladDressings": "# of Salad Dressings", "dietaryPreferences": "Dietary Preferences",
                   "weeklySoups": "# of Weekly Soups", "weeklyHotplates": "# of Weekly Hotplates",
                   "saladNotes": "Salad Notes", "generalNotes": "General Notes", "hotplateNotes": "Hotplate Notes",
-                  "saladLikes": "Salad Likes", "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
+                  "protein": "Salad Likes", "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
                   "hotplateLikes": "Hotplate Likes", "hotplateDislikes": "Hotplate Dislikes", "hotplateLoves": "Hotplate Loves"}
     if key in formatDict:
         return formatDict[key]
@@ -29,7 +30,7 @@ def formatKey(key):
 def formatValue(val, prettyPhone=False):
     try:
         int(val)
-        if len(val) == 10 and prettyPhone == True:
+        if len(val) == 10 and prettyPhone:
             return "({}) {}-{}".format(val[0:3], val[3:6], val[6:10])
         return val
     except:
