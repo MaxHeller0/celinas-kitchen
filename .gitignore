@@ -2,7 +2,7 @@
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
-
+vcs.xml
 Cache Files
 __pycache__/*
 

@@ -192,6 +192,11 @@ def getClient(name):
     except:
         return None
 
+def getClientNameById(id):
+    client = BaseClient.query.filter_by(id=id).first()
+    if client:
+        return client.name
+    return None
 
 def getClientNames():
     """Returns a list of client names from the database as a list of dicts of form {"name":name}"""
