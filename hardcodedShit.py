@@ -13,7 +13,7 @@ clientAttributes[1] = sorted(clientAttributes[0] + ["mondaySalads", "thursdaySal
                                                     "hotplateLikes", "hotplateDislikes", "hotplateLoves", "hotplateNotes", "weeklyHotplates", "weeklySoups"],
                              key=lambda x: clientAttributeOrder.index(x))
 inputTypes = {
-    "defaultText": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "weeklyHotplates", "weeklySoups"],
+    "defaultText": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "saladDressings", "weeklyHotplates", "weeklySoups"],
     "opinionText": ["protein", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "allergies"],
     "noteText": ["generalNotes", "saladNotes", "hotplateNotes"]
 }

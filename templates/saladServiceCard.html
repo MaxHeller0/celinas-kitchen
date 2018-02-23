@@ -4,23 +4,25 @@
   <h3 class="saladServiceCard">
     Phone: {{clientData["phone"]|viewFormatValue}}
   </h3>
-  <br>
 
   <h3 class="saladServiceCard">
     Address: {{clientData["address"]|viewFormatValue}}
   </h3>
-  <br>
 
   <h3 class="saladServiceCard">
     # of Monday Salads: {{clientData["mondaySalads"]|viewFormatValue}}
   </h3>
-  <br>
 
   <h3 class="saladServiceCard">
       # of Thursday Salads: {{clientData["thursdaySalads"]|viewFormatValue}}
   </h3>
+
+  <h3 class="saladServiceCard">
+      # of salad dressings: {{clientData["saladDressings"]|viewFormatValue}}
+  </h3>
   <br>
   <br>
+
 
   <h3 id="allergies">
       Allergies: {{clientData["allergies"]|viewFormatValue}}
@@ -52,7 +54,4 @@
   </h3>
   <br>
 
-  <h3 class="saladServiceCard">
-    # of salad dressings: {{clientData["saladDressings"]|viewFormatValue}}
-  </h3>
-  <br>
+

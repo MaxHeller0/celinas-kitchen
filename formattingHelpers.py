@@ -20,7 +20,7 @@ def formatKey(key):
                   "saladDressings": "# of Salad Dressings", "dietaryPreferences": "Dietary Preferences",
                   "weeklySoups": "# of Weekly Soups", "weeklyHotplates": "# of Weekly Hotplates",
                   "saladNotes": "Salad Notes", "generalNotes": "General Notes", "hotplateNotes": "Hotplate Notes",
-                  "protein": "Salad Likes", "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
+                  "protein": "Protein", "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
                   "hotplateLikes": "Hotplate Likes", "hotplateDislikes": "Hotplate Dislikes", "hotplateLoves": "Hotplate Loves"}
     if key in formatDict:
         return formatDict[key]
