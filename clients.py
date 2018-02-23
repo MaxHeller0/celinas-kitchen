@@ -65,6 +65,7 @@ class BaseClient(db.Model):
     address = db.Column(db.Text)
     allergies = db.Column(db.Text)
     generalNotes = db.Column(db.Text)
+    dietaryPreferences = db.Column(db.Text)
 
     def __init__(self, request, clientType=0):
         self.name = formatName(request.form.get("name"))
@@ -73,6 +74,7 @@ class BaseClient(db.Model):
         self.address = request.form.get("address").lower()
         self.allergies = request.form.get("allergies").lower()
         self.generalNotes = request.form.get("generalNotes")
+        self.dietaryPreferences = request.form.get("dietaryPreferences")
 
     def update(self, request):
         self.__init__(request, self.clientType)
@@ -97,7 +99,7 @@ def baseClient(request, clientType=0):
 class StandingOrderClient(db.Model):
     __tablename__ = "standingOrder"
     id = db.Column(db.Integer, primary_key=True)
-    saladLikes = db.Column(db.Text)
+    protein = db.Column(db.Text)
     saladDislikes = db.Column(db.Text)
     saladLoves = db.Column(db.Text)
     hotplateLikes = db.Column(db.Text)
@@ -105,6 +107,7 @@ class StandingOrderClient(db.Model):
     hotplateLoves = db.Column(db.Text)
     mondaySalads = db.Column(db.Integer)
     thursdaySalads = db.Column(db.Integer)
+    saladDressings = db.Column(db.Integer)
     weeklyHotplates = db.Column(db.Integer)
     weeklySoups = db.Column(db.Integer)
     saladNotes = db.Column(db.Text)
@@ -112,7 +115,7 @@ class StandingOrderClient(db.Model):
 
     def __init__(self, request, clientId):
         self.id = clientId
-        self.saladLikes = request.form.get("saladLikes").lower()
+        self.protein = request.form.get("protein").lower()
         self.saladDislikes = request.form.get("saladDislikes").lower()
         self.saladLoves = request.form.get("saladLoves").lower()
         self.hotplateLikes = request.form.get("hotplateLikes").lower()
@@ -120,6 +123,7 @@ class StandingOrderClient(db.Model):
         self.hotplateLoves = request.form.get("hotplateLoves").lower()
         self.mondaySalads = forceNum(request.form.get("mondaySalads"))
         self.thursdaySalads = forceNum(request.form.get("thursdaySalads"))
+        self.saladDressings = forceNum(request.form.get("saladDressings"))
         self.weeklyHotplates = forceNum(request.form.get("weeklyHotplates"))
         self.weeklySoups = forceNum(request.form.get("weeklySoups"))
         self.saladNotes = request.form.get("saladNotes")

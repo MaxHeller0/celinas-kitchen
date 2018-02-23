@@ -1,18 +1,57 @@
-{% extends "layout.html" %}
-
-{% block title %}
-    Client Details
-{% endblock %}
-
-{% block main %}
   <h1>
     {{ clientData["name"]|title }}
   </h1>
-  {% for attribute in attributes %}
-      <h3 class="saladServiceCard">
-      {{attribute|formatKey}}: {{clientData[attribute]|viewFormatValue}}
-      </h3>
-      <br>
-      <br>
-  {% endfor %}
-{% endblock %}
+  <h3 class="saladServiceCard">
+    Phone: {{clientData["phone"]|viewFormatValue}}
+  </h3>
+
+  <h3 class="saladServiceCard">
+    Address: {{clientData["address"]|viewFormatValue}}
+  </h3>
+
+  <h3 class="saladServiceCard">
+    # of Monday Salads: {{clientData["mondaySalads"]|viewFormatValue}}
+  </h3>
+
+  <h3 class="saladServiceCard">
+      # of Thursday Salads: {{clientData["thursdaySalads"]|viewFormatValue}}
+  </h3>
+
+  <h3 class="saladServiceCard">
+      # of salad dressings: {{clientData["saladDressings"]|viewFormatValue}}
+  </h3>
+  <br>
+  <br>
+
+
+  <h3 id="allergies">
+      Allergies: {{clientData["allergies"]|viewFormatValue}}
+  </h3>
+  <br>
+
+  <h3 class="saladServiceCard">
+      Protein: {{clientData["protein"]|viewFormatValue}}
+  </h3>
+  <br>
+
+  <h3 class="saladServiceCard">
+    Dietary preferences: {{clientData["dietaryPreferences"]|viewFormatValue}}
+  </h3>
+  <br>
+
+  <h3 class="saladServiceCard">
+      Protein: {{clientData["protein"]|viewFormatValue}}
+  </h3>
+  <br>
+
+  <h3 class="saladServiceCard">
+    Dislikes: {{clientData["saladDislikes"]|viewFormatValue}}
+  </h3>
+  <br>
+
+  <h3 class="saladServiceCard">
+    Loves: {{clientData["saladLoves"]|viewFormatValue}}
+  </h3>
+  <br>
+
+
