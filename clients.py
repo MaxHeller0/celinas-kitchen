@@ -4,7 +4,7 @@ from sqlalchemy import text
 from dbconfig import db
 from formattingHelpers import forceNum, formatName, removeExcess, sortDict
 from hardcodedShit import clientTypes
-from orders import OrderItem
+# from orders import OrderItem
 
 
 class Admin(db.Model):
@@ -66,6 +66,7 @@ class BaseClient(db.Model):
     address = db.Column(db.Text)
     allergies = db.Column(db.Text)
     generalNotes = db.Column(db.Text)
+    delivery = db.Column(db.Integer)
 
     def __init__(self, request, clientType=0):
         self.name = formatName(request.form.get("name"))
@@ -74,6 +75,7 @@ class BaseClient(db.Model):
         self.address = request.form.get("address").lower()
         self.allergies = request.form.get("allergies").lower()
         self.generalNotes = request.form.get("generalNotes")
+        self.delivery = request.form.get("delivery")
 
     def update(self, request):
         self.__init__(request, self.clientType)
@@ -98,9 +100,10 @@ def baseClient(request, clientType=0):
 class StandingOrderClient(db.Model):
     __tablename__ = "standingOrder"
     id = db.Column(db.Integer, primary_key=True)
-    saladLikes = db.Column(db.Text)
+    protein = db.Column(db.Text)
     saladDislikes = db.Column(db.Text)
     saladLoves = db.Column(db.Text)
+    saladDressings = db.Column(db.Integer)
     hotplateLikes = db.Column(db.Text)
     hotplateDislikes = db.Column(db.Text)
     hotplateLoves = db.Column(db.Text)
@@ -113,9 +116,10 @@ class StandingOrderClient(db.Model):
 
     def __init__(self, request, clientId):
         self.id = clientId
-        self.saladLikes = request.form.get("saladLikes").lower()
+        self.protein = request.form.get("protein").lower()
         self.saladDislikes = request.form.get("saladDislikes").lower()
         self.saladLoves = request.form.get("saladLoves").lower()
+        self.saladDressings = forceNum(request.form.get("saladDressings"))
         self.hotplateLikes = request.form.get("hotplateLikes").lower()
         self.hotplateDislikes = request.form.get("hotplateDislikes").lower()
         self.hotplateLoves = request.form.get("hotplateLoves").lower()

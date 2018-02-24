@@ -19,8 +19,9 @@ def formatKey(key):
     formatDict = {"mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
                   "weeklySoups": "# of Weekly Soups", "weeklyHotplates": "# of Weekly Hotplates",
                   "saladNotes": "Salad Notes", "generalNotes": "General Notes", "hotplateNotes": "Hotplate Notes",
-                  "saladLikes": "Salad Likes", "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
-                  "hotplateLikes": "Hotplate Likes", "hotplateDislikes": "Hotplate Dislikes", "hotplateLoves": "Hotplate Loves"}
+                  "protein": "Protein", "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves", "saladDressings": "Salad Dressings",
+                  "hotplateLikes": "Hotplate Likes", "hotplateDislikes": "Hotplate Dislikes", "hotplateLoves": "Hotplate Loves",
+                  "dietaryPreferences": "Dietary Preferences"}
     if key in formatDict:
         return formatDict[key]
     return key.title()
