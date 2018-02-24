@@ -6,15 +6,16 @@ from clients import (adminCheck, deleteClient, getAdmin, getClient,
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
-                               formatValue, title, usd, viewFormatValue)
-from hardcodedShit import (clientAttributes, clientTypes, dbConfig,
-                           saladServiceAttributes)
+                               formatValue, title, usd, viewFormatValue, formatBool)
+from hardcodedShit import (clientAttributes, clientTypes, dbConfig)
 from helpers import apology, login_required, root_login_required
 from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
 
 # configure application
 application = Flask(__name__)
 app = application
+
+app.config["DEBUG"] = True
 
 # configure database
 app.config["SQLALCHEMY_DATABASE_URI"] = dbConfig
@@ -30,6 +31,7 @@ app.jinja_env.filters["capitalize"] = capitalize
 app.jinja_env.filters["formatValue"] = formatValue
 app.jinja_env.filters["viewFormatValue"] = viewFormatValue
 app.jinja_env.filters["formatKey"] = formatKey
+app.jinja_env.filters["formatBool"] = formatBool
 app.jinja_env.filters["usd"] = usd
 
 # ensure responses aren't cached
@@ -83,7 +85,7 @@ def recipe(name=None):
 
             elif source == "deleteButton":
                 deleteRecipe(name)
-                return render_template(url_for("index"))
+                return redirect(url_for("index"))
 
             else:
                 # source must have been an edit button
@@ -133,13 +135,10 @@ def client(name=None):
             # return redirect(url_for("index"))
         source = request.form.get("source")
 
-    # set destination and message depending on source
     if source in ["viewButton", "GET"]:
         destination = "viewClient.html"
         message = "Client details"
 
-    # handle new/edit client functions calling the appropriate function from
-    # databaseHelpers
     elif source in ["newClient", "editClient"]:
         destination = "viewClient.html"
         message = ''
@@ -158,8 +157,7 @@ def client(name=None):
         if inputCheckResults[0]:
             return apology(inputCheckResults[1][0], inputCheckResults[1][1])
 
-        # appropriate function for the client type, adding their information
-        # to the database
+        # add client to db using appropriate function
         initDict[clientType](request)
 
     elif source == "deleteButton":
@@ -171,13 +169,11 @@ def client(name=None):
         message = ''
         destination = "editClient.html"
 
-    # get client data for view client page
     clientData = getClient(name)
     if clientData is None:
         return apology("Could not retrieve client with name {}".format(name), '')
 
-    # display page based on destination, passing in client data, message,
-    # and cssClass to help with formatting
+    # return either editClient or viewClient passing in all the clients data
     return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
 
 
@@ -191,7 +187,7 @@ def saladServiceCard(name=None):
         assert clientData["clientType"] == 1
     except:
         return redirect(url_for('index'))
-    return render_template("saladServiceCard.html", clientData=clientData, attributes=saladServiceAttributes)
+    return render_template("saladServiceCard.html", clientData=clientData)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -201,14 +197,11 @@ def login():
     # forget any user_id
     session.clear()
 
-    # if user reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        # ensure username was submitted
         if not request.form.get("name"):
             return apology("must provide name")
 
-        # ensure password was submitted
         elif not request.form.get("password"):
             return apology("must provide password")
 
@@ -221,7 +214,6 @@ def login():
         # remember which user has logged in
         session["adminId"] = adminId
 
-        # redirect user to home page
         return redirect(url_for("index"))
 
     # else if user reached route via GET (as by clicking a link or via redirect)
@@ -235,7 +227,6 @@ def change_pwd():
     """Allows admins to change their passwords"""
     if request.method == "POST":
 
-        # make sure old password was entered
         if not request.form.get("password_old"):
             return apology("must enter old password")
 
@@ -243,22 +234,17 @@ def change_pwd():
         if not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
             return apology("must enter the same new password twice")
 
-        # query database for admin
         admin = getAdmin(session["adminId"])
 
-        # change password
         try:
             updateAdmin(admin, request)
-
         except:
             return apology("old password invalid")
 
         logout()
 
-        # redirect user to login page
         return redirect(url_for("login"))
 
-    # else if user reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("change_pwd.html")
 
@@ -267,10 +253,7 @@ def change_pwd():
 def logout():
     """Log user out."""
 
-    # forget any user_id
     session.clear()
-
-    # redirect user to login form
     return redirect(url_for("login"))
 
 
@@ -279,10 +262,8 @@ def logout():
 def register():
     """Register user."""
 
-    # if user reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        # ensure username was submitted
         if not request.form.get("name"):
             return apology("must provide name")
 
@@ -290,14 +271,12 @@ def register():
         elif not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
             return apology("must enter the same password twice")
 
-        # insert the user into the database
         newAdmin(request)
 
-        # redirect user to login page
         return redirect(url_for("index"))
 
-    # else if user reached route via GET (as by clicking a link or via redirect)
     else:
+
         return render_template("register.html")
 
 

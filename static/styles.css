@@ -83,4 +83,12 @@ main td, th {
   font-size: 24px;
   text-align: left;
   margin-left: 200px;
+  font-weight: normal;
+}
+
+#allergies {
+  font-size: 24px;
+  text-align: left;
+  margin-left: 200px;
+  font-weight: bold;
 }
