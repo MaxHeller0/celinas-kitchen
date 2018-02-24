@@ -6,7 +6,7 @@ from clients import (adminCheck, deleteClient, getAdmin, getClient,
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
-                               formatValue, title, usd, viewFormatValue)
+                               formatValue, title, usd, viewFormatValue, formatBool)
 from hardcodedShit import (clientAttributes, clientTypes, dbConfig,
                            saladServiceAttributes)
 from helpers import apology, login_required, root_login_required
@@ -32,6 +32,7 @@ app.jinja_env.filters["capitalize"] = capitalize
 app.jinja_env.filters["formatValue"] = formatValue
 app.jinja_env.filters["viewFormatValue"] = viewFormatValue
 app.jinja_env.filters["formatKey"] = formatKey
+app.jinja_env.filters["formatBool"] = formatBool
 app.jinja_env.filters["usd"] = usd
 
 # ensure responses aren't cached

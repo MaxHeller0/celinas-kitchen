@@ -10,8 +10,12 @@
   </h1>
   <p>
     {% for attribute in clientData %}
-    {% if clientData[attribute] != None and clientData[attribute] != '' and attribute != 'id' and attribute != 'clientType' and attribute != 'name' %}
-      {{attribute|formatKey}}: {{clientData[attribute]|viewFormatValue}} <br>
+    {% if clientData[attribute] not in [None, ''] and attribute not in ['id', 'clientType', 'name'] %}
+      {% if attribute == 'saladDressings' %}
+        {{attribute|formatKey}}: {{clientData[attribute]|formatBool}} <br>
+      {% else %}
+        {{attribute|formatKey}}: {{clientData[attribute]|viewFormatValue}} <br>
+      {% endif %}
     {% endif %}
     {% endfor %}
   </p>

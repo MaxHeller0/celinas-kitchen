@@ -107,7 +107,7 @@ class StandingOrderClient(db.Model):
     hotplateLoves = db.Column(db.Text)
     mondaySalads = db.Column(db.Integer)
     thursdaySalads = db.Column(db.Integer)
-    saladDressings = db.Column(db.Integer)
+    saladDressings = db.Column(db.Boolean, default=False)
     weeklyHotplates = db.Column(db.Integer)
     weeklySoups = db.Column(db.Integer)
     saladNotes = db.Column(db.Text)

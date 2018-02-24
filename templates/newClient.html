@@ -20,6 +20,15 @@
           <div class="form-group">
             {{attribute|formatKey}}: <textarea class="noteText" name={{attribute}}></textarea><br>
           </div>
+        {% elif cssClass[attribute] == "boolean" %}
+          <div class="form-group">
+            {{attribute|formatKey}}:
+            <input type="radio" name={{attribute}} id="True" value="True">
+            <label for="True">True</label>
+            <input type="radio" name={{attribute}} id="False" value="False">
+            <label for="False">False</label>
+            <br>
+          </div>
         {% endif %}
       {% endfor %}
       <div class="form-group">
