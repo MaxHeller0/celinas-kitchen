@@ -18,9 +18,10 @@ def capitalize(val):
 def formatKey(key):
     formatDict = {"mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
                   "saladDressings": "Salad Dressings", "dietaryPreferences": "Dietary Preferences",
-                  "weeklySoups": "# of Weekly Soups", "weeklyHotplates": "# of Weekly Hotplates",
-                  "saladNotes": "Salad Notes", "generalNotes": "General Notes", "hotplateNotes": "Hotplate Notes",
-                  "protein": "Protein", "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
+                  "mondayHotplates": "# of Monday Hotplates", "tuesdayHotplates": "# of Tuesday Hotplates",
+                  "thursdayHotplates": "# of Thursday Hotplates", "saladNotes": "Salad Notes",
+                  "generalNotes": "General Notes", "hotplateNotes": "Hotplate Notes",
+                  "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
                   "hotplateLikes": "Hotplate Likes", "hotplateDislikes": "Hotplate Dislikes", "hotplateLoves": "Hotplate Loves"}
     if key in formatDict:
         return formatDict[key]

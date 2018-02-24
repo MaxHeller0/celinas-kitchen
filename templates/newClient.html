@@ -23,9 +23,9 @@
         {% elif cssClass[attribute] == "boolean" %}
           <div class="form-group">
             {{attribute|formatKey}}:
-            <input type="radio" name={{attribute}} id="True" value="True">
+            <input type="radio" name={{attribute}} id="True" value="1">
             <label for="True">True</label>
-            <input type="radio" name={{attribute}} id="False" value="False">
+            <input type="radio" name={{attribute}} id="False" value="0">
             <label for="False">False</label>
             <br>
           </div>
