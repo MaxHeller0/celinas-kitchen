@@ -162,6 +162,10 @@ def client(name=None):
         # to the database
         initDict[clientType](request)
 
+    elif source == "deleteButton":
+        deleteClient(name)
+        return redirect(url_for("index"))
+
     else:
         # source must have been an edit button
         message = ''
