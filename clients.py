@@ -4,7 +4,6 @@ from sqlalchemy import text
 from dbconfig import db
 from formattingHelpers import forceNum, formatName, removeExcess, sortDict
 from hardcodedShit import clientTypes
-# from orders import OrderItem
 
 
 class Admin(db.Model):
@@ -105,7 +104,6 @@ class StandingOrderClient(db.Model):
     protein = db.Column(db.Text)
     saladDislikes = db.Column(db.Text)
     saladLoves = db.Column(db.Text)
-    saladDressings = db.Column(db.Integer)
     hotplateLikes = db.Column(db.Text)
     hotplateDislikes = db.Column(db.Text)
     hotplateLoves = db.Column(db.Text)
@@ -131,7 +129,6 @@ class StandingOrderClient(db.Model):
         self.weeklyMoney = forceNum(request.form.get("weeklyMoney"))
         self.mondaySalads = forceNum(request.form.get("mondaySalads"))
         self.thursdaySalads = forceNum(request.form.get("thursdaySalads"))
-        self.saladDressings = forceNum(request.form.get("saladDressings"))
         self.mondayHotplates = forceNum(request.form.get("mondayHotplates"))
         self.tuesdayHotplates = forceNum(request.form.get("tuesdayHotplates"))
         self.thursdayHotplates = forceNum(request.form.get("thursdayHotplates"))
