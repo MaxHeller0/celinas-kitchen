@@ -16,7 +16,7 @@ def capitalize(val):
 
 
 def formatKey(key):
-    formatDict = {"mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
+    formatDict = {"weeklyMoney": "Weekly Money", "mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
                   "saladDressings": "Salad Dressings", "dietaryPreferences": "Dietary Preferences",
                   "mondayHotplates": "# of Monday Hotplates", "tuesdayHotplates": "# of Tuesday Hotplates",
                   "thursdayHotplates": "# of Thursday Hotplates", "saladNotes": "Salad Notes",
