@@ -1,21 +1,24 @@
 import os
 
 clientTypes = {"Base": 0, "Standing Order": 1}
-clientAttributeOrder = ["id", "clientType", "name", "phone", "address", "hash", "mondaySalads", "thursdaySalads", "saladDressings", "weeklySoups", "weeklyHotplates",
+clientAttributeOrder = ["id", "clientType", "name", "phone", "address", "delivery", "hash",
+                        "weeklyMoney", "mondaySalads", "thursdaySalads", "saladDressings", "mondayHotplates", "tuesdayHotplates", "thursdayHotplates",
                         "allergies", "dietaryPreferences", "protein", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves",
                         "generalNotes", "saladNotes", "generalNotes", "hotplateNotes"]
 clientTypeOrder = ["Base", "Standing Order"]
 clientAttributes = {}
 clientAttributes[0] = ["name", "phone",
-                       "address", "allergies", "generalNotes", "dietaryPreferences"]
-saladServiceAttributes = ["mondaySalads", "thursdaySalads", "saladDressings", "allergies", "protein", "saladDislikes", "saladLoves", "saladNotes"]
-clientAttributes[1] = sorted(clientAttributes[0] + ["mondaySalads", "thursdaySalads", "saladDressings", "protein", "saladDislikes", "saladLoves", "saladNotes",
-                                                    "hotplateLikes", "hotplateDislikes", "hotplateLoves", "hotplateNotes", "weeklyHotplates", "weeklySoups"],
+                       "address", "delivery", "allergies", "generalNotes", "dietaryPreferences"]
+clientAttributes[1] = sorted(clientAttributes[0] + ["weeklyMoney", "mondaySalads", "thursdaySalads", "saladDressings",
+                                                    "protein", "saladDislikes", "saladLoves", "saladNotes",
+                                                    "hotplateLikes", "hotplateDislikes", "hotplateLoves", "hotplateNotes",
+                                                    "mondayHotplates", "tuesdayHotplates", "thursdayHotplates"],
                              key=lambda x: clientAttributeOrder.index(x))
 inputTypes = {
-    "defaultText": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "saladDressings", "weeklyHotplates", "weeklySoups"],
+    "defaultText": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "mondayHotplates", "tuesdayHotplates", "thursdayHotplates", "weeklyMoney"],
     "opinionText": ["protein", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "allergies"],
-    "noteText": ["generalNotes", "saladNotes", "hotplateNotes"]
+    "noteText": ["generalNotes", "saladNotes", "hotplateNotes"],
+    "boolean": ["saladDressings", "delivery"]
 }
 try:
     dbConfig = "mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(username=os.environ["RDS_USERNAME"],

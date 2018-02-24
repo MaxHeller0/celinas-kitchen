@@ -28,6 +28,15 @@
               {{attribute|formatKey}}:
               <textarea class="noteText" name={{attribute}}>{{clientData[attribute]|formatValue}}</textarea><br>
             </div>
+          {% elif cssClass[attribute] == "boolean" %}
+            <div class="form-group">
+              {{attribute|formatKey}}:
+              <input type="radio" name={{attribute}} id="True" value="1" {% if clientData[attribute] %} checked="checked" {% endif %}>
+              <label for="True">True</label>
+              <input type="radio" name={{attribute}} id="False" value="0" {% if not clientData[attribute] %} checked="checked" {% endif %}>
+              <label for="False">False</label>
+              <br>
+            </div>
           {% endif %}
         {% endif %}
       {% endfor %}

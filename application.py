@@ -6,9 +6,8 @@ from clients import (adminCheck, deleteClient, getAdmin, getClient,
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
-                               formatValue, title, usd, viewFormatValue)
-from hardcodedShit import (clientAttributes, clientTypes, dbConfig,
-                           saladServiceAttributes)
+                               formatValue, title, usd, viewFormatValue, formatBool)
+from hardcodedShit import (clientAttributes, clientTypes, dbConfig)
 from helpers import apology, login_required, root_login_required
 from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
 
@@ -32,6 +31,7 @@ app.jinja_env.filters["capitalize"] = capitalize
 app.jinja_env.filters["formatValue"] = formatValue
 app.jinja_env.filters["viewFormatValue"] = viewFormatValue
 app.jinja_env.filters["formatKey"] = formatKey
+app.jinja_env.filters["formatBool"] = formatBool
 app.jinja_env.filters["usd"] = usd
 
 # ensure responses aren't cached
@@ -187,7 +187,7 @@ def saladServiceCard(name=None):
         assert clientData["clientType"] == 1
     except:
         return redirect(url_for('index'))
-    return render_template("saladServiceCard.html", clientData=clientData, attributes=saladServiceAttributes)
+    return render_template("saladServiceCard.html", clientData=clientData)
 
 
 @app.route("/login", methods=["GET", "POST"])
