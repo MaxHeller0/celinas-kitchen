@@ -47,6 +47,10 @@ def getRecipe(name):
     return Recipe.query.filter_by(name=name).first()
 
 
+def getRecipeById(id):
+    return Recipe.query.filter_by(id=id).first()
+
+
 def getRecipeList():
     """Returns a list of recipe names from the database"""
     return Recipe.query.order_by(Recipe.name).all()

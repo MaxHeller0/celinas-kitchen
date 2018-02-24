@@ -3,7 +3,8 @@ from sqlalchemy import text
 
 from dbconfig import db
 from formattingHelpers import forceNum, formatName, removeExcess, sortDict
-from hardcodedShit import clientTypes, dbConfig
+from hardcodedShit import clientTypes
+# from orders import OrderItem
 
 
 class Admin(db.Model):
@@ -104,6 +105,7 @@ class StandingOrderClient(db.Model):
     protein = db.Column(db.Text)
     saladDislikes = db.Column(db.Text)
     saladLoves = db.Column(db.Text)
+    saladDressings = db.Column(db.Integer)
     hotplateLikes = db.Column(db.Text)
     hotplateDislikes = db.Column(db.Text)
     hotplateLoves = db.Column(db.Text)
@@ -122,6 +124,7 @@ class StandingOrderClient(db.Model):
         self.protein = request.form.get("protein").lower()
         self.saladDislikes = request.form.get("saladDislikes").lower()
         self.saladLoves = request.form.get("saladLoves").lower()
+        self.saladDressings = forceNum(request.form.get("saladDressings"))
         self.hotplateLikes = request.form.get("hotplateLikes").lower()
         self.hotplateDislikes = request.form.get("hotplateDislikes").lower()
         self.hotplateLoves = request.form.get("hotplateLoves").lower()
@@ -152,6 +155,21 @@ def standingOrderClient(request):
         client = StandingOrderClient(request, clientId)
         db.session.add(client)
     db.session.commit()
+
+
+# class ALaCarteClient(db.Model):
+#     __tablename__ = "aLaCarteClients"
+#     id = db.Column(db.Integer, primary_key=True)
+#
+#     def __init__(self, request, clientId):
+#         pass
+#
+#     def update(self, request):
+#         self.__init__(request, self.id)
+#
+#     def toDict(self):
+#         return dict((key, value) for key, value in self.__dict__.items()
+#                     if not callable(value) and not key.startswith('_'))
 
 
 def deleteClient(name):
@@ -186,6 +204,11 @@ def getClient(name):
     except:
         return None
 
+def getClientNameById(id):
+    client = BaseClient.query.filter_by(id=id).first()
+    if client:
+        return client.name
+    return None
 
 def getClientNames():
     """Returns a list of client names from the database as a list of dicts of form {"name":name}"""
