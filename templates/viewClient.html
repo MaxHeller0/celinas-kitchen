@@ -13,6 +13,8 @@
     {% if clientData[attribute] not in [None, ''] and attribute not in ['id', 'clientType', 'name'] %}
       {% if attribute in ['saladDressings', 'delivery'] %}
         {{attribute|formatKey}}: {{clientData[attribute]|formatBool}} <br>
+      {% elif attribute in ['weeklyMoney'] %}
+        {{attribute|formatKey}}: {{clientData[attribute]|usd}} <br>
       {% else %}
         {{attribute|formatKey}}: {{clientData[attribute]|viewFormatValue}} <br>
       {% endif %}
@@ -24,4 +26,5 @@
       <button name="name" value="{{clientData["name"]}}" class="btn btn-default" type="submit">Edit</button>
     </div>
   </form>
+
 {% endblock %}
