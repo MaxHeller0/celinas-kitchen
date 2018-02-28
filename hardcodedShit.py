@@ -13,7 +13,7 @@ clientAttributes[1] = sorted(clientAttributes[0] + ["weeklyMoney", "mondaySalads
                                                     "protein", "saladDislikes", "saladLoves", "saladNotes",
                                                     "hotplateLikes", "hotplateDislikes", "hotplateLoves", "hotplateNotes",
                                                     "mondayHotplates", "tuesdayHotplates", "thursdayHotplates"],
-                             key=lambda x: clientAttributeOrder.index(x))
+                                                    key=lambda x: clientAttributeOrder.index(x))
 inputTypes = {
     "defaultText": ["name", "phone", "address", "mondaySalads", "thursdaySalads", "mondayHotplates", "tuesdayHotplates", "thursdayHotplates", "weeklyMoney"],
     "opinionText": ["protein", "saladDislikes", "saladLoves", "hotplateLikes", "hotplateDislikes", "hotplateLoves", "allergies"],
@@ -28,4 +28,4 @@ try:
                                                                                    db=os.environ["RDS_DB_NAME"])
 except:
     dbConfig = "mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(
-        username="admin", password="y94D6NDeTColiQDZAEWp", server="aa13t6f8mueycaj.cy9bm4pmzdu7.us-east-1.rds.amazonaws.com", port="3306", db="ebdb")
+        username="admin", password="y94D6NDeTColiQDZAEWp", server="aaxoj5yaehj8v0.cy9bm4pmzdu7.us-east-1.rds.amazonaws.com", port="3306", db="ebdb")

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import re
 
 from hardcodedShit import clientAttributeOrder, clientTypeOrder, inputTypes
 
@@ -16,16 +17,14 @@ def capitalize(val):
 
 
 def formatKey(key):
-    formatDict = {"weeklyMoney": "Weekly Money", "mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
-                  "saladDressings": "Salad Dressings", "dietaryPreferences": "Dietary Preferences",
+    formatDict = {"mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
                   "mondayHotplates": "# of Monday Hotplates", "tuesdayHotplates": "# of Tuesday Hotplates",
-                  "thursdayHotplates": "# of Thursday Hotplates", "saladNotes": "Salad Notes",
-                  "generalNotes": "General Notes", "hotplateNotes": "Hotplate Notes",
-                  "saladDislikes": "Salad Dislikes", "saladLoves": "Salad Loves",
-                  "hotplateLikes": "Hotplate Likes", "hotplateDislikes": "Hotplate Dislikes", "hotplateLoves": "Hotplate Loves"}
+                  "thursdayHotplates": "# of Thursday Hotplates"}
     if key in formatDict:
         return formatDict[key]
-    return key.title()
+    else:
+        # split camelcase keys
+        return " ".join(re.findall('[a-zA-Z][^A-Z]*', key)).title()
 
 
 def formatValue(val, prettyPhone=False):
