@@ -2,11 +2,12 @@ from flask import Flask, redirect, render_template, request, session, url_for
 
 from clients import (adminCheck, deleteClient, getAdmin, getClient,
                      getClientNames, getClientType, initDict, newAdmin,
-                     updateAdmin)
+                     updateAdmin, getClientNameById)
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
-                               formatValue, title, usd, viewFormatValue, formatBool)
+                               formatValue, title, usd, viewFormatValue, formatBool,
+                               formatDateTime)
 from hardcodedShit import (clientAttributes, clientTypes, dbConfig)
 from helpers import apology, login_required, root_login_required
 from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe, Recipe
@@ -179,6 +180,7 @@ def client(name=None):
 
 
 @app.route("/saladServiceCard/<name>", methods=["GET"])
+@login_required
 def saladServiceCard(name=None):
     try:
         # attempt to get client
@@ -191,11 +193,13 @@ def saladServiceCard(name=None):
     return render_template("saladServiceCard.html", clientData=clientData)
 
 @app.route("/newOrder", methods=["GET"])
+@login_required
 def newOrder():
     return render_template("newOrder.html")
 
 @app.route("/order/", methods=["GET", "POST"])
 @app.route("/order/<orderId>", methods=["GET", "POST"])
+@login_required
 def order(orderId=None):
     if orderId:
         order = Order.query.filter_by(id=orderId).first()
@@ -219,6 +223,19 @@ def order(orderId=None):
         return render_template("order.html", id=orderId, orderDetails=order.list())
     except:
         return redirect(url_for("index"))
+
+@app.route("/orders/", methods=["GET"])
+@login_required
+def viewOrders():
+    orders = Order.query.order_by(Order.date.desc()).all()
+    formattedOrders = []
+    for order in orders:
+        clientName = title(getClientNameById(order.clientId))
+        total = usd(order.total())
+        date = formatDateTime(order.date)
+        orderId = order.id
+        formattedOrders.append([clientName, total, date, orderId])
+    return render_template("viewOrders.html", orders=formattedOrders)
 
 
 @app.route("/login", methods=["GET", "POST"])

@@ -27,11 +27,6 @@ class OrderItem(db.Model):
         dish = getRecipeById(self.dishId)
         return "{},{},{},{}".format(self.count, dish.name.title(), usd(self.price), usd(self.price * self.count))
 
-
-# def getOrderItems(orderId):
-#     return OrderItem.query.filter_by(orderId=orderId).all()
-
-
 class Order(db.Model):
     __tablename__ = "orders"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -57,3 +52,10 @@ class Order(db.Model):
                 total += row.count * row.price
             t[2].append(usd(total))
         return t
+
+    def total(self):
+        orders = OrderItem.query.filter_by(orderId=self.id).all()
+        total = 0
+        for row in orders:
+            total += row.count * row.price
+        return total
