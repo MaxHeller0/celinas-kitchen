@@ -25,7 +25,7 @@ class OrderItem(db.Model):
 
     def __repr__(self):
         dish = getRecipeById(self.dishId)
-        return "{}x{}".format(self.count, dish.name.title())
+        return "{},{},{}".format(self.count, dish.name.title(), usd(dish.price))
 
 
 # def getOrderItems(orderId):
@@ -46,14 +46,14 @@ class Order(db.Model):
 
     def list(self):
         orders = OrderItem.query.filter_by(orderId=self.id).all()
-        t = []
+        t = [[], [], []]
         if len(orders) == 0:
-            t.append("Add the first item below")
+            t[0].append("Add the first item below")
         else:
-            t.append("Order Details: {}, {}".format(getClientNameById(self.clientId).title(), formatDateTime(self.date)))
+            t[0].append("Order Details: {}, {}".format(getClientNameById(self.clientId).title(), formatDateTime(self.date)))
             total = 0
             for row in orders:
-                t.append(str(row))
+                t[1].append(str(row))
                 total += row.count * row.price
-            t.append("Total: " + usd(total))
+            t[2].append("Total: " + usd(total))
         return t

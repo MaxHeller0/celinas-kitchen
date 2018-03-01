@@ -200,16 +200,20 @@ def order(orderId=None):
     if orderId:
         order = Order.query.filter_by(id=orderId).first()
     else:
-        name = formatName(request.form.get("name"))
         try:
+            name = formatName(request.form.get("name"))
             order = Order(name)
-        except: return redirect(url_for("newOrder"))
+        except:
+            return redirect(url_for("newOrder"))
     if request.method == "POST":
         dishName = formatName(request.form.get("name"))
         dish = Recipe.query.filter_by(name=dishName).first()
         quantity = request.form.get("quantity")
+        price = request.form.get("price")
+        if not price:
+            price = dish.price
         if dish:
-            orderItem = OrderItem(orderId, quantity, dish.id, dish.basePrice)
+            orderItem = OrderItem(orderId, quantity, dish.id, price)
         return redirect(url_for("order") + str(order.id))
     return render_template("order.html", id=orderId, orderDetails=order.list())
 

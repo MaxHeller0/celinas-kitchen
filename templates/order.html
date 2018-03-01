@@ -6,9 +6,17 @@
 
 {% block main %}
   <h1>
-    {% for line in orderDetails %}
-      {{line}}<br>
+    {{ orderDetails[0][0] }}<br>
+    <table>
+    {% for row in orderDetails[1] %}
+      <tr>
+        {% for cell in row.split(',') %}
+          <td>{{cell}}</td>
+        {% endfor %}
+      </tr>
     {% endfor %}
+    </table>
+    {{ orderDetails[2][0] }}
   </h1>
   <form action="{{url_for('order')}}{{id}}" method="POST">
     <div class="form-group">
@@ -22,6 +30,8 @@
           {% endfor %}
         {% endif %}
       </datalist>
+      @
+      <input class="form-control" type="number" min="0" name="price" placeholder="Override stored price">
       <button class="btn btn-default" type="submit">Add Item(s)</button>
     </div>
   </form>
