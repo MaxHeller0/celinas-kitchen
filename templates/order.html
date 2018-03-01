@@ -14,7 +14,7 @@
     <div class="form-group">
       <input class="form-control" type="number" min="1" name="quantity" value="1">
       x
-      <input class="form-control" list="recipes" name="name" placeholder="Recipe Name">
+      <input class="form-control" list="recipes" name="name" placeholder="Recipe Name" autofocus="True">
       <datalist name="recipes" id="recipes">
         {% if recipes %}
           {% for recipe in recipes %}
