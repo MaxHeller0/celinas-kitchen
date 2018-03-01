@@ -215,7 +215,11 @@ def order(orderId=None):
                 price = dish.price
             orderItem = OrderItem(orderId, quantity, dish.id, price)
         return redirect(url_for("order") + str(order.id))
-    return render_template("order.html", id=orderId, orderDetails=order.list())
+    try:
+        return render_template("order.html", id=orderId, orderDetails=order.list())
+    except:
+        return redirect(url_for("index"))
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
