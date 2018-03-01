@@ -92,3 +92,7 @@ main td, th {
   margin-left: 200px;
   font-weight: bold;
 }
+
+#orderTable {
+  text-align: left;
+}

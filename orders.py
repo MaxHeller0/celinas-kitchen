@@ -25,7 +25,7 @@ class OrderItem(db.Model):
 
     def __repr__(self):
         dish = getRecipeById(self.dishId)
-        return "{},{},{}".format(self.count, dish.name.title(), usd(dish.price))
+        return "{},{},{},{}".format(self.count, dish.name.title(), usd(self.price), usd(self.price * self.count))
 
 
 # def getOrderItems(orderId):
@@ -55,5 +55,5 @@ class Order(db.Model):
             for row in orders:
                 t[1].append(str(row))
                 total += row.count * row.price
-            t[2].append("Total: " + usd(total))
+            t[2].append(usd(total))
         return t
