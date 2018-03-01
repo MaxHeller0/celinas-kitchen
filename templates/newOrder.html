@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  New Order
+{% endblock %}
+
+{% block main %}
+<form action="{{ url_for('order') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
+  <div class="form-group">
+    <input class="form-control" list="clientNames" name="name" placeholder="Client Name">
+    <datalist name="clientNames" id="clientNames">
+      {% if clientNameList %}
+        {% for client in clientNameList %}
+          <option value="{{client.name|title}}">
+        {% endfor %}
+      {% endif %}
+    </datalist>
+    <button class="btn btn-default" type="submit">Continue</button>
+  </div>
+</form>
+{% endblock %}

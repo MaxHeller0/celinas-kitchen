@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Order Details
+{% endblock %}
+
+{% block main %}
+  <h1>
+    {% for line in orderDetails %}
+      {{line}}<br>
+    {% endfor %}
+  </h1>
+  <form action="{{url_for('order')}}{{id}}" method="POST">
+    <div class="form-group">
+      <input class="form-control" type="number" min="1" name="quantity" value="1">
+      x
+      <input class="form-control" list="recipes" name="name" placeholder="Recipe Name">
+      <datalist name="recipes" id="recipes">
+        {% if recipes %}
+          {% for recipe in recipes %}
+            <option value="{{recipe.name|title}}">
+          {% endfor %}
+        {% endif %}
+      </datalist>
+      <button class="btn btn-default" type="submit">Add Item(s)</button>
+    </div>
+  </form>
+{% endblock %}

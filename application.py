@@ -9,7 +9,8 @@ from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, usd, viewFormatValue, formatBool)
 from hardcodedShit import (clientAttributes, clientTypes, dbConfig)
 from helpers import apology, login_required, root_login_required
-from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
+from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe, Recipe
+from orders import Order, OrderItem
 
 # configure application
 application = Flask(__name__)
@@ -189,6 +190,28 @@ def saladServiceCard(name=None):
         return redirect(url_for('index'))
     return render_template("saladServiceCard.html", clientData=clientData)
 
+@app.route("/newOrder", methods=["GET"])
+def newOrder():
+    return render_template("newOrder.html")
+
+@app.route("/order/", methods=["GET", "POST"])
+@app.route("/order/<orderId>", methods=["GET", "POST"])
+def order(orderId=None):
+    if orderId:
+        order = Order.query.filter_by(id=orderId).first()
+    else:
+        name = formatName(request.form.get("name"))
+        try:
+            order = Order(name)
+        except: return redirect(url_for("newOrder"))
+    if request.method == "POST":
+        dishName = formatName(request.form.get("name"))
+        dish = Recipe.query.filter_by(name=dishName).first()
+        quantity = request.form.get("quantity")
+        if dish:
+            orderItem = OrderItem(orderId, quantity, dish.id, dish.basePrice)
+        return redirect(url_for("order") + str(order.id))
+    return render_template("order.html", id=orderId, orderDetails=order.list())
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

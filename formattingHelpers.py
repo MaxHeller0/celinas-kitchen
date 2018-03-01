@@ -68,6 +68,9 @@ def forceNum(string, output="int"):
     except:
         return 0
 
+def formatDateTime(datetime):
+    t = str(datetime)
+    return "{}/{} at {}".format(t[5:7], t[8:10], t[11:16])
 
 def removeExcess(string, keep=""):
     excess = "'-/()!@#$%^&*<>.?\":;|+=_{}[]~"

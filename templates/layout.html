@@ -102,6 +102,11 @@
                       </form>
                     </ul>
                   </li>
+                  <form action="{{ url_for('newOrder') }}" method="GET" class="navbar-form navbar-left">
+                    <div class="form-group">
+                      <button class="btn btn-default" type="submit">New Order</button>
+                    </div>
+                  </form>
               </ul>
               {% endif %}
               {% if session.adminId == 1 %}
