@@ -210,9 +210,9 @@ def order(orderId=None):
         dish = Recipe.query.filter_by(name=dishName).first()
         quantity = request.form.get("quantity")
         price = request.form.get("price")
-        if not price:
-            price = dish.price
         if dish:
+            if not price:
+                price = dish.price
             orderItem = OrderItem(orderId, quantity, dish.id, price)
         return redirect(url_for("order") + str(order.id))
     return render_template("order.html", id=orderId, orderDetails=order.list())
