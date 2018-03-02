@@ -1,8 +1,8 @@
 from flask import Flask, redirect, render_template, request, session, url_for
 
-from clients import (adminCheck, deleteClient, getAdmin, getClient,
-                     getClientNames, getClientType, initDict, newAdmin,
-                     updateAdmin, getClientNameById)
+from clients import (deleteClient, getClient,
+                     getClientNames, getClientType, initDict,
+                     getClientNameById, Admin)
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
@@ -266,7 +266,7 @@ def login():
         elif not request.form.get("password"):
             return apology("must provide password")
 
-        adminId = adminCheck(request)
+        adminId = Admin.check(request)
 
         # ensure username exists and password is correct
         if adminId is None:
@@ -295,11 +295,9 @@ def change_pwd():
         if not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
             return apology("must enter the same new password twice")
 
-        admin = getAdmin(session["adminId"])
+        admin = Admin.query.get(session["adminId"])
 
-        try:
-            updateAdmin(admin, request)
-        except:
+        if not admin.update(request):
             return apology("old password invalid")
 
         logout()
@@ -324,7 +322,6 @@ def register():
     """Register user."""
 
     if request.method == "POST":
-
         if not request.form.get("name"):
             return apology("must provide name")
 
@@ -332,12 +329,10 @@ def register():
         elif not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
             return apology("must enter the same password twice")
 
-        newAdmin(request)
+        Admin(request)
 
         return redirect(url_for("index"))
-
     else:
-
         return render_template("register.html")
 
 

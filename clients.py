@@ -16,44 +16,24 @@ class Admin(db.Model):
         self.name = formatName(request.form.get("name"))
         self.hash = pwd_context.hash(request.form.get("password"))
 
+        # make sure admin with same name doesn't already exist
+        if not Admin.query.filter_by(name=self.name).first():
+            db.session.add(self)
+            db.session.commit()
+
     def update(self, request):
+        if not pwd_context.verify(request.form.get("password_old"), self.hash):
+            return False
         self.hash = pwd_context.hash(request.form.get("password"))
-
-
-def newAdmin(request):
-    name = formatName(request.form.get("name"))
-    admin = Admin.query.filter_by(name=name).first()
-    if not admin:
-        admin = Admin(request)
-        db.session.add(admin)
         db.session.commit()
+        return True
 
-
-def adminCheck(request):
-    name = formatName(request.form.get("name"))
-    admin = Admin.query.filter_by(name=name).first()
-    if admin is None or not pwd_context.verify(request.form.get("password"), admin.hash):
-        return None
-    return admin.id
-
-
-def getAdmin(id):
-    """
-    Input: id number
-    Returns: admin object or None
-    """
-    try:
-        return Admin.query.get(id)
-    except:
-        return None
-
-
-def updateAdmin(admin, request):
-    if not pwd_context.verify(request.form.get("password_old"), admin.hash):
-        return False
-    admin.update(request)
-    db.session.commit()
-    return True
+    def check(request):
+        name = formatName(request.form.get("name"))
+        admin = Admin.query.filter_by(name=name).first()
+        if admin is None or not pwd_context.verify(request.form.get("password"), admin.hash):
+            return None
+        return admin.id
 
 
 class BaseClient(db.Model):
