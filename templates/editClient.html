@@ -11,8 +11,11 @@
   </h1>
   <form action="{{ url_for('client') }}" method="POST">
     <fieldset>
+      <div class="form-group">
+        Name: <input class="form-control" type="text" name=name value="{{clientData["name"]}}"><br>
+      </div>
       {% for attribute in clientData %}
-        {% if attribute != 'id' and attribute != 'clientType' and attribute != 'hash' %}
+        {% if attribute not in ['id', 'clientType', 'hash', 'name'] %}
           {%if cssClass[attribute] == "defaultText" %}
             <div class="form-group">
               {{attribute|formatKey}}:
