@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Client Details
+{% endblock %}
+
+{% block main %}
+  <h1>
+    Details for
+    {{ client_data["name"] }}
+  </h1>
+  <form action="{{ url_for('client') }}" method="POST">
+    <fieldset>
+      <div class="form-group">
+        <input class="form-control" type="hidden" name=old_name value="{{client_data["name"]}}"><br>
+        Name: <input class="form-control" type="text" name=name value="{{client_data["name"]}}"><br>
+      </div>
+      {% for attribute in client_data %}
+        {% if attribute not in ['id', 'client_type', 'hash', 'name'] %}
+          {%if css_class[attribute] == "defaultText" %}
+            <div class="form-group">
+              {{attribute|format_key}}:
+              <input class="form-control" type="text" name={{attribute}} value="{{client_data[attribute]|format_value}}"><br>
+            </div>
+          {% elif css_class[attribute] == "opinionText" %}
+            <div class="form-group">
+              {{attribute|format_key}}:
+              <textarea class="opinionText" name={{attribute}}>{{client_data[attribute]|format_value}}</textarea><br>
+            </div>
+          {% elif css_class[attribute] == "noteText" %}
+            <div class="form-group">
+              {{attribute|format_key}}:
+              <textarea class="noteText" name={{attribute}}>{{client_data[attribute]}}</textarea><br>
+            </div>
+          {% elif css_class[attribute] == "boolean" %}
+            <div class="form-group">
+              {{attribute|format_key}}:
+              <input type="radio" name={{attribute}} id="True" value="1" {% if client_data[attribute] %} checked="checked" {% endif %}>
+              <label for="True">Yes</label>
+              <input type="radio" name={{attribute}} id="False" value="0" {% if not client_data[attribute] %} checked="checked" {% endif %}>
+              <label for="False">No</label>
+              <br>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      <div class="form-group">
+        <button name="source" value="edit_client" class="btn btn-default" type="submit">Save</button>
+        <button name="source" value="delete_button" class="btn btn-default" type="submit">Delete</button>
+      </div>
+    </fieldset>
+  </form>
+{% endblock %}

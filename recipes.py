@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 
-from dbconfig import db
-from formattingHelpers import forceNum
+from db_config import db
+from formatting_helpers import force_num
 
 
 class Recipe(db.Model):
@@ -14,7 +14,7 @@ class Recipe(db.Model):
     def __init__(self, request):
         self.name = request.form.get("name")
         self.description = request.form.get("description")
-        self.price = forceNum(request.form.get("price"), "float")
+        self.price = force_num(request.form.get("price"), "float")
 
     def __repr__(self):
         return "{name}: {description}".format(name=self.name, description=self.description)
@@ -23,9 +23,9 @@ class Recipe(db.Model):
         self.__init__(request)
 
 
-def newRecipe(request):
+def new_recipe(request):
     name = request.form.get("name")
-    recipe = getRecipe(name)
+    recipe = get_recipe(name)
     if recipe:
         recipe.update(request)
     else:
@@ -35,20 +35,20 @@ def newRecipe(request):
     return recipe
 
 
-def deleteRecipe(name):
-    recipe = getRecipe(name)
+def delete_recipe(name):
+    recipe = get_recipe(name)
     db.session.delete(recipe)
     db.session.commit()
 
 
-def getRecipe(name):
+def get_recipe(name):
     return Recipe.query.filter_by(name=name).first()
 
 
-def getRecipeById(id):
+def get_recipe_by_id(id):
     return Recipe.query.filter_by(id=id).first()
 
 
-def getRecipeList():
+def get_recipe_list():
     """Returns a list of recipe names from the database"""
     return Recipe.query.order_by(Recipe.name).all()

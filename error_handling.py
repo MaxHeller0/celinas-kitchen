@@ -1,18 +1,18 @@
 from clients import BaseClient
-from formattingHelpers import removeExcess
-from hardcodedShit import clientAttributes
+from formatting_helpers import remove_excess
+from hardcoded_shit import client_attributes
 
 
-def clientInputCheck(request, clientType, source):
+def client_input_check(request, client_type, source):
     name = request.form.get("name")
     client = BaseClient.query.filter_by(name=name).first()
 
-    # check if client already exists so details aren't overwritten from newClient
-    if client and source == "newClient":
+    # check if client already exists so details aren't overwritten from new_client
+    if client and source == "new_client":
         return (True, ["Client already exists in database", ""])
 
     # make sure client type was provided (client exists)
-    if clientType is None:
+    if client_type is None:
         return (True, ["Client doesn't exist in database or retrieval failed", ''])
     try:
         # make sure the client has a name
@@ -21,24 +21,24 @@ def clientInputCheck(request, clientType, source):
             raise ValueError
 
         # make sure that, if entered, the phone numyber in a 10 digit number
-        phoneStr = removeExcess(request.form.get("phone"))
-        if phoneStr:
+        phone_str = remove_excess(request.form.get("phone"))
+        if phone_str:
             try:
-                int(phoneStr)
+                int(phone_str)
             except:
                 message = ["Phone number must be number", '']
                 raise ValueError
-            if len(phoneStr) == 7:
+            if len(phone_str) == 7:
                 message = ["Must include area code for phone number", '']
                 raise ValueError
-            elif len(phoneStr) != 10:
+            elif len(phone_str) != 10:
                 message = ["Not a valid phone number", '']
                 raise ValueError
 
         # standing order client form checking
         # TODO BROKEN
-        if clientType == 1:
-            for attribute in clientAttributes[1][3:6]:
+        if client_type == 1:
+            for attribute in client_attributes[1][3:6]:
                 if any(c in ".\'\"!@#$%^&*()_+" for c in request.form.get(attribute)):
                     return (True, [("you entered an invalid character for " + attribute), ''])
     except ValueError:

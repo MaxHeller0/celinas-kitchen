@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Client Details
+{% endblock %}
+
+{% block main %}
+  <h1>{{ message }}: {{ client_data["name"] }}</h1>
+  <p>
+    {% for attribute in client_data %}
+    {% if client_data[attribute] not in [None, ''] and attribute not in ['id', 'client_type', 'name'] %}
+      {% if attribute in ['salad_dressings', 'delivery'] %}
+        <b>{{attribute|format_key}}:</b> {{client_data[attribute]|format_bool}}<br><br>
+      {% elif attribute in ['weekly_money'] %}
+        <b>{{attribute|format_key}}:</b> {{client_data[attribute]|usd}} <br><br>
+      {% else %}
+        <b>{{attribute|format_key}}:</b> {{client_data[attribute]|view_format_value}}<br><br>
+      {% endif %}
+    {% endif %}
+    {% endfor %}
+  </p>
+  <form action="{{ url_for('client') }}" method="POST">
+    <div class="form-group">
+      <button name="name" value="{{client_data["name"]}}" class="btn btn-default" type="submit">Edit</button>
+    </div>
+  </form>
+
+{% endblock %}

@@ -8,21 +8,21 @@
   <form action="{{ url_for('client') }}" method="POST">
     <fieldset>
       {% for attribute in attributes %}
-        {%if cssClass[attribute] == "defaultText" %}
+        {%if css_class[attribute] == "defaultText" %}
           <div class="form-group">
-            {{attribute|formatKey}}: <input class="form-control" type="text" name={{attribute}}><br>
+            {{attribute|format_key}}: <input class="form-control" type="text" name={{attribute}}><br>
           </div>
-        {% elif cssClass[attribute] == "opinionText" %}
+        {% elif css_class[attribute] == "opinionText" %}
           <div class="form-group">
-            {{attribute|formatKey}}: <textarea class="opinionText" name={{attribute}}></textarea><br>
+            {{attribute|format_key}}: <textarea class="opinionText" name={{attribute}}></textarea><br>
           </div>
-        {% elif cssClass[attribute] == "noteText" %}
+        {% elif css_class[attribute] == "noteText" %}
           <div class="form-group">
-            {{attribute|formatKey}}: <textarea class="noteText" name={{attribute}}></textarea><br>
+            {{attribute|format_key}}: <textarea class="noteText" name={{attribute}}></textarea><br>
           </div>
-        {% elif cssClass[attribute] == "boolean" %}
+        {% elif css_class[attribute] == "boolean" %}
           <div class="form-group">
-            {{attribute|formatKey}}:
+            {{attribute|format_key}}:
             <input type="radio" name={{attribute}} id="True" value="1">
             <label for="True">Yes</label>
             <input type="radio" name={{attribute}} id="False" value="0">
@@ -32,7 +32,7 @@
         {% endif %}
       {% endfor %}
       <div class="form-group">
-        <button name="source" value="newClient" class="btn btn-default" type="submit">Create</button>
+        <button name="source" value="new_client" class="btn btn-default" type="submit">Create</button>
       </div>
     </fieldset>
   </form>

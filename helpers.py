@@ -16,7 +16,7 @@ def login_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("adminId") is None:
+        if session.get("admin_id") is None:
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
@@ -28,7 +28,7 @@ def root_login_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("adminId") is not 1:
+        if session.get("admin_id") is not 1:
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function

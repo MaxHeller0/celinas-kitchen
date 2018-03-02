@@ -1,30 +1,30 @@
 import datetime
 
-from dbconfig import db
-from formattingHelpers import usd, formatDateTime
-from recipes import getRecipeById
+from db_config import db
+from formatting_helpers import usd, format_date_time
+from recipes import get_recipe_by_id
 from sqlalchemy import text
 from clients import BaseClient
 
 
 class OrderItem(db.Model):
-    __tablename__ = "orderItems"
+    __tablename__ = "order_items"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    orderId = db.Column(db.Integer, nullable=False)
+    order_id = db.Column(db.Integer, nullable=False)
     count = db.Column(db.Integer, nullable=False)
-    dishId= db.Column(db.Integer, nullable=False)
+    dish_id= db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float(precision=2), nullable=False)
 
-    def __init__(self, orderId, count, dishId, price):
-        self.orderId = orderId
+    def __init__(self, order_id, count, dish_id, price):
+        self.order_id = order_id
         self.count = count
-        self.dishId = dishId
+        self.dish_id = dish_id
         self.price = price
         db.session.add(self)
         db.session.commit()
 
     def list(self):
-        dish = getRecipeById(self.dishId)
+        dish = get_recipe_by_id(self.dish_id)
         return [self.count, dish.name.title(), usd(self.price), usd(self.price * self.count), self.id]
 
     def delete(self):
@@ -34,29 +34,29 @@ class OrderItem(db.Model):
 class Order(db.Model):
     __tablename__ = "orders"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    clientId = db.Column(db.Integer, nullable=False)
+    client_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime(timezone=True))
 
     def delete(self):
-        orderItems = OrderItem.query.filter_by(orderId=self.id).all()
-        for item in orderItems:
+        order_items = OrderItem.query.filter_by(order_id=self.id).all()
+        for item in order_items:
             db.session.delete(item)
         db.session.delete(self)
         db.session.commit()
 
     def __init__(self, name):
-        self.clientId = BaseClient.query.filter_by(name=name).first().id
+        self.client_id = BaseClient.query.filter_by(name=name).first().id
         self.date = datetime.datetime.now()
         db.session.add(self)
         db.session.commit()
 
     def list(self):
-        orders = OrderItem.query.filter_by(orderId=self.id).all()
+        orders = OrderItem.query.filter_by(order_id=self.id).all()
         t = [[], [], []]
         if len(orders) == 0:
             t[0].append("Add the first item below")
         else:
-            t[0].append("Order Details: {}, {}".format(BaseClient.query.get(self.clientId).name, formatDateTime(self.date)))
+            t[0].append("Order Details: {}, {}".format(BaseClient.query.get(self.client_id).name, format_date_time(self.date)))
             total = 0
             for row in orders:
                 t[1].append(row.list())
@@ -65,7 +65,7 @@ class Order(db.Model):
         return t
 
     def total(self):
-        orders = OrderItem.query.filter_by(orderId=self.id).all()
+        orders = OrderItem.query.filter_by(order_id=self.id).all()
         total = 0
         for row in orders:
             total += row.count * row.price

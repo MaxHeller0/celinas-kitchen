@@ -6,7 +6,7 @@
 
 {% block main %}
   <h1>
-    {{ orderDetails[0][0] }}<br><br>
+    {{ order_details[0][0] }}<br><br>
   </h1>
   <br>
     <table class="table" id="orderTable">
@@ -20,7 +20,7 @@
           </tr>
         </thread>
       <tbody>
-        {% for row in orderDetails[1] %}
+        {% for row in order_details[1] %}
         <tr>
           <td>{{row[0]}}</td>
           <td>{{row[1]}}</td>
@@ -53,7 +53,7 @@
           <td></td>
           <td></td>
           <th scope="row">Total</th>
-          <td>{{ orderDetails[2][0] }}</td>
+          <td>{{ order_details[2][0] }}</td>
           <td></td>
         </tr>
       </tbody>

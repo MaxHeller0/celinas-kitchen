@@ -1,15 +1,15 @@
 from flask import Flask, redirect, render_template, request, session, url_for
 from datetime import datetime, timedelta
 
-from clients import deleteClient, getClient, BaseClient, Admin, initDict
-from dbconfig import db
-from errorHandling import clientInputCheck
-from formattingHelpers import (capitalize, cssClass, formatKey,
-                               formatValue, title, usd, viewFormatValue, formatBool,
-                               formatDateTime)
-from hardcodedShit import clientAttributes, clientTypes, dbConfig
+from clients import delete_client, get_client, BaseClient, Admin, init_dict
+from db_config import db
+from error_handling import client_input_check
+from formatting_helpers import (capitalize, css_class, format_key,
+                               format_value, title, usd, view_format_value, format_bool,
+                               format_date_time)
+from hardcoded_shit import client_attributes, client_types, db_config
 from helpers import apology, login_required, root_login_required
-from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe, Recipe
+from recipes import delete_recipe, get_recipe, get_recipe_list, new_recipe, Recipe
 from orders import Order, OrderItem
 
 # configure application
@@ -19,7 +19,7 @@ app = application
 app.config["DEBUG"] = True
 
 # configure database
-app.config["SQLALCHEMY_DATABASE_URI"] = dbConfig
+app.config["SQLALCHEMY_DATABASE_URI"] = db_config
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 # configure session
@@ -29,10 +29,10 @@ app.config["SESSION_TYPE"] = "filesystem"
 # set up filters for use in displaying text
 app.jinja_env.filters["title"] = title
 app.jinja_env.filters["capitalize"] = capitalize
-app.jinja_env.filters["formatValue"] = formatValue
-app.jinja_env.filters["viewFormatValue"] = viewFormatValue
-app.jinja_env.filters["formatKey"] = formatKey
-app.jinja_env.filters["formatBool"] = formatBool
+app.jinja_env.filters["format_value"] = format_value
+app.jinja_env.filters["view_format_value"] = view_format_value
+app.jinja_env.filters["format_key"] = format_key
+app.jinja_env.filters["format_bool"] = format_bool
 app.jinja_env.filters["usd"] = usd
 
 # ensure responses aren't cached
@@ -46,8 +46,8 @@ if app.config["DEBUG"]:
 
 
 @app.context_processor
-def injectNavbarData():
-    return dict(clientTypes=clientTypes, clientNameList=BaseClient.query.order_by(BaseClient.name).all(), recipes=getRecipeList())
+def inject_navbar_data():
+    return dict(client_types=client_types, client_nameList=BaseClient.query.order_by(BaseClient.name).all(), recipes=get_recipe_list())
 
 
 @app.route("/")
@@ -69,49 +69,49 @@ def recipe(name=None):
             name = request.form.get("name")
 
         try:
-            recipe = getRecipe(name)
+            recipe = get_recipe(name)
             source = request.form.get("source")
 
             if request.method == "GET":
-                return render_template("viewRecipe.html", recipe=recipe)
+                return render_template("view_recipe.html", recipe=recipe)
 
-            elif source in ["newButton", "viewButton"]:
-                if source == "newButton":
+            elif source in ["new_button", "view_button"]:
+                if source == "new_button":
                     if name in [None, ""]:
                         # trying to create new recipe without a name
                         return apology("Recipes must have a name")
-                    recipe = newRecipe(request)
+                    recipe = new_recipe(request)
                 return redirect("/recipe/{name}".format(name=name))
 
-            elif source == "deleteButton":
-                deleteRecipe(name)
+            elif source == "delete_button":
+                delete_recipe(name)
                 return redirect(url_for("index"))
 
             else:
                 # source must have been an edit button
-                return render_template("editRecipe.html", recipe=recipe)
+                return render_template("edit_recipe.html", recipe=recipe)
 
         except:
             return redirect(url_for("index"))
     else:
-        return render_template("editRecipe.html", recipe=None)
+        return render_template("edit_recipe.html", recipe=None)
 
 
-@app.route("/newClient", methods=["GET", "POST"])
+@app.route("/new_client", methods=["GET", "POST"])
 @login_required
-def newClient():
+def new_client():
     """
     Renders client creation page
-    pass in list of required attributes for the client type from the clientAttributes dictionary
+    pass in list of required attributes for the client type from the client_attributes dictionary
     """
-    # block people from trying to GET newCLient
+    # block people from trying to GET new_client
     if request.method == "GET":
         return redirect(url_for("index"))
-    global clientType
-    clientType = int(request.form.get("clientType"))
-    if clientType in [None, ""]:
+    global client_type
+    client_type = int(request.form.get("client_type"))
+    if client_type in [None, ""]:
         return redirect("/")
-    return render_template("newClient.html", clientType=clientType, attributes=clientAttributes[clientType], cssClass=cssClass)
+    return render_template("new_client.html", client_type=client_type, attributes=client_attributes[client_type], css_class=css_class)
 
 
 @app.route("/client/", methods=["GET", "POST"])
@@ -133,138 +133,138 @@ def client(name=None):
             return apology('Client must have a name', '')
         source = request.form.get("source")
 
-    if source in ["viewButton", "GET"]:
-        destination = "viewClient.html"
+    if source in ["view_button", "GET"]:
+        destination = "view_client.html"
         message = "Client details"
 
-    elif source in ["newClient", "editClient"]:
-        destination = "viewClient.html"
+    elif source in ["new_client", "edit_client"]:
+        destination = "view_client.html"
         message = ''
 
-        if source == "newClient":
-            # get clientType defined earlier in /newClient
-            global clientType
+        if source == "new_client":
+            # get client_type defined earlier in /new_client
+            global client_type
             message = "Client added to the database"
 
-        elif source == "editClient":
-            oldName = request.form.get("oldName")
-            clientType = BaseClient.query.filter_by(name=oldName).first().clientType
+        elif source == "edit_client":
+            old_name = request.form.get("old_name")
+            client_type = BaseClient.query.filter_by(name=old_name).first().client_type
             message = "Client details updated"
 
         # check for errors
-        inputCheckResults = clientInputCheck(request, clientType, source)
-        if inputCheckResults[0]:
-            return apology(inputCheckResults[1][0], inputCheckResults[1][1])
+        input_check_results = client_input_check(request, client_type, source)
+        if input_check_results[0]:
+            return apology(input_check_results[1][0], input_check_results[1][1])
 
         # add client to db using appropriate function
-        initDict[clientType](request)
+        init_dict[client_type](request)
 
-    elif source == "deleteButton":
-        deleteClient(name)
+    elif source == "delete_button":
+        delete_client(name)
         return redirect(url_for("index"))
 
     else:
         # source must have been an edit button
         message = ''
-        destination = "editClient.html"
+        destination = "edit_client.html"
 
-    clientData = getClient(name)
-    if clientData is None:
+    client_data = get_client(name)
+    if client_data is None:
         return apology("Could not retrieve client with name {}".format(name), '')
 
-    # return either editClient or viewClient passing in all the clients data
-    return render_template(destination, clientData=clientData, message=message, cssClass=cssClass)
+    # return either edit_client or view_client passing in all the clients data
+    return render_template(destination, client_data=client_data, message=message, css_class=css_class)
 
 
-@app.route("/saladServiceCard/<name>", methods=["GET"])
+@app.route("/salad_service_card/<name>", methods=["GET"])
 @login_required
-def saladServiceCard(name=None):
+def salad_service_card(name=None):
     try:
         # attempt to get client
-        clientData = getClient(name)
+        client_data = get_client(name)
 
         # make sure they're a salad service client
-        assert clientData["clientType"] == 1
+        assert client_data["client_type"] == 1
     except:
         return redirect(url_for('index'))
-    return render_template("saladServiceCard.html", clientData=clientData)
+    return render_template("salad_service_card.html", client_data=client_data)
 
-@app.route("/newOrder", methods=["GET"])
+@app.route("/new_order", methods=["GET"])
 @login_required
-def newOrder():
-    return render_template("newOrder.html")
+def new_order():
+    return render_template("new_order.html")
 
 @app.route("/order/", methods=["GET", "POST"])
-@app.route("/order/<orderId>", methods=["GET", "POST"])
+@app.route("/order/<order_id>", methods=["GET", "POST"])
 @login_required
-def order(orderId=None):
-    if orderId:
-        order = Order.query.filter_by(id=orderId).first()
+def order(order_id=None):
+    if order_id:
+        order = Order.query.filter_by(id=order_id).first()
     else:
         try:
             name = request.form.get("name")
             order = Order(name)
         except:
-            return redirect(url_for("newOrder"))
+            return redirect(url_for("new_order"))
     if request.method == "POST":
-        toDelete = request.form.get("delete")
-        if toDelete:
-            OrderItem.query.filter_by(id=toDelete).first().delete()
+        to_delete = request.form.get("delete")
+        if to_delete:
+            OrderItem.query.filter_by(id=to_delete).first().delete()
         else:
-            dishName = request.form.get("name")
-            dish = Recipe.query.filter_by(name=dishName).first()
+            dish_name = request.form.get("name")
+            dish = Recipe.query.filter_by(name=dish_name).first()
             quantity = request.form.get("quantity")
             price = request.form.get("price")
             if dish:
                 if not price:
                     price = dish.price
-                orderItem = OrderItem(orderId, quantity, dish.id, price)
+                order_item = OrderItem(order_id, quantity, dish.id, price)
         return redirect(url_for("order") + str(order.id))
     try:
-        return render_template("order.html", id=orderId, orderDetails=order.list())
+        return render_template("order.html", id=order_id, order_details=order.list())
     except:
         return redirect(url_for("index"))
 
-@app.route("/order/<orderId>/delete", methods=["GET"])
+@app.route("/order/<order_id>/delete", methods=["GET"])
 @login_required
-def deleteOrder(orderId=None):
-    if orderId:
-        order = Order.query.filter_by(id=orderId).first()
+def delete_order(order_id=None):
+    if order_id:
+        order = Order.query.filter_by(id=order_id).first()
         order.delete()
-        return redirect(url_for("viewOrders"))
+        return redirect(url_for("view_orders"))
     return redirect(url_for("index"))
 
 @app.route("/orders/", methods=["GET", "POST"])
 @login_required
-def viewOrders():
+def view_orders():
     if request.method == "GET":
         orders = Order.query.order_by(Order.date.desc()).all()
     else:
-        filterBy = request.form.get("filterBy")
-        filterQuery = request.form.get("filterQuery")
+        filter_by = request.form.get("filter_by")
+        filter_query = request.form.get("filter_query")
         time = request.form.get("time")
         now = datetime.now().date()
-        timeDict = {"pastDay": now, "pastWeek": now - timedelta(weeks=1),
-                    "pastMonth": now - timedelta(weeks=4), "allTime": None}
-        pastTime = timeDict[time]
+        time_dict = {"past_day": now, "past_week": now - timedelta(weeks=1),
+                    "past_month": now - timedelta(weeks=4), "all_time": None}
+        past_time = time_dict[time]
         try:
-            if filterBy == "client":
-                clientId = BaseClient.query.filter_by(name=filterQuery).first().id
-                orders = Order.query.filter_by(clientId=clientId).order_by(Order.date.desc())
+            if filter_by == "client":
+                client_id = BaseClient.query.filter_by(name=filter_query).first().id
+                orders = Order.query.filter_by(client_id=client_id).order_by(Order.date.desc())
         except:
             orders = Order.query
-        if pastTime:
-            orders = orders.filter(Order.date > pastTime)
+        if past_time:
+            orders = orders.filter(Order.date > past_time)
         orders = orders.order_by(Order.date.desc()).all()
 
-    formattedOrders = []
+    formatted_orders = []
     for order in orders:
-        clientName = BaseClient.query.get(order.clientId).name
+        client_name = BaseClient.query.get(order.client_id).name
         total = usd(order.total())
-        date = formatDateTime(order.date)
-        orderId = order.id
-        formattedOrders.append([date, clientName, total, orderId])
-    return render_template("viewOrders.html", orders=formattedOrders)
+        date = format_date_time(order.date)
+        order_id = order.id
+        formatted_orders.append([date, client_name, total, order_id])
+    return render_template("view_orders.html", orders=formatted_orders)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -282,14 +282,14 @@ def login():
         elif not request.form.get("password"):
             return apology("must provide password")
 
-        adminId = Admin.check(request)
+        admin_id = Admin.check(request)
 
         # ensure username exists and password is correct
-        if adminId is None:
+        if admin_id is None:
             return apology("invalid username and/or password")
 
         # remember which user has logged in
-        session["adminId"] = adminId
+        session["admin_id"] = admin_id
 
         return redirect(url_for("index"))
 
@@ -311,7 +311,7 @@ def change_pwd():
         if not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
             return apology("must enter the same new password twice")
 
-        admin = Admin.query.get(session["adminId"])
+        admin = Admin.query.get(session["admin_id"])
 
         if not admin.update(request):
             return apology("old password invalid")

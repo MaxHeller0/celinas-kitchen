@@ -7,10 +7,10 @@
 {% block main %}
 <form action="{{ url_for('order') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
   <div class="form-group">
-    <input class="form-control" list="clientNames" name="name" placeholder="Client Name">
-    <datalist name="clientNames" id="clientNames">
-      {% if clientNameList %}
-        {% for client in clientNameList %}
+    <input class="form-control" list="client_names" name="name" placeholder="Client Name">
+    <datalist name="client_names" id="client_names">
+      {% if client_nameList %}
+        {% for client in client_nameList %}
           <option value="{{client.name}}">
         {% endfor %}
       {% endif %}

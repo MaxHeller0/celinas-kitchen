@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import re
 
-from hardcodedShit import clientAttributeOrder, clientTypeOrder, inputTypes
+from hardcoded_shit import client_attribute_order, client_type_order, input_types
 
 
 def title(val):
@@ -16,21 +16,21 @@ def capitalize(val):
     return val
 
 
-def formatKey(key):
-    formatDict = {"mondaySalads": "# of Monday Salads", "thursdaySalads": "# of Thursday Salads",
-                  "mondayHotplates": "# of Monday Hotplates", "tuesdayHotplates": "# of Tuesday Hotplates",
-                  "thursdayHotplates": "# of Thursday Hotplates"}
-    if key in formatDict:
-        return formatDict[key]
+def format_key(key):
+    format_dict = {"monday_salads": "# of Monday Salads", "thursday_salads": "# of Thursday Salads",
+                  "monday_hotplates": "# of Monday Hotplates", "tuesday_hotplates": "# of Tuesday Hotplates",
+                  "thursday_hotplates": "# of Thursday Hotplates"}
+    if key in format_dict:
+        return format_dict[key]
     else:
-        # split camelcase keys
-        return " ".join(re.findall('[a-zA-Z][^A-Z]*', key)).title()
+        # split underscored keys
+        return " ".join(key.split("_")).title()
 
 
-def formatValue(val, prettyPhone=False):
+def format_value(val, pretty_phone=False):
     try:
         int(val)
-        if len(val) == 10 and prettyPhone:
+        if len(val) == 10 and pretty_phone:
             return "({}) {}-{}".format(val[0:3], val[3:6], val[6:10])
         return val
     except:
@@ -38,14 +38,14 @@ def formatValue(val, prettyPhone=False):
             return val.title()
         return val
 
-def formatBool(val):
+def format_bool(val):
     if val:
         return "Yes"
     else:
         return "No"
 
-def viewFormatValue(val):
-    return formatValue(val, prettyPhone=True)
+def view_format_value(val):
+    return format_value(val, pretty_phone=True)
 
 
 def usd(value):
@@ -53,22 +53,22 @@ def usd(value):
     return "${:,.2f}".format(value)
 
 
-def forceNum(string, output="int"):
+def force_num(string, output="int"):
     """
     Input: string that ideally can be converted to a number
     Returns: converted number or 0 if conversion isn't possible
     """
-    convertDict = {"int": int, "float": float}
+    convert_dict = {"int": int, "float": float}
     try:
-        return convertDict[output](string)
+        return convert_dict[output](string)
     except:
         return 0
 
-def formatDateTime(datetime):
+def format_date_time(datetime):
     t = str(datetime)
     return "{}/{} at {}".format(t[5:7], t[8:10], t[11:16])
 
-def removeExcess(string, keep=""):
+def remove_excess(string, keep=""):
     excess = "'-/()!@#$%^&*<>.?\":;|+=_{}[]~"
     result = ""
     for c in keep:
@@ -79,19 +79,19 @@ def removeExcess(string, keep=""):
     return result.strip()
 
 
-def sortDict(unsortedDict, dictName):
+def sort_dict(unsorted_dict, dict_name):
     """
     Credit goes to John La Rooy of stackoverflow:
     https://stackoverflow.com/questions/12031482/custom-sorting-python-dictionary
     returns a sorted dictionary
     """
-    if dictName == "clientAttributes":
-        return OrderedDict(sorted(unsortedDict.items(), key=lambda i: clientAttributeOrder.index(i[0])))
-    elif dictName == "clientTypes":
-        return OrderedDict(sorted(unsortedDict.items(), key=lambda i: clientTypeOrder.index(i[0])))
+    if dict_name == "client_attributes":
+        return OrderedDict(sorted(unsorted_dict.items(), key=lambda i: client_attribute_order.index(i[0])))
+    elif dict_name == "client_types":
+        return OrderedDict(sorted(unsorted_dict.items(), key=lambda i: client_type_order.index(i[0])))
 
 
-def invertDict(dictionary):
+def invert_dict(dictionary):
     result = {}
     for key in dictionary:
         for value in dictionary[key]:
@@ -99,4 +99,4 @@ def invertDict(dictionary):
     return result
 
 
-cssClass = invertDict(inputTypes)
+css_class = invert_dict(input_types)
