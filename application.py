@@ -1,4 +1,5 @@
 from flask import Flask, redirect, render_template, request, session, url_for
+from datetime import datetime, timedelta
 
 from clients import deleteClient, getClient, BaseClient, Admin, initDict
 from dbconfig import db
@@ -243,10 +244,23 @@ def viewOrders():
     else:
         filterBy = request.form.get("filterBy")
         filterQuery = request.form.get("filterQuery")
+        time = request.form.get("time")
         if filterBy == "client":
-            clientId = BaseClient.query.filter_by(name=filterQuery).first().id
-            orders = Order.query.filter_by(clientId=clientId).order_by(Order.date.desc()).all()
+            now = datetime.now().date()
+            if time == "pastDay":
+                pastTime = now
+            elif time == "pastWeek":
+                pastTime = now - timedelta(weeks=1)
+            elif time == "pastMonth":
+                pastTime = now - timedelta(weeks=4)
+            else:
+                pastTime = None
 
+            clientId = BaseClient.query.filter_by(name=filterQuery).first().id
+            orders = Order.query.filter_by(clientId=clientId).order_by(Order.date.desc())
+            if pastTime:
+                orders = orders.filter(Order.date > pastTime)
+            orders = orders.all()
 
     formattedOrders = []
     for order in orders:
