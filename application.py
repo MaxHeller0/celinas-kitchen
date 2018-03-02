@@ -257,7 +257,7 @@ def viewOrders():
             orders = Order.query
         if pastTime:
             orders = orders.filter(Order.date > pastTime)
-        orders = orders.all()
+        orders = orders.order_by(Order.date.desc()).all()
 
     formattedOrders = []
     for order in orders:
