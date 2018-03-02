@@ -260,7 +260,7 @@ def viewOrders():
 
     formattedOrders = []
     for order in orders:
-        clientName = title(BaseClient.query.get(order.clientId).name)
+        clientName = BaseClient.query.get(order.clientId).name
         total = usd(order.total())
         date = formatDateTime(order.date)
         orderId = order.id

@@ -56,7 +56,7 @@ class Order(db.Model):
         if len(orders) == 0:
             t[0].append("Add the first item below")
         else:
-            t[0].append("Order Details: {}, {}".format(BaseClient.query.get(self.clientId).name.title(), formatDateTime(self.date)))
+            t[0].append("Order Details: {}, {}".format(BaseClient.query.get(self.clientId).name, formatDateTime(self.date)))
             total = 0
             for row in orders:
                 t[1].append(row.list())

@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block main %}
-  <h1>{{ message }}: {{ clientData["name"]|title }}</h1>
+  <h1>{{ message }}: {{ clientData["name"] }}</h1>
   <p>
     {% for attribute in clientData %}
     {% if clientData[attribute] not in [None, ''] and attribute not in ['id', 'clientType', 'name'] %}

@@ -7,7 +7,7 @@
 {% block main %}
   <h1>
     Details for
-    {{ clientData["name"]|title }}
+    {{ clientData["name"] }}
   </h1>
   <form action="{{ url_for('client') }}" method="POST">
     <fieldset>
