@@ -1,12 +1,12 @@
 from flask import Flask, redirect, render_template, request, session, url_for
 
-from clients import deleteClient, getClient, BaseClient, Admin
+from clients import deleteClient, getClient, BaseClient, Admin, initDict
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, usd, viewFormatValue, formatBool,
                                formatDateTime)
-from hardcodedShit import (clientAttributes, clientTypes, dbConfig, initDict)
+from hardcodedShit import clientAttributes, clientTypes, dbConfig
 from helpers import apology, login_required, root_login_required
 from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe, Recipe
 from orders import Order, OrderItem

@@ -166,5 +166,5 @@ def getClient(name):
     except:
         return None
 
-
+initDict = {0: baseClient, 1: standingOrderClient}
 clientTypes = sortDict(clientTypes, dictName="clientTypes")
