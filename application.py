@@ -1,15 +1,16 @@
 from flask import Flask, redirect, render_template, request, session, url_for
+from datetime import datetime, timedelta
 
-from clients import (adminCheck, deleteClient, getAdmin, getClient,
-                     getClientNames, getClientType, initDict, newAdmin,
-                     updateAdmin)
+from clients import deleteClient, getClient, BaseClient, Admin, initDict
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
-                               formatValue, title, usd, viewFormatValue, formatBool)
-from hardcodedShit import (clientAttributes, clientTypes, dbConfig)
+                               formatValue, title, usd, viewFormatValue, formatBool,
+                               formatDateTime)
+from hardcodedShit import clientAttributes, clientTypes, dbConfig
 from helpers import apology, login_required, root_login_required
-from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe
+from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe, Recipe
+from orders import Order, OrderItem
 
 # configure application
 application = Flask(__name__)
@@ -46,7 +47,7 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def injectNavbarData():
-    return dict(clientTypes=clientTypes, clientNameList=getClientNames(), recipes=getRecipeList())
+    return dict(clientTypes=clientTypes, clientNameList=BaseClient.query.order_by(BaseClient.name).all(), recipes=getRecipeList())
 
 
 @app.route("/")
@@ -149,7 +150,7 @@ def client(name=None):
             message = "Client added to the database"
 
         elif source == "editClient":
-            clientType = getClientType(name)
+            clientType = BaseClient.query.filter_by(name=name).first().clientType
             message = "Client details updated"
 
         # check for errors
@@ -178,6 +179,7 @@ def client(name=None):
 
 
 @app.route("/saladServiceCard/<name>", methods=["GET"])
+@login_required
 def saladServiceCard(name=None):
     try:
         # attempt to get client
@@ -188,6 +190,83 @@ def saladServiceCard(name=None):
     except:
         return redirect(url_for('index'))
     return render_template("saladServiceCard.html", clientData=clientData)
+
+@app.route("/newOrder", methods=["GET"])
+@login_required
+def newOrder():
+    return render_template("newOrder.html")
+
+@app.route("/order/", methods=["GET", "POST"])
+@app.route("/order/<orderId>", methods=["GET", "POST"])
+@login_required
+def order(orderId=None):
+    if orderId:
+        order = Order.query.filter_by(id=orderId).first()
+    else:
+        try:
+            name = formatName(request.form.get("name"))
+            order = Order(name)
+        except:
+            return redirect(url_for("newOrder"))
+    if request.method == "POST":
+        toDelete = request.form.get("delete")
+        if toDelete:
+            OrderItem.query.filter_by(id=toDelete).first().delete()
+        else:
+            dishName = formatName(request.form.get("name"))
+            dish = Recipe.query.filter_by(name=dishName).first()
+            quantity = request.form.get("quantity")
+            price = request.form.get("price")
+            if dish:
+                if not price:
+                    price = dish.price
+                orderItem = OrderItem(orderId, quantity, dish.id, price)
+        return redirect(url_for("order") + str(order.id))
+    try:
+        return render_template("order.html", id=orderId, orderDetails=order.list())
+    except:
+        return redirect(url_for("index"))
+
+@app.route("/order/<orderId>/delete", methods=["GET"])
+@login_required
+def deleteOrder(orderId=None):
+    if orderId:
+        order = Order.query.filter_by(id=orderId).first()
+        order.delete()
+        return redirect(url_for("viewOrders"))
+    return redirect(url_for("index"))
+
+@app.route("/orders/", methods=["GET", "POST"])
+@login_required
+def viewOrders():
+    if request.method == "GET":
+        orders = Order.query.order_by(Order.date.desc()).all()
+    else:
+        filterBy = request.form.get("filterBy")
+        filterQuery = request.form.get("filterQuery")
+        time = request.form.get("time")
+        now = datetime.now().date()
+        timeDict = {"pastDay": now, "pastWeek": now - timedelta(weeks=1),
+                    "pastMonth": now - timedelta(weeks=4), "allTime": None}
+        pastTime = timeDict[time]
+        try:
+            if filterBy == "client":
+                clientId = BaseClient.query.filter_by(name=filterQuery).first().id
+                orders = Order.query.filter_by(clientId=clientId).order_by(Order.date.desc())
+        except:
+            orders = Order.query
+        if pastTime:
+            orders = orders.filter(Order.date > pastTime)
+        orders = orders.all()
+
+    formattedOrders = []
+    for order in orders:
+        clientName = title(BaseClient.query.get(order.clientId).name)
+        total = usd(order.total())
+        date = formatDateTime(order.date)
+        orderId = order.id
+        formattedOrders.append([date, clientName, total, orderId])
+    return render_template("viewOrders.html", orders=formattedOrders)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -205,7 +284,7 @@ def login():
         elif not request.form.get("password"):
             return apology("must provide password")
 
-        adminId = adminCheck(request)
+        adminId = Admin.check(request)
 
         # ensure username exists and password is correct
         if adminId is None:
@@ -234,11 +313,9 @@ def change_pwd():
         if not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
             return apology("must enter the same new password twice")
 
-        admin = getAdmin(session["adminId"])
+        admin = Admin.query.get(session["adminId"])
 
-        try:
-            updateAdmin(admin, request)
-        except:
+        if not admin.update(request):
             return apology("old password invalid")
 
         logout()
@@ -263,7 +340,6 @@ def register():
     """Register user."""
 
     if request.method == "POST":
-
         if not request.form.get("name"):
             return apology("must provide name")
 
@@ -271,12 +347,10 @@ def register():
         elif not (request.form.get("password") and request.form.get("password") == request.form.get("password_retype")):
             return apology("must enter the same password twice")
 
-        newAdmin(request)
+        Admin(request)
 
         return redirect(url_for("index"))
-
     else:
-
         return render_template("register.html")
 
 

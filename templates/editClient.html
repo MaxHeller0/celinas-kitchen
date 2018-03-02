@@ -26,7 +26,7 @@
           {% elif cssClass[attribute] == "noteText" %}
             <div class="form-group">
               {{attribute|formatKey}}:
-              <textarea class="noteText" name={{attribute}}>{{clientData[attribute]|formatValue}}</textarea><br>
+              <textarea class="noteText" name={{attribute}}>{{clientData[attribute]}}</textarea><br>
             </div>
           {% elif cssClass[attribute] == "boolean" %}
             <div class="form-group">

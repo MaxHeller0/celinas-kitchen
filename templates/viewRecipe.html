@@ -10,8 +10,7 @@
   </h1>
   <p>
     Description: {{ recipe.description|capitalize }}<br/>
-    Base Price: {{ recipe.basePrice|usd }}<br/>
-    Customized Price: {{ recipe.customPrice|usd }}<br/>
+    Base Price: {{ recipe.price|usd }}<br/>
   </p>
   <form action="{{ url_for('recipe') }}" method="POST">
     <div class="form-group">

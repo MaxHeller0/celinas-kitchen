@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Order Details
+{% endblock %}
+
+{% block main %}
+  <h1>
+    {{ orderDetails[0][0] }}<br><br>
+  </h1>
+  <br>
+    <table class="table" id="orderTable">
+       <thread>
+         <tr>
+            <th scope="col">Quantity</th>
+            <th scope="col">Dish</th>
+            <th scope="col">Unit Price</th>
+            <th scope="col">Price</th>
+            <th scope="col"></th>
+          </tr>
+        </thread>
+      <tbody>
+        {% for row in orderDetails[1] %}
+        <tr>
+          <td>{{row[0]}}</td>
+          <td>{{row[1]}}</td>
+          <td>{{row[2]}}</td>
+          <td>{{row[3]}}</td>
+          <form action="{{url_for('order')}}{{id}}" method="POST">
+            <td><button class="btn btn-default" name="delete" value="{{row[4]}}" type="submit">Delete</button></td>
+          </form>
+        </tr>
+        {% endfor %}
+        <tr>
+          <form action="{{url_for('order')}}{{id}}" method="POST">
+            <td><input class="form-control" type="number" min="1" name="quantity" value="1"></td>
+            <td>
+              <input class="form-control" list="recipes" name="name" placeholder="Recipe Name" autofocus="True">
+              <datalist name="recipes" id="recipes">
+                {% if recipes %}
+                {% for recipe in recipes %}
+                  <option value="{{recipe.name|title}}">
+                {% endfor %}
+                {% endif %}
+              </datalist>
+            </td>
+            <td><input class="form-control" type="number" min="0" name="price" placeholder="Override stored price"></td>
+            <td><button class="btn btn-default" type="submit">Add Item(s)</button></td>
+            <td></td>
+          </form>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <th scope="row">Total</th>
+          <td>{{ orderDetails[2][0] }}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+
+{% endblock %}

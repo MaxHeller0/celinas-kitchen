@@ -24,9 +24,9 @@ main table {
 
 main td, th {
   /* left-align tables' cells */
-  /*text-align: left;*/
+  text-align: left;
   padding: 8px;
-  /*border-bottom: 1px solid #ddd;*/
+  border-bottom: 1px solid #ddd;
 }
 
 .navbar-default .navbar-brand .red {
@@ -86,9 +86,19 @@ main td, th {
   font-weight: normal;
 }
 
+.sideBySide{
+  float: left;
+  margin: 5px;
+}
+
 #allergies {
   font-size: 24px;
   text-align: left;
   margin-left: 200px;
   font-weight: bold;
+}
+
+
+.overflow {
+  overflow: auto;
 }
