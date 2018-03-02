@@ -1,5 +1,6 @@
 import os
 
+initDict = {0: baseClient, 1: standingOrderClient}
 clientTypes = {"Base": 0, "Standing Order": 1}
 clientAttributeOrder = ["id", "clientType", "name", "phone", "address", "delivery", "hash",
                         "weeklyMoney", "mondaySalads", "thursdaySalads", "saladDressings", "mondayHotplates", "tuesdayHotplates", "thursdayHotplates",

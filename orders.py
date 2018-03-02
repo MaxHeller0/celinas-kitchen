@@ -4,7 +4,7 @@ from dbconfig import db
 from formattingHelpers import usd, formatName, formatDateTime
 from recipes import getRecipeById
 from sqlalchemy import text
-from clients import getClientNameById, getClientId
+from clients import BaseClient
 
 
 class OrderItem(db.Model):
@@ -45,7 +45,7 @@ class Order(db.Model):
         db.session.commit()
 
     def __init__(self, name):
-        self.clientId = getClientId(name)
+        self.clientId = BaseClient.query.filter_by(name=formatName(name)).first().id
         self.date = datetime.datetime.now()
         db.session.add(self)
         db.session.commit()
@@ -56,7 +56,7 @@ class Order(db.Model):
         if len(orders) == 0:
             t[0].append("Add the first item below")
         else:
-            t[0].append("Order Details: {}, {}".format(getClientNameById(self.clientId).title(), formatDateTime(self.date)))
+            t[0].append("Order Details: {}, {}".format(BaseClient.query.get(self.clientId).name.title(), formatDateTime(self.date)))
             total = 0
             for row in orders:
                 t[1].append(row.list())
