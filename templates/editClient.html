@@ -12,6 +12,7 @@
   <form action="{{ url_for('client') }}" method="POST">
     <fieldset>
       <div class="form-group">
+        <input class="form-control" type="hidden" name=oldName value="{{clientData["name"]}}"><br>
         Name: <input class="form-control" type="text" name=name value="{{clientData["name"]}}"><br>
       </div>
       {% for attribute in clientData %}

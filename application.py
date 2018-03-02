@@ -129,10 +129,8 @@ def client(name=None):
         try:
             name = request.form.get("name")
             assert len(name) > 0
-
         except:
             return apology('Client must have a name', '')
-            # return redirect(url_for("index"))
         source = request.form.get("source")
 
     if source in ["viewButton", "GET"]:
@@ -149,7 +147,8 @@ def client(name=None):
             message = "Client added to the database"
 
         elif source == "editClient":
-            clientType = BaseClient.query.filter_by(name=name).first().clientType
+            oldName = request.form.get("oldName")
+            clientType = BaseClient.query.filter_by(name=oldName).first().clientType
             message = "Client details updated"
 
         # check for errors

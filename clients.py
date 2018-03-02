@@ -67,7 +67,10 @@ class BaseClient(db.Model):
 
 
 def baseClient(request, clientType=0):
-    name = request.form.get("name")
+    if request.form.get("source") == "editClient":
+        name = request.form.get("oldName")
+    else:
+        name = request.form.get("name")
     client = BaseClient.query.filter_by(name=name).first()
     if client:
         client.update(request)
