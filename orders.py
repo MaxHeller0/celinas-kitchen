@@ -23,9 +23,13 @@ class OrderItem(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def __repr__(self):
+    def list(self):
         dish = getRecipeById(self.dishId)
-        return "{},{},{},{}".format(self.count, dish.name.title(), usd(self.price), usd(self.price * self.count))
+        return [self.count, dish.name.title(), usd(self.price), usd(self.price * self.count), self.id]
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
 class Order(db.Model):
     __tablename__ = "orders"
@@ -55,7 +59,7 @@ class Order(db.Model):
             t[0].append("Order Details: {}, {}".format(getClientNameById(self.clientId).title(), formatDateTime(self.date)))
             total = 0
             for row in orders:
-                t[1].append(str(row))
+                t[1].append(row.list())
                 total += row.count * row.price
             t[2].append(usd(total))
         return t

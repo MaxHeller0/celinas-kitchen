@@ -210,14 +210,18 @@ def order(orderId=None):
         except:
             return redirect(url_for("newOrder"))
     if request.method == "POST":
-        dishName = formatName(request.form.get("name"))
-        dish = Recipe.query.filter_by(name=dishName).first()
-        quantity = request.form.get("quantity")
-        price = request.form.get("price")
-        if dish:
-            if not price:
-                price = dish.price
-            orderItem = OrderItem(orderId, quantity, dish.id, price)
+        toDelete = request.form.get("delete")
+        if toDelete:
+            OrderItem.query.filter_by(id=toDelete).first().delete()
+        else:
+            dishName = formatName(request.form.get("name"))
+            dish = Recipe.query.filter_by(name=dishName).first()
+            quantity = request.form.get("quantity")
+            price = request.form.get("price")
+            if dish:
+                if not price:
+                    price = dish.price
+                orderItem = OrderItem(orderId, quantity, dish.id, price)
         return redirect(url_for("order") + str(order.id))
     try:
         return render_template("order.html", id=orderId, orderDetails=order.list())
