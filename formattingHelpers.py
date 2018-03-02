@@ -53,10 +53,6 @@ def usd(value):
     return "${:,.2f}".format(value)
 
 
-def formatName(name):
-    return removeExcess(name.lower(), "-'")
-
-
 def forceNum(string, output="int"):
     """
     Input: string that ideally can be converted to a number

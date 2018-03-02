@@ -2,7 +2,7 @@ from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy import text
 
 from dbconfig import db
-from formattingHelpers import forceNum, formatName, removeExcess, sortDict
+from formattingHelpers import forceNum, removeExcess, sortDict
 from hardcodedShit import clientTypes
 
 
@@ -13,7 +13,7 @@ class Admin(db.Model):
     hash = db.Column(db.Text)
 
     def __init__(self, request):
-        self.name = formatName(request.form.get("name"))
+        self.name = request.form.get("name")
         self.hash = pwd_context.hash(request.form.get("password"))
 
         # make sure admin with same name doesn't already exist
@@ -29,7 +29,7 @@ class Admin(db.Model):
         return True
 
     def check(request):
-        name = formatName(request.form.get("name"))
+        name = request.form.get("name")
         admin = Admin.query.filter_by(name=name).first()
         if admin is None or not pwd_context.verify(request.form.get("password"), admin.hash):
             return None
@@ -49,7 +49,7 @@ class BaseClient(db.Model):
     dietaryPreferences = db.Column(db.Text)
 
     def __init__(self, request, clientType=0):
-        self.name = formatName(request.form.get("name"))
+        self.name = request.form.get("name")
         self.phone = removeExcess(request.form.get("phone"))
         self.clientType = clientType
         self.address = request.form.get("address").lower()
@@ -67,7 +67,7 @@ class BaseClient(db.Model):
 
 
 def baseClient(request, clientType=0):
-    name = formatName(request.form.get("name"))
+    name = request.form.get("name")
     client = BaseClient.query.filter_by(name=name).first()
     if client:
         client.update(request)
@@ -136,7 +136,7 @@ def standingOrderClient(request):
 
 def deleteClient(name):
     tableNames = {0: "clients", 1: "standingOrder"}
-    clientId = BaseClient.query.filter_by(name=formatName(name)).first().id
+    clientId = BaseClient.query.filter_by(name=name).first().id
     clientType = BaseClient.query.get(clientId).clientType
     t = text("DELETE FROM clients WHERE id=:clientId")
     db.engine.execute(t, clientId=clientId)
@@ -154,7 +154,6 @@ def getClient(name):
     """
     tableNames = {0: "clients", 1: "standingOrder"}
     try:
-        name = formatName(name)
         t = text("SELECT * FROM clients WHERE name LIKE :name")
         client = db.engine.execute(t, name=name).first()
         if client["clientType"] != 0:

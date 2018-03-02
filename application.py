@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from clients import deleteClient, getClient, BaseClient, Admin, initDict
 from dbconfig import db
 from errorHandling import clientInputCheck
-from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
+from formattingHelpers import (capitalize, cssClass, formatKey,
                                formatValue, title, usd, viewFormatValue, formatBool,
                                formatDateTime)
 from hardcodedShit import clientAttributes, clientTypes, dbConfig
@@ -69,7 +69,6 @@ def recipe(name=None):
             name = request.form.get("name")
 
         try:
-            name = formatName(name)
             recipe = getRecipe(name)
             source = request.form.get("source")
 
@@ -128,7 +127,7 @@ def client(name=None):
         source = "GET"
     else:
         try:
-            name = formatName(request.form.get("name"))
+            name = request.form.get("name")
             assert len(name) > 0
 
         except:
@@ -204,7 +203,7 @@ def order(orderId=None):
         order = Order.query.filter_by(id=orderId).first()
     else:
         try:
-            name = formatName(request.form.get("name"))
+            name = request.form.get("name")
             order = Order(name)
         except:
             return redirect(url_for("newOrder"))
@@ -213,7 +212,7 @@ def order(orderId=None):
         if toDelete:
             OrderItem.query.filter_by(id=toDelete).first().delete()
         else:
-            dishName = formatName(request.form.get("name"))
+            dishName = request.form.get("name")
             dish = Recipe.query.filter_by(name=dishName).first()
             quantity = request.form.get("quantity")
             price = request.form.get("price")

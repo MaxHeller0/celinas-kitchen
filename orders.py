@@ -1,7 +1,7 @@
 import datetime
 
 from dbconfig import db
-from formattingHelpers import usd, formatName, formatDateTime
+from formattingHelpers import usd, formatDateTime
 from recipes import getRecipeById
 from sqlalchemy import text
 from clients import BaseClient
@@ -45,7 +45,7 @@ class Order(db.Model):
         db.session.commit()
 
     def __init__(self, name):
-        self.clientId = BaseClient.query.filter_by(name=formatName(name)).first().id
+        self.clientId = BaseClient.query.filter_by(name=name).first().id
         self.date = datetime.datetime.now()
         db.session.add(self)
         db.session.commit()

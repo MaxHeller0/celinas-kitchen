@@ -1,10 +1,10 @@
 from clients import BaseClient
-from formattingHelpers import formatName, removeExcess
+from formattingHelpers import removeExcess
 from hardcodedShit import clientAttributes
 
 
 def clientInputCheck(request, clientType, source):
-    name = formatName(request.form.get("name"))
+    name = request.form.get("name")
     client = BaseClient.query.filter_by(name=name).first()
 
     # check if client already exists so details aren't overwritten from newClient
@@ -24,14 +24,14 @@ def clientInputCheck(request, clientType, source):
         phoneStr = removeExcess(request.form.get("phone"))
         if phoneStr:
             try:
-                int(removeExcess(phoneStr))
+                int(phoneStr)
             except:
                 message = ["Phone number must be number", '']
                 raise ValueError
-            if len(removeExcess(phoneStr)) == 7:
+            if len(phoneStr) == 7:
                 message = ["Must include area code for phone number", '']
                 raise ValueError
-            elif len(removeExcess(phoneStr)) != 10:
+            elif len(phoneStr) != 10:
                 message = ["Not a valid phone number", '']
                 raise ValueError
 
