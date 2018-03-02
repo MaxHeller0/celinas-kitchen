@@ -1,14 +1,12 @@
 from flask import Flask, redirect, render_template, request, session, url_for
 
-from clients import (deleteClient, getClient,
-                     getClientNames, getClientType, initDict,
-                     getClientNameById, Admin)
+from clients import deleteClient, getClient, BaseClient, Admin
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
                                formatValue, title, usd, viewFormatValue, formatBool,
                                formatDateTime)
-from hardcodedShit import (clientAttributes, clientTypes, dbConfig)
+from hardcodedShit import (clientAttributes, clientTypes, dbConfig, initDict)
 from helpers import apology, login_required, root_login_required
 from recipes import deleteRecipe, getRecipe, getRecipeList, newRecipe, Recipe
 from orders import Order, OrderItem
@@ -48,7 +46,7 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def injectNavbarData():
-    return dict(clientTypes=clientTypes, clientNameList=getClientNames(), recipes=getRecipeList())
+    return dict(clientTypes=clientTypes, clientNameList=BaseClient.query.order_by(BaseClient.name).all(), recipes=getRecipeList())
 
 
 @app.route("/")
@@ -151,7 +149,7 @@ def client(name=None):
             message = "Client added to the database"
 
         elif source == "editClient":
-            clientType = getClientType(name)
+            clientType = BaseClient.query.filter_by(name=name).first().clientType
             message = "Client details updated"
 
         # check for errors
@@ -243,7 +241,7 @@ def viewOrders():
     orders = Order.query.order_by(Order.date.desc()).all()
     formattedOrders = []
     for order in orders:
-        clientName = title(getClientNameById(order.clientId))
+        clientName = title(BaseClient.query.get(order.clientId).name)
         total = usd(order.total())
         date = formatDateTime(order.date)
         orderId = order.id
