@@ -33,6 +33,13 @@ class Order(db.Model):
     clientId = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime(timezone=True))
 
+    def delete(self):
+        orderItems = OrderItem.query.filter_by(orderId=self.id).all()
+        for item in orderItems:
+            db.session.delete(item)
+        db.session.delete(self)
+        db.session.commit()
+
     def __init__(self, name):
         self.clientId = getClientId(name)
         self.date = datetime.datetime.now()

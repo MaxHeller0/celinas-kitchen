@@ -17,34 +17,28 @@
           </tr>
         </thread>
       <tbody>
-        <tr>
         {% for row in orderDetails[1] %}
-        {% for cell in row.split(',') %}
-          <td>{{cell}}</td>
+          <tr>
+            {% for cell in row.split(',') %}
+              <td>{{cell}}</td>
+            {% endfor %}
+          </tr>
         {% endfor %}
-        </tr>
-      {% endfor %}
         <tr>
           <form action="{{url_for('order')}}{{id}}" method="POST">
-            <td>
-              <input class="form-control" type="number" min="1" name="quantity" value="1">
-            </td>
+            <td><input class="form-control" type="number" min="1" name="quantity" value="1"></td>
             <td>
               <input class="form-control" list="recipes" name="name" placeholder="Recipe Name" autofocus="True">
               <datalist name="recipes" id="recipes">
                 {% if recipes %}
                 {% for recipe in recipes %}
-                <option value="{{recipe.name|title}}">
-                  {% endfor %}
-                  {% endif %}
+                  <option value="{{recipe.name|title}}">
+                {% endfor %}
+                {% endif %}
               </datalist>
             </td>
-            <td>
-              <input class="form-control" type="number" min="0" name="price" placeholder="Override stored price">
-            </td>
-            <td>
-              <button class="btn btn-default" type="submit">Add Item(s)</button>
-            </td>
+            <td><input class="form-control" type="number" min="0" name="price" placeholder="Override stored price"></td>
+            <td><button class="btn btn-default" type="submit">Add Item(s)</button></td>
           </form>
         </tr>
         <tr>

@@ -224,6 +224,15 @@ def order(orderId=None):
     except:
         return redirect(url_for("index"))
 
+@app.route("/order/<orderId>/delete", methods=["GET"])
+@login_required
+def deleteOrder(orderId=None):
+    if orderId:
+        order = Order.query.filter_by(id=orderId).first()
+        order.delete()
+        return redirect(url_for("viewOrders"))
+    return redirect(url_for("index"))
+
 @app.route("/orders/", methods=["GET"])
 @login_required
 def viewOrders():
@@ -234,7 +243,7 @@ def viewOrders():
         total = usd(order.total())
         date = formatDateTime(order.date)
         orderId = order.id
-        formattedOrders.append([clientName, total, date, orderId])
+        formattedOrders.append([date, clientName, total, orderId])
     return render_template("viewOrders.html", orders=formattedOrders)
 
 
