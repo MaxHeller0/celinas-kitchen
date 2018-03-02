@@ -245,22 +245,19 @@ def viewOrders():
         filterBy = request.form.get("filterBy")
         filterQuery = request.form.get("filterQuery")
         time = request.form.get("time")
-        if filterBy == "client":
-            now = datetime.now().date()
-            if time == "pastDay":
-                pastTime = now
-            elif time == "pastWeek":
-                pastTime = now - timedelta(weeks=1)
-            elif time == "pastMonth":
-                pastTime = now - timedelta(weeks=4)
-            else:
-                pastTime = None
-
-            clientId = BaseClient.query.filter_by(name=filterQuery).first().id
-            orders = Order.query.filter_by(clientId=clientId).order_by(Order.date.desc())
-            if pastTime:
-                orders = orders.filter(Order.date > pastTime)
-            orders = orders.all()
+        now = datetime.now().date()
+        timeDict = {"pastDay": now, "pastWeek": now - timedelta(weeks=1),
+                    "pastMonth": now - timedelta(weeks=4), "allTime": None}
+        pastTime = timeDict[time]
+        try:
+            if filterBy == "client":
+                clientId = BaseClient.query.filter_by(name=filterQuery).first().id
+                orders = Order.query.filter_by(clientId=clientId).order_by(Order.date.desc())
+        except:
+            orders = Order.query
+        if pastTime:
+            orders = orders.filter(Order.date > pastTime)
+        orders = orders.all()
 
     formattedOrders = []
     for order in orders:
