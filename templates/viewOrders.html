@@ -5,33 +5,47 @@
 {% endblock %}
 
 {% block main %}
-  <h1>
-    <table class="table" id="orderTable">
-      <thread>
-        <tr>
-          <th scope="col">Date</th>
-          <th scope="col">Client</th>
-          <th scope="col">Total</th>
-          <th scope="col"></th>
-          <th scope="col"></th>
-        </tr>
-      </thread>
-      <tbody>
-        {% for order in orders %}
-        <tr>
-          <td>{{order[0]}}</td>
-          <td>{{order[1]}}</td>
-          <td>{{order[2]}}</td>
-          <form action="{{url_for('order')}}{{order[3]}}">
-            <td><button class="btn btn-default" type="submit">View</button></td>
-          </form>
-          <form action="{{url_for('order')}}{{order[3]}}/delete">
-            <td><button class="btn btn-default" type="submit">Delete</button></td>
-          </form>
-        <tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </h1>
+<div id="filterFormContainer">
+  <form action="{{url_for('viewOrders')}}" method="POST">
+    <div class="sideBySide">
+      <select class="selectpicker" name="filterBy">
+        <option>Client</option>
+        <option>Dish</option>
+      </select>
+    </div>
+    <div class="sideBySide">
+      <input type="text" name="filterQuery" class="form-control" placeholder="Filter Query">
+    </div>
+    <div class="sideBySide">
+      <input type="submit" name="filter" id="filter" class="btn btn-default" value="Filter">
+    </div>
+  </form>
+</div>
+<table class="table" id="orderTable">
+  <thread>
+    <tr>
+      <th scope="col">Date</th>
+      <th scope="col">Client</th>
+      <th scope="col">Total</th>
+      <th scope="col"></th>
+      <th scope="col"></th>
+    </tr>
+  </thread>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>{{order[0]}}</td>
+      <td>{{order[1]}}</td>
+      <td>{{order[2]}}</td>
+      <form action="{{url_for('order')}}{{order[3]}}">
+        <td><button class="btn btn-default" type="submit">View</button></td>
+      </form>
+      <form action="{{url_for('order')}}{{order[3]}}/delete">
+        <td><button class="btn btn-default" type="submit">Delete</button></td>
+      </form>
+    <tr>
+    {% endfor %}
+    </tbody>
+  </table>
 
   {% endblock %}

@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template, request, session, url_for
 
 from clients import (adminCheck, deleteClient, getAdmin, getClient,
                      getClientNames, getClientType, initDict, newAdmin,
-                     updateAdmin, getClientNameById)
+                     updateAdmin, getClientNameById, BaseClient)
 from dbconfig import db
 from errorHandling import clientInputCheck
 from formattingHelpers import (capitalize, cssClass, formatKey, formatName,
@@ -237,10 +237,19 @@ def deleteOrder(orderId=None):
         return redirect(url_for("viewOrders"))
     return redirect(url_for("index"))
 
-@app.route("/orders/", methods=["GET"])
+@app.route("/orders/", methods=["GET", "POST"])
 @login_required
 def viewOrders():
-    orders = Order.query.order_by(Order.date.desc()).all()
+    if request.method == "GET":
+        orders = Order.query.order_by(Order.date.desc()).all()
+    else:
+        filterBy = request.form.get("filterBy")
+        filterQuery = request.form.get("filterQuery")
+        if filterBy == "Client":
+            clientId = BaseClient.query.filter_by(name=filterQuery).first().id
+            orders = Order.query.filter_by(clientId=clientId).order_by(Order.date.desc()).all()
+
+
     formattedOrders = []
     for order in orders:
         clientName = title(getClientNameById(order.clientId))

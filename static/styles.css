@@ -24,7 +24,8 @@ main table {
 
 main td, th {
   /* left-align tables' cells */
-  /*text-align: left;*/
+  text-align: left;
+  vertical-align: middle;
   padding: 8px;
   /*border-bottom: 1px solid #ddd;*/
 }
@@ -86,6 +87,11 @@ main td, th {
   font-weight: normal;
 }
 
+.sideBySide{
+  float: left;
+  margin: 5px;
+}
+
 #allergies {
   font-size: 24px;
   text-align: left;
@@ -93,6 +99,8 @@ main td, th {
   font-weight: bold;
 }
 
-#orderTable {
-  text-align: left;
+
+#filterFormContainer{
+  height: 110px;
+  overflow: auto;
 }
