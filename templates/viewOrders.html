@@ -5,22 +5,28 @@
 {% endblock %}
 
 {% block main %}
-<div id="filterFormContainer">
-  <form action="{{url_for('viewOrders')}}" method="POST">
-    <div class="sideBySide">
-      <select class="selectpicker" name="filterBy">
-        <option>Client</option>
-        <option>Dish</option>
-      </select>
+<form class="form-inline" action="{{url_for('viewOrders')}}" method="POST">
+  <div class="form-group overflow">
+    <div class="input-group sideBySide">
+      <div class="input-group-addon">Filter by</div>
+      <div class="input-group">
+        <select class="form-control" name="filterBy">
+          <option selected value="client">Client</option>
+          <option value="dish">Dish</option>
+        </select>
+      </div>
     </div>
-    <div class="sideBySide">
-      <input type="text" name="filterQuery" class="form-control" placeholder="Filter Query">
+    <div class="input-group sideBySide">
+      <div class="input-group-addon">Query:</div>
+      <div class="input-group">
+        <input type="text" name="filterQuery" class="form-control">
+      </div>
     </div>
-    <div class="sideBySide">
-      <input type="submit" name="filter" id="filter" class="btn btn-default" value="Filter">
+    <div class="input-group sideBySide">
+      <button class="btn btn-default">Filter</button>
     </div>
-  </form>
-</div>
+  </div>
+</form>
 <table class="table" id="orderTable">
   <thread>
     <tr>
@@ -38,10 +44,10 @@
       <td>{{order[1]}}</td>
       <td>{{order[2]}}</td>
       <form action="{{url_for('order')}}{{order[3]}}">
-        <td><button class="btn btn-default" type="submit">View</button></td>
+        <td><button class="btn btn-default btn-sm" type="submit">View</button></td>
       </form>
       <form action="{{url_for('order')}}{{order[3]}}/delete">
-        <td><button class="btn btn-default" type="submit">Delete</button></td>
+        <td><button class="btn btn-default btn-sm" type="submit">Delete</button></td>
       </form>
     <tr>
     {% endfor %}

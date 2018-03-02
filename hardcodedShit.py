@@ -28,4 +28,4 @@ try:
                                                                                    db=os.environ["RDS_DB_NAME"])
 except:
     dbConfig = "mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(
-        username="admin", password="y94D6NDeTColiQDZAEWp", server="aaxoj5yaehj8v0.cy9bm4pmzdu7.us-east-1.rds.amazonaws.com", port="3306", db="ebdb")
+        username="admin", password="jOKb7lRRps&smt1bPeW!$", server="celinas-kitchen-testing.czfoxvxyu3gn.us-east-2.rds.amazonaws.com", port="3306", db="ebdb")

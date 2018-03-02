@@ -243,7 +243,7 @@ def viewOrders():
     else:
         filterBy = request.form.get("filterBy")
         filterQuery = request.form.get("filterQuery")
-        if filterBy == "Client":
+        if filterBy == "client":
             clientId = BaseClient.query.filter_by(name=filterQuery).first().id
             orders = Order.query.filter_by(clientId=clientId).order_by(Order.date.desc()).all()
 

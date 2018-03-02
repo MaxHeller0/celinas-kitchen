@@ -25,9 +25,8 @@ main table {
 main td, th {
   /* left-align tables' cells */
   text-align: left;
-  vertical-align: middle;
   padding: 8px;
-  /*border-bottom: 1px solid #ddd;*/
+  border-bottom: 1px solid #ddd;
 }
 
 .navbar-default .navbar-brand .red {
@@ -100,7 +99,6 @@ main td, th {
 }
 
 
-#filterFormContainer{
-  height: 110px;
+.overflow {
   overflow: auto;
 }
