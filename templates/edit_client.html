@@ -18,20 +18,20 @@
       </div>
       {% for attribute in client_data %}
         {% if attribute not in['id', 'client_type', 'hash', 'name'] %}
-          {%if css_class[attribute] == "defaultText" %}
+          {%if css_class[attribute] == "default_text" %}
             <div class="form-group">
               {{attribute|format_key}}:
               <input class="form-control" type="text" name="{{attribute}}" value="{{client_data[attribute]|format_value}}"><br>
             </div>
-          {% elif css_class[attribute] == "opinionText" %}
+          {% elif css_class[attribute] == "opinion_text" %}
             <div class="form-group">
               {{attribute|format_key}}:
-              <textarea class="opinionText" name="{{attribute}}">{{client_data[attribute]|format_value}}</textarea><br>
+              <textarea class="opinion_text" name="{{attribute}}">{{client_data[attribute]|format_value}}</textarea><br>
             </div>
-          {% elif css_class[attribute] == "noteText" %}
+          {% elif css_class[attribute] == "note_text" %}
             <div class="form-group">
               {{attribute|format_key}}:
-              <textarea class="noteText" name="{{attribute}}">{{client_data[attribute]}}</textarea><br>
+              <textarea class="note_text" name="{{attribute}}">{{client_data[attribute]}}</textarea><br>
             </div>
           {% elif css_class[attribute] == "boolean" %}
             <div class="form-group">
@@ -42,7 +42,12 @@
               <label for="False">No</label>
               <br>
             </div>
-          {% endif %}
+          {% elif css_class[attribute] == "money" %}
+            <div class="form-group">
+              {{attribute|format_key}}:
+              <input class="form-control" type="number" name="{{attribute}}" step=".01" value="{{client_data[attribute]|usd}}"><br>
+            </div>
+         {% endif %}
         {% endif %}
       {% endfor %}
       <div class="form-group">

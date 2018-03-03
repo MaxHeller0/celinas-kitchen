@@ -9,13 +9,17 @@
     {{ client_data["name"] }}</h1>
   <p>
     {% for attribute in client_data %}
-      {% if client_data[attribute] not in[None, ''] and attribute not in['id', 'client_type', 'name'] %}
-        {% if attribute in['salad_dressings', 'delivery'] %}
+      {% if client_data[attribute] and attribute not in ['id', 'client_type', 'name'] %}
+        {% if css_class[attribute] == "boolean" %}
           <b>{{attribute|format_key}}:</b>
           {{client_data[attribute]|format_bool}}<br><br>
-        {% elif attribute in['weekly_money'] %}
+        {% elif css_class[attribute] == "money" %}
           <b>{{attribute|format_key}}:</b>
           {{client_data[attribute]|usd}}
+          <br><br>
+        {% elif css_class[attribute] == "note_text" %}
+          <b>{{attribute|format_key}}:</b>
+          {{client_data[attribute]}}
           <br><br>
         {% else %}
           <b>{{attribute|format_key}}:</b>

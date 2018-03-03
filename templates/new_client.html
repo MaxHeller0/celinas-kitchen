@@ -8,20 +8,20 @@
   <form action="{{ url_for('client') }}" method="POST">
     <fieldset>
       {% for attribute in attributes %}
-        {%if css_class[attribute] == "defaultText" %}
+        {%if css_class[attribute] == "default_text" %}
           <div class="form-group">
             {{attribute|format_key}}:
             <input class="form-control" type="text" name="{{attribute}}"><br>
           </div>
-        {% elif css_class[attribute] == "opinionText" %}
+        {% elif css_class[attribute] == "opinion_text" %}
           <div class="form-group">
             {{attribute|format_key}}:
-            <textarea class="opinionText" name="{{attribute}}"></textarea><br>
+            <textarea class="opinion_text" name="{{attribute}}"></textarea><br>
           </div>
-        {% elif css_class[attribute] == "noteText" %}
+        {% elif css_class[attribute] == "note_text" %}
           <div class="form-group">
             {{attribute|format_key}}:
-            <textarea class="noteText" name="{{attribute}}"></textarea><br>
+            <textarea class="note_text" name="{{attribute}}"></textarea><br>
           </div>
         {% elif css_class[attribute] == "boolean" %}
           <div class="form-group">

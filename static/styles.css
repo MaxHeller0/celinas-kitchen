@@ -37,7 +37,7 @@ main td, th {
   min-width: 0px;
 }
 
-.opinionText {
+.opinion_text {
   display: block;
   width: 25vw;
   height: 5vh;
@@ -58,7 +58,7 @@ main td, th {
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }
 
-.noteText {
+.note_text {
   display: block;
   width: 25vw;
   height: 25vh;
