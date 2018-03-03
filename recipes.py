@@ -33,15 +33,11 @@ def new_recipe(request):
     name = request.form.get("name")
     old_name = request.form.get("old_name")
 
-    recipe = Recipe.query.filter_by(name=name).first()
+    recipe = Recipe.query.filter_by(name=old_name).first()
     if recipe:
         recipe.update(request)
     else:
-        recipe = Recipe.query.filter_by(name=old_name).first()
-        if recipe:
-            recipe.update(request)
-        else:
-            recipe = Recipe(request)
+        recipe = Recipe(request)
         db.session.add(recipe)
     db.session.commit()
     return recipe
