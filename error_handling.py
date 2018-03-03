@@ -34,13 +34,6 @@ def client_input_check(request, client_type, source):
             elif len(phone_str) != 10:
                 message = ["Not a valid phone number", '']
                 raise ValueError
-
-        # standing order client form checking
-        # TODO BROKEN
-        if client_type == 1:
-            for attribute in client_attributes[1][3:6]:
-                if any(c in ".\'\"!@#$%^&*()_+" for c in request.form.get(attribute)):
-                    return (True, [("you entered an invalid character for " + attribute), ''])
     except ValueError:
         return (True, message)
     except:

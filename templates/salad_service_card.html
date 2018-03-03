@@ -1,80 +1,97 @@
-  <h1>
-    {{ client_data["name"] }}
-  </h1>
+<h1>
+  {{ client_data["name"] }}
+</h1>
 
-  <p class="salad_service_card">
-    Phone: {{client_data["phone"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  Phone:
+  {{client_data["phone"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-    Address: {{client_data["address"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  Address:
+  {{client_data["address"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-    Delivery: {{client_data["delivery"]|format_bool}}
-  </p>
+<p class="salad_service_card">
+  Delivery:
+  {{client_data["delivery"]|format_bool}}
+</p>
 
-  <p class="salad_service_card">
-    Weekly money: {{client_data["weekly_money"]|usd}}
-  </p>
+<p class="salad_service_card">
+  Weekly money:
+  {{client_data["weekly_money"]|usd}}
+</p>
 
-  <p class="salad_service_card">
-    # of Monday Salads: {{client_data["monday_salads"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  # of Monday Salads:
+  {{client_data["monday_salads"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-      # of Thursday Salads: {{client_data["thursday_salads"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  # of Thursday Salads:
+  {{client_data["thursday_salads"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-      Salad dressings: {{client_data["salad_dressings"]|format_bool}}
-  </p>
+<p class="salad_service_card">
+  Salad dressings:
+  {{client_data["salad_dressings"]|format_bool}}
+</p>
 
-  <p class="salad_service_card">
-    # of Monday Hotplates: {{client_data["monday_hotplates"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  # of Monday Hotplates:
+  {{client_data["monday_hotplates"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-    # of Tuesday Hotplates: {{client_data["tuesday_hotplates"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  # of Tuesday Hotplates:
+  {{client_data["tuesday_hotplates"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-    # of Thursday Hotplates: {{client_data["thursday_hotplates"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  # of Thursday Hotplates:
+  {{client_data["thursday_hotplates"]|view_format_value}}
+</p>
 
-  <br>
-  <br>
+<br>
+<br>
 
+<h3 id="allergies">
+  Allergies:
+  {{client_data["allergies"]|view_format_value}}
+</h3>
 
-  <h3 id="allergies">
-      Allergies: {{client_data["allergies"]|view_format_value}}
-  </h3>
+<p class="salad_service_card">
+  Protein:
+  {{client_data["protein"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-      Protein: {{client_data["protein"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  Dietary preferences:
+  {{client_data["dietary_preferences"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-    Dietary preferences: {{client_data["dietary_preferences"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  Dislikes:
+  {{client_data["salad_dislikes"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-    Dislikes: {{client_data["salad_dislikes"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  Loves:
+  {{client_data["salad_loves"]|view_format_value}}
+</p>
 
-  <p class="salad_service_card">
-    Loves: {{client_data["salad_loves"]|view_format_value}}
-  </p>
+<br>
+<br>
 
-  <br>
-  <br>
-
-  <p class="salad_service_card">
-    General notes: {{client_data["general_notes"]|view_format_value}}
-  </p>
-  <p>
-    Salad notes: {{client_data["salad_notes"]|view_format_value}}
-  </p>
-  <p>
-    Hotplate notes: {{client_data["hotplate_notes"]|view_format_value}}
-  </p>
+<p class="salad_service_card">
+  General notes:
+  {{client_data["general_notes"]|view_format_value}}
+</p>
+<p>
+  Salad notes:
+  {{client_data["salad_notes"]|view_format_value}}
+</p>
+<p>
+  Hotplate notes:
+  {{client_data["hotplate_notes"]|view_format_value}}
+</p>

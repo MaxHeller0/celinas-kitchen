@@ -1,16 +1,17 @@
-from flask import Flask, redirect, render_template, request, session, url_for
 from datetime import datetime, timedelta
 
-from clients import delete_client, get_client, BaseClient, Admin, init_dict
+from flask import Flask, redirect, render_template, request, session, url_for
+
+from clients import Admin, BaseClient, delete_client, get_client, init_dict
 from db_config import db
 from error_handling import client_input_check
-from formatting_helpers import (capitalize, css_class, format_key,
-                               format_value, title, usd, view_format_value, format_bool,
-                               format_date_time)
+from formatting_helpers import (capitalize, css_class, format_bool,
+                                format_date_time, format_key, format_value,
+                                title, usd, view_format_value)
 from hardcoded_shit import client_attributes, client_types, db_config
 from helpers import apology, login_required, root_login_required
-from recipes import delete_recipe, get_recipe, get_recipe_list, new_recipe, Recipe
 from orders import Order, OrderItem
+from recipes import Recipe, new_recipe
 
 # configure application
 application = Flask(__name__)
@@ -47,7 +48,10 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def inject_navbar_data():
-    return dict(client_types=client_types, client_nameList=BaseClient.query.order_by(BaseClient.name).all(), recipes=get_recipe_list())
+    return dict(client_types=client_types,
+                client_nameList=BaseClient.query.order_by(
+                    BaseClient.name).all(),
+                recipes=Recipe.query.order_by(Recipe.name).all())
 
 
 @app.route("/")
@@ -63,28 +67,26 @@ def index():
 @login_required
 def recipe(name=None):
     if request.method == "POST" or name:
-
-        # accessed via post, get name from form
         if name is None:
             name = request.form.get("name")
 
         try:
-            recipe = get_recipe(name)
+            recipe = Recipe.query.filter_by(name=name).first()
             source = request.form.get("source")
 
             if request.method == "GET":
                 return render_template("view_recipe.html", recipe=recipe)
 
-            elif source in ["new_button", "view_button"]:
-                if source == "new_button":
-                    if name in [None, ""]:
+            elif source in ["save_button", "view_button"]:
+                if source == "save_button":
+                    if not name:
                         # trying to create new recipe without a name
                         return apology("Recipes must have a name")
                     recipe = new_recipe(request)
                 return redirect("/recipe/{name}".format(name=name))
 
             elif source == "delete_button":
-                delete_recipe(name)
+                Recipe.delete(name)
                 return redirect(url_for("index"))
 
             else:
@@ -148,7 +150,8 @@ def client(name=None):
 
         elif source == "edit_client":
             old_name = request.form.get("old_name")
-            client_type = BaseClient.query.filter_by(name=old_name).first().client_type
+            client_type = BaseClient.query.filter_by(
+                name=old_name).first().client_type
             message = "Client details updated"
 
         # check for errors
@@ -189,10 +192,12 @@ def salad_service_card(name=None):
         return redirect(url_for('index'))
     return render_template("salad_service_card.html", client_data=client_data)
 
+
 @app.route("/new_order", methods=["GET"])
 @login_required
 def new_order():
     return render_template("new_order.html")
+
 
 @app.route("/order/", methods=["GET", "POST"])
 @app.route("/order/<order_id>", methods=["GET", "POST"])
@@ -220,10 +225,11 @@ def order(order_id=None):
                     price = dish.price
                 order_item = OrderItem(order_id, quantity, dish.id, price)
         return redirect(url_for("order") + str(order.id))
-    try:
-        return render_template("order.html", id=order_id, order_details=order.list())
-    except:
-        return redirect(url_for("index"))
+    # try:
+    return render_template("order.html", id=order_id, order_details=order.list())
+# except:
+    # return redirect(url_for("index"))
+
 
 @app.route("/order/<order_id>/delete", methods=["GET"])
 @login_required
@@ -233,6 +239,7 @@ def delete_order(order_id=None):
         order.delete()
         return redirect(url_for("view_orders"))
     return redirect(url_for("index"))
+
 
 @app.route("/orders/", methods=["GET", "POST"])
 @login_required
@@ -245,12 +252,14 @@ def view_orders():
         time = request.form.get("time")
         now = datetime.now().date()
         time_dict = {"past_day": now, "past_week": now - timedelta(weeks=1),
-                    "past_month": now - timedelta(weeks=4), "all_time": None}
+                     "past_month": now - timedelta(weeks=4), "all_time": None}
         past_time = time_dict[time]
         try:
             if filter_by == "client":
-                client_id = BaseClient.query.filter_by(name=filter_query).first().id
-                orders = Order.query.filter_by(client_id=client_id).order_by(Order.date.desc())
+                client_id = BaseClient.query.filter_by(
+                    name=filter_query).first().id
+                orders = Order.query.filter_by(
+                    client_id=client_id).order_by(Order.date.desc())
         except:
             orders = Order.query
         if past_time:

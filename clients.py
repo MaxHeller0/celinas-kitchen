@@ -82,7 +82,7 @@ def base_client(request, client_type=0):
 
 
 class StandingOrderClient(db.Model):
-    __tablename__ = "standingOrder"
+    __tablename__ = "standing_order"
     id = db.Column(db.Integer, primary_key=True)
     protein = db.Column(db.Text)
     salad_dislikes = db.Column(db.Text)
@@ -113,8 +113,10 @@ class StandingOrderClient(db.Model):
         self.monday_salads = force_num(request.form.get("monday_salads"))
         self.thursday_salads = force_num(request.form.get("thursday_salads"))
         self.monday_hotplates = force_num(request.form.get("monday_hotplates"))
-        self.tuesday_hotplates = force_num(request.form.get("tuesday_hotplates"))
-        self.thursday_hotplates = force_num(request.form.get("thursday_hotplates"))
+        self.tuesday_hotplates = force_num(
+            request.form.get("tuesday_hotplates"))
+        self.thursday_hotplates = force_num(
+            request.form.get("thursday_hotplates"))
         self.salad_notes = request.form.get("salad_notes")
         self.hotplate_notes = request.form.get("hotplate_notes")
 
@@ -138,7 +140,7 @@ def standing_order_client(request):
 
 
 def delete_client(name):
-    table_names = {0: "clients", 1: "standingOrder"}
+    table_names = {0: "clients", 1: "standing_order"}
     client_id = BaseClient.query.filter_by(name=name).first().id
     client_type = BaseClient.query.get(client_id).client_type
     t = text("DELETE FROM clients WHERE id=:client_id")
@@ -153,9 +155,9 @@ def delete_client(name):
 def get_client(name):
     """
     Input: name
-    Returns: associated client details as a sorted dictionary, or None if no client exists
+    Returns: associated client details as a sorted dictionary, or None
     """
-    table_names = {0: "clients", 1: "standingOrder"}
+    table_names = {0: "clients", 1: "standing_order"}
     try:
         t = text("SELECT * FROM clients WHERE name LIKE :name")
         client = db.engine.execute(t, name=name).first()
@@ -167,6 +169,7 @@ def get_client(name):
         return sort_dict(client, "client_attributes")
     except:
         return None
+
 
 init_dict = {0: base_client, 1: standing_order_client}
 client_types = sort_dict(client_types, dict_name="client_types")

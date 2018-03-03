@@ -17,38 +17,31 @@ class Recipe(db.Model):
         self.price = force_num(request.form.get("price"), "float")
 
     def __repr__(self):
-        return "{name}: {description}".format(name=self.name, description=self.description)
+        return "{name}: {description}".format(name=self.name,
+                                              description=self.description)
 
     def update(self, request):
         self.__init__(request)
 
+    def delete(name):
+        recipe = Recipe.query.filter_by(name=name).first()
+        db.session.delete(recipe)
+        db.session.commit()
+
 
 def new_recipe(request):
     name = request.form.get("name")
-    recipe = get_recipe(name)
+    old_name = request.form.get("old_name")
+
+    recipe = Recipe.query.filter_by(name=name).first()
     if recipe:
         recipe.update(request)
     else:
-        recipe = Recipe(request)
+        recipe = Recipe.query.filter_by(name=old_name).first()
+        if recipe:
+            recipe.update(request)
+        else:
+            recipe = Recipe(request)
         db.session.add(recipe)
     db.session.commit()
     return recipe
-
-
-def delete_recipe(name):
-    recipe = get_recipe(name)
-    db.session.delete(recipe)
-    db.session.commit()
-
-
-def get_recipe(name):
-    return Recipe.query.filter_by(name=name).first()
-
-
-def get_recipe_by_id(id):
-    return Recipe.query.filter_by(id=id).first()
-
-
-def get_recipe_list():
-    """Returns a list of recipe names from the database"""
-    return Recipe.query.order_by(Recipe.name).all()

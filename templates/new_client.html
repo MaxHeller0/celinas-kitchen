@@ -10,22 +10,25 @@
       {% for attribute in attributes %}
         {%if css_class[attribute] == "defaultText" %}
           <div class="form-group">
-            {{attribute|format_key}}: <input class="form-control" type="text" name={{attribute}}><br>
+            {{attribute|format_key}}:
+            <input class="form-control" type="text" name="{{attribute}}"><br>
           </div>
         {% elif css_class[attribute] == "opinionText" %}
           <div class="form-group">
-            {{attribute|format_key}}: <textarea class="opinionText" name={{attribute}}></textarea><br>
+            {{attribute|format_key}}:
+            <textarea class="opinionText" name="{{attribute}}"></textarea><br>
           </div>
         {% elif css_class[attribute] == "noteText" %}
           <div class="form-group">
-            {{attribute|format_key}}: <textarea class="noteText" name={{attribute}}></textarea><br>
+            {{attribute|format_key}}:
+            <textarea class="noteText" name="{{attribute}}"></textarea><br>
           </div>
         {% elif css_class[attribute] == "boolean" %}
           <div class="form-group">
             {{attribute|format_key}}:
-            <input type="radio" name={{attribute}} id="True" value="1">
+            <input type="radio" name="{{attribute}}" id="True" value="1">
             <label for="True">Yes</label>
-            <input type="radio" name={{attribute}} id="False" value="0">
+            <input type="radio" name="{{attribute}}" id="False" value="0">
             <label for="False">No</label>
             <br>
           </div>

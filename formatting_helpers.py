@@ -1,7 +1,8 @@
-from collections import OrderedDict
 import re
+from collections import OrderedDict
 
-from hardcoded_shit import client_attribute_order, client_type_order, input_types
+from hardcoded_shit import (client_attribute_order, client_type_order,
+                            input_types)
 
 
 def title(val):
@@ -17,9 +18,11 @@ def capitalize(val):
 
 
 def format_key(key):
-    format_dict = {"monday_salads": "# of Monday Salads", "thursday_salads": "# of Thursday Salads",
-                  "monday_hotplates": "# of Monday Hotplates", "tuesday_hotplates": "# of Tuesday Hotplates",
-                  "thursday_hotplates": "# of Thursday Hotplates"}
+    format_dict = {"monday_salads": "# of Monday Salads",
+                   "thursday_salads": "# of Thursday Salads",
+                   "monday_hotplates": "# of Monday Hotplates",
+                   "tuesday_hotplates": "# of Tuesday Hotplates",
+                   "thursday_hotplates": "# of Thursday Hotplates"}
     if key in format_dict:
         return format_dict[key]
     else:
@@ -38,11 +41,13 @@ def format_value(val, pretty_phone=False):
             return val.title()
         return val
 
+
 def format_bool(val):
     if val:
         return "Yes"
     else:
         return "No"
+
 
 def view_format_value(val):
     return format_value(val, pretty_phone=True)
@@ -64,9 +69,11 @@ def force_num(string, output="int"):
     except:
         return 0
 
+
 def format_date_time(datetime):
     t = str(datetime)
     return "{}/{} at {}".format(t[5:7], t[8:10], t[11:16])
+
 
 def remove_excess(string, keep=""):
     excess = "'-/()!@#$%^&*<>.?\":;|+=_{}[]~"
@@ -82,13 +89,15 @@ def remove_excess(string, keep=""):
 def sort_dict(unsorted_dict, dict_name):
     """
     Credit goes to John La Rooy of stackoverflow:
-    https://stackoverflow.com/questions/12031482/custom-sorting-python-dictionary
+    stackoverflow.com/questions/12031482/custom-sorting-python-dictionary
     returns a sorted dictionary
     """
     if dict_name == "client_attributes":
-        return OrderedDict(sorted(unsorted_dict.items(), key=lambda i: client_attribute_order.index(i[0])))
+        return OrderedDict(sorted(unsorted_dict.items(),
+                                  key=lambda i: client_attribute_order.index(i[0])))
     elif dict_name == "client_types":
-        return OrderedDict(sorted(unsorted_dict.items(), key=lambda i: client_type_order.index(i[0])))
+        return OrderedDict(sorted(unsorted_dict.items(),
+                                  key=lambda i: client_type_order.index(i[0])))
 
 
 def invert_dict(dictionary):
