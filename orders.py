@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import text
 
@@ -49,7 +49,7 @@ class Order(db.Model):
 
     def __init__(self, name):
         self.client_id = BaseClient.query.filter_by(name=name).first().id
-        self.date = datetime.datetime.now()
+        self.date = datetime.now()
         db.session.add(self)
         db.session.commit()
 
@@ -74,3 +74,24 @@ class Order(db.Model):
         for row in orders:
             total += row.count * row.price
         return total
+
+
+def filter_orders(request):
+    filter_cat = request.form.get("filter_cat")
+    filter_query = request.form.get("filter_query")
+    time = request.form.get("time")
+    now = datetime.now().date()
+    time_dict = {"past_day": now, "past_week": now - timedelta(weeks=1),
+                 "past_month": now - timedelta(weeks=4), "all_time": None}
+    past_time = time_dict[time]
+    try:
+        if filter_cat == "client":
+            client_id = BaseClient.query.filter_by(name=filter_query).first().id
+            orders = Order.query.filter_by(client_id=client_id).order_by(Order.date.desc())
+    except:
+        orders = Order.query
+    if past_time:
+        orders = orders.filter(Order.date > past_time)
+    orders = orders.order_by(Order.date.desc()).all()
+
+    return orders

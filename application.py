@@ -10,7 +10,7 @@ from formatting_helpers import (capitalize, css_class, format_bool,
                                 title, usd, view_format_value)
 from hardcoded_shit import client_attributes, client_types, db_config
 from helpers import apology, login_required, root_login_required
-from orders import Order, OrderItem
+from orders import Order, OrderItem, filter_orders
 from recipes import Recipe, new_recipe
 
 # configure application
@@ -204,7 +204,7 @@ def new_order():
 @login_required
 def order(order_id=None):
     if order_id:
-        order = Order.query.filter_by(id=order_id).first()
+        order = Order.query.get(order_id)
     else:
         try:
             name = request.form.get("name")
@@ -214,7 +214,7 @@ def order(order_id=None):
     if request.method == "POST":
         to_delete = request.form.get("delete")
         if to_delete:
-            OrderItem.query.filter_by(id=to_delete).first().delete()
+            OrderItem.query.get(to_delete).delete()
         else:
             dish_name = request.form.get("name")
             dish = Recipe.query.filter_by(name=dish_name).first()
@@ -235,7 +235,7 @@ def order(order_id=None):
 @login_required
 def delete_order(order_id=None):
     if order_id:
-        order = Order.query.filter_by(id=order_id).first()
+        order = Order.query.get(order_id)
         order.delete()
         return redirect(url_for("view_orders"))
     return redirect(url_for("index"))
@@ -247,24 +247,7 @@ def view_orders():
     if request.method == "GET":
         orders = Order.query.order_by(Order.date.desc()).all()
     else:
-        filter_by = request.form.get("filter_by")
-        filter_query = request.form.get("filter_query")
-        time = request.form.get("time")
-        now = datetime.now().date()
-        time_dict = {"past_day": now, "past_week": now - timedelta(weeks=1),
-                     "past_month": now - timedelta(weeks=4), "all_time": None}
-        past_time = time_dict[time]
-        try:
-            if filter_by == "client":
-                client_id = BaseClient.query.filter_by(
-                    name=filter_query).first().id
-                orders = Order.query.filter_by(
-                    client_id=client_id).order_by(Order.date.desc())
-        except:
-            orders = Order.query
-        if past_time:
-            orders = orders.filter(Order.date > past_time)
-        orders = orders.order_by(Order.date.desc()).all()
+        orders = filter_orders(request)
 
     formatted_orders = []
     for order in orders:
@@ -273,6 +256,7 @@ def view_orders():
         date = format_date_time(order.date)
         order_id = order.id
         formatted_orders.append([date, client_name, total, order_id])
+
     return render_template("view_orders.html", orders=formatted_orders)
 
 
