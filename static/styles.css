@@ -91,6 +91,12 @@ main td, th {
   margin: 5px;
 }
 
+
+.image_table{
+    border-bottom: 0px;
+}
+
+
 #allergies {
   font-size: 24px;
   text-align: left;
