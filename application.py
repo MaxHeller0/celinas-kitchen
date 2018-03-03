@@ -49,7 +49,7 @@ if app.config["DEBUG"]:
 @app.context_processor
 def inject_navbar_data():
     return dict(client_types=client_types,
-                client_nameList=BaseClient.query.order_by(
+                client_name_list=BaseClient.query.order_by(
                     BaseClient.name).all(),
                 recipes=Recipe.query.order_by(Recipe.name).all())
 
