@@ -85,9 +85,9 @@ def recipe(name=None):
                     recipe = new_recipe(request)
                 return redirect("/recipe/{name}".format(name=name))
 
-            elif source == "delete_button":
-                Recipe.delete(name)
-                return redirect(url_for("index"))
+            # elif source == "delete_button":
+            #     Recipe.delete(name)
+            #     return redirect(url_for("index"))
 
             else:
                 # source must have been an edit button
