@@ -88,8 +88,7 @@ def recipe(name=None):
             #     Recipe.delete(name)
             #     return redirect(url_for("index"))
 
-            else:
-                # source must have been an edit button
+            elif source == "edit_button":
                 return render_template("edit_recipe.html", recipe=recipe)
 
         except:
@@ -97,21 +96,20 @@ def recipe(name=None):
     else:
         return render_template("edit_recipe.html", recipe=None)
 
-
-@app.route("/new_client", methods=["GET", "POST"])
+@app.route("/new_client/", methods=["GET", "POST"])
+@app.route("/new_client/<client_type>", methods=["GET"])
 @login_required
-def new_client():
+def new_client(client_type=None):
     """
     Renders client creation page
     pass in list of required attributes for the client type from the client_attributes dictionary
     """
-    # block people from trying to GET new_client
-    if request.method == "GET":
+    if request.method == "POST":
+        client_type = request.form.get("client_type")
+        return redirect(url_for("new_client") + client_type)
+    if not client_type:
         return redirect(url_for("index"))
-    global client_type
-    client_type = int(request.form.get("client_type"))
-    if client_type in [None, ""]:
-        return redirect("/")
+    client_type = int(client_type)
     return render_template("new_client.html", client_type=client_type, attributes=client_attributes[client_type], css_class=css_class)
 
 
@@ -123,28 +121,23 @@ def client(name=None):
     Renders a page to edit or view client details
     pass in existing details so that users can build off of them
     """
-    # check how the user got to the page
     if request.method == "GET":
         source = "GET"
-    else:
-        try:
-            name = request.form.get("name")
-            assert len(name) > 0
-        except:
-            return apology('Client must have a name', '')
-        source = request.form.get("source")
-
-    if source in ["view_button", "GET"]:
         destination = "view_client.html"
         message = "Client details"
+    else:
+        name = request.form.get("name")
+        source = request.form.get("source")
+
+    if source == "view_button":
+        return redirect(url_for("client") + name)
 
     elif source in ["new_client", "edit_client"]:
         destination = "view_client.html"
         message = ''
 
         if source == "new_client":
-            # get client_type defined earlier in /new_client
-            global client_type
+            client_type = int(request.form.get("client_type"))
             message = "Client added to the database"
 
         elif source == "edit_client":
@@ -155,34 +148,34 @@ def client(name=None):
 
         # add client to db using appropriate function
         init_dict[client_type](request)
+        return redirect(url_for("client") + name)
 
     elif source == "delete_button":
+        # delete client's orders
+        client_id = BaseClient.query.filter_by(name=name).first().id
+        orders = Order.query.filter_by(client_id=client_id).all()
+        for order in orders:
+            order.delete()
+
         delete_client(name)
         return redirect(url_for("index"))
 
-    else:
-        # source must have been an edit button
+    elif source == "edit_button":
         message = ''
         destination = "edit_client.html"
 
     client_data = get_client(name)
     if client_data is None:
-        return apology("Could not retrieve client with name {}".format(name), '')
+        return apology("Could not retrieve client with name {}".format(name))
 
-    # return either edit_client or view_client passing in all the clients data
     return render_template(destination, client_data=client_data, message=message, css_class=css_class)
 
 
 @app.route("/salad_service_card/<name>", methods=["GET"])
 @login_required
 def salad_service_card(name=None):
-    try:
-        # attempt to get client
-        client_data = get_client(name)
-
-        # make sure they're a salad service client
-        assert client_data["client_type"] == 1
-    except:
+    client_data = get_client(name)
+    if not client_data["client_type"] == 1:
         return redirect(url_for('index'))
     return render_template("salad_service_card.html", client_data=client_data)
 
@@ -219,10 +212,10 @@ def order(order_id=None):
                     price = dish.price
                 order_item = OrderItem(order_id, quantity, dish.id, price)
         return redirect(url_for("order") + str(order.id))
-    # try:
-    return render_template("order.html", id=order_id, order_details=order.list())
-# except:
-    # return redirect(url_for("index"))
+    try:
+        return render_template("order.html", id=order_id, order_details=order.list())
+    except:
+        return redirect(url_for("index"))
 
 
 @app.route("/order/<order_id>/delete", methods=["GET"])
