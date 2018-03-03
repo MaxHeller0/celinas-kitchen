@@ -75,15 +75,13 @@ def format_date_time(datetime):
     return "{}/{} at {}".format(t[5:7], t[8:10], t[11:16])
 
 
-def remove_excess(string, keep=""):
-    excess = "'-/()!@#$%^&*<>.?\":;|+=_{}[]~"
+def format_phone(string):
+    excess = " '-/()!@#$%^&*<>.?\":;|+=_{}[]~"
     result = ""
-    for c in keep:
-        excess.replace(c, "")
     for c in string:
         if c not in excess:
             result += c
-    return result.strip()
+    return result
 
 
 def sort_dict(unsorted_dict, dict_name):

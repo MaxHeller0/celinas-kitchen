@@ -2,7 +2,7 @@ from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy import text
 
 from db_config import db
-from formatting_helpers import force_num, remove_excess, sort_dict
+from formatting_helpers import force_num, format_phone, sort_dict
 from hardcoded_shit import client_types
 
 
@@ -50,7 +50,7 @@ class BaseClient(db.Model):
 
     def __init__(self, request, client_type=0):
         self.name = request.form.get("name")
-        self.phone = remove_excess(request.form.get("phone"))
+        self.phone = format_phone(request.form.get("phone"))
         self.client_type = client_type
         self.address = request.form.get("address").lower()
         self.delivery = force_num(request.form.get("delivery"))

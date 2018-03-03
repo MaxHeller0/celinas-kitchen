@@ -4,7 +4,6 @@ from flask import Flask, redirect, render_template, request, session, url_for
 
 from clients import Admin, BaseClient, delete_client, get_client, init_dict
 from db_config import db
-from error_handling import client_input_check
 from formatting_helpers import (capitalize, css_class, format_bool,
                                 format_date_time, format_key, format_value,
                                 title, usd, view_format_value)
@@ -153,11 +152,6 @@ def client(name=None):
             client_type = BaseClient.query.filter_by(
                 name=old_name).first().client_type
             message = "Client details updated"
-
-        # check for errors
-        input_check_results = client_input_check(request, client_type, source)
-        if input_check_results[0]:
-            return apology(input_check_results[1][0], input_check_results[1][1])
 
         # add client to db using appropriate function
         init_dict[client_type](request)
