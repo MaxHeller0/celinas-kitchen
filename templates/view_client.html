@@ -34,5 +34,11 @@
     </div>
     <input type="hidden" name="name" value="{{client_data['name']}}">
   </form>
-
+  {% if client_data['client_type'] == 1 %}
+    <form action="{{ url_for('salad_service_card') }}" method="POST">
+      <div class="form-group">
+        <button name="name" value="{{ client_data['name'] }}" class="btn btn-default" type="submit"> View salad service card </button>
+      </div>
+    </form>
+  {% endif %}
 {% endblock %}

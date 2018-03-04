@@ -171,9 +171,13 @@ def client(name=None):
     return render_template(destination, client_data=client_data, message=message, css_class=css_class)
 
 
+@app.route("/salad_service_card/", methods=["POST"])
 @app.route("/salad_service_card/<name>", methods=["GET"])
 @login_required
 def salad_service_card(name=None):
+    if request.method == "POST":
+        name = request.form.get("name")
+        return redirect(url_for("salad_service_card") + name)
     client_data = get_client(name)
     if not client_data["client_type"] == 1:
         return redirect(url_for('index'))
