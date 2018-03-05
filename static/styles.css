@@ -33,10 +33,6 @@ main td, th {
   color: #ea433b;
 }
 
-.dropdown-menu {
-  min-width: 0px;
-}
-
 .opinion_text {
   display: block;
   width: 25vw;
@@ -86,16 +82,14 @@ main td, th {
   font-weight: normal;
 }
 
-.sideBySide{
+.side_by_side {
   float: left;
   margin: 5px;
 }
 
-
-.image_table{
-    border-bottom: 0px;
+.image_table {
+  border-bottom: 0px;
 }
-
 
 #allergies {
   font-size: 24px;
@@ -104,11 +98,9 @@ main td, th {
   font-weight: bold;
 }
 
-
 .overflow {
   overflow: auto;
 }
-
 
 input:invalid {
   border: 2px solid red;

@@ -7,7 +7,7 @@
 {% block main %}
   <form class="form-inline" action="{{url_for('view_orders')}}" method="POST">
     <div class="form-group overflow">
-      <div class="input-group sideBySide">
+      <div class="input-group side_by_side">
         <div class="input-group-addon">Filter by</div>
         <div class="input-group">
           <select class="form-control" name="filter_cat">
@@ -16,27 +16,29 @@
           </select>
         </div>
       </div>
-      <div class="input-group sideBySide">
+      <div class="input-group side_by_side">
         <div class="input-group-addon">Query:</div>
         <div class="input-group">
           <input type="text" name="filter_query" class="form-control">
         </div>
       </div>
-      <div class="input-group sideBySide">
+      <div class="input-group side_by_side">
         <div class="input-group-addon">From</div>
-        <select class="form-control" name="time">
-          <option selected="selected" value="past_day">Today</option>
-          <option value="past_week">Past Week</option>
-          <option value="past_month">Past Month</option>
-          <option value="all_time">All Time</option>
-        </select>
+        <div class="input-group">
+          <select class="form-control" name="time">
+            <option selected="selected" value="past_day">Today</option>
+            <option value="past_week">Past Week</option>
+            <option value="past_month">Past Month</option>
+            <option value="all_time">All Time</option>
+          </select>
+        </div>
       </div>
-      <div class="input-group sideBySide">
+      <div class="input-group side_by_side">
         <button class="btn btn-default">Filter</button>
       </div>
     </div>
   </form>
-  <table class="table" id="orderTable">
+  <table>
     <thread>
       <tr>
         <th scope="col">Date</th>
