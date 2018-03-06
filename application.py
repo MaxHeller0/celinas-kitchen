@@ -62,126 +62,108 @@ def index():
 
 
 @app.route("/recipe/", methods=["GET", "POST"])
-@app.route("/recipe/<name>", methods=["GET"])
 @login_required
 def recipe(name=None):
-    if request.method == "POST" or name:
-        if name is None:
-            name = request.form.get("name")
-
-        try:
-            recipe = Recipe.query.filter_by(name=name).first()
-            source = request.form.get("source")
-
-            if request.method == "GET":
-                return render_template("view_recipe.html", recipe=recipe)
-
-            elif source in ["save_button", "view_button"]:
-                if source == "save_button":
-                    if not name:
-                        # trying to create new recipe without a name
-                        return apology("Recipes must have a name")
-                    recipe = new_recipe(request)
-                return redirect("/recipe/{name}".format(name=name))
-
-            # elif source == "delete_button":
-            #     Recipe.delete(name)
-            #     return redirect(url_for("index"))
-
-            elif source == "edit_button":
-                return render_template("edit_recipe.html", recipe=recipe)
-
-        except:
-            return redirect(url_for("index"))
+    dest_dict = {"view": "view_recipe.html", "edit": "edit_recipe.html"}
+    destination = dest_dict[request.args.get('dest', default='view')]
+    if request.method == "GET":
+        name = request.args.get("name")
+        if not name:
+            return render_template("edit_recipe.html", recipe=None)
     else:
-        return render_template("edit_recipe.html", recipe=None)
+        name = request.form.get("name")
+        source = request.form.get("source")
+        if source == "edit_button":
+            return redirect(url_for('recipe', name=name, dest="edit"))
+        elif source == "save_button" and name:
+            recipe = new_recipe(request)
+        return redirect(url_for('recipe', name=name))
+
+    recipe = Recipe.query.filter_by(name=name).first()
+    if recipe:
+        return render_template(destination, recipe=recipe)
+    else:
+        return redirect(url_for('index'))
+
 
 @app.route("/new_client/", methods=["GET", "POST"])
-@app.route("/new_client/<client_type>", methods=["GET"])
 @login_required
-def new_client(client_type=None):
+def new_client():
     """
     Renders client creation page
     pass in list of required attributes for the client type from the client_attributes dictionary
     """
     if request.method == "POST":
         client_type = request.form.get("client_type")
-        return redirect(url_for("new_client") + client_type)
-    if not client_type:
+        return redirect(url_for("new_client", client_type=client_type))
+    else:
+        client_type = request.args.get("client_type", type=int)
+    if client_type not in client_types.values():
         return redirect(url_for("index"))
-    client_type = int(client_type)
     return render_template("new_client.html", client_type=client_type, attributes=client_attributes[client_type], css_class=css_class)
 
 
 @app.route("/client/", methods=["GET", "POST"])
-@app.route("/client/<name>", methods=["GET"])
 @login_required
 def client(name=None):
     """
     Renders a page to edit or view client details
     pass in existing details so that users can build off of them
     """
+    dest_dict = {"view": "view_client.html", "edit": "edit_client.html"}
+    destination = dest_dict[request.args.get('dest', default='view')]
     if request.method == "GET":
-        source = "GET"
-        destination = "view_client.html"
-        message = "Client details"
+        name = request.args.get('name')
     else:
         name = request.form.get("name")
         source = request.form.get("source")
 
-    if source == "view_button":
-        return redirect(url_for("client") + name)
+        if destination == "edit_client.html" or source == "edit_button":
+            return redirect(url_for('client', name=name, dest="edit"))
+        elif source == "view_button":
+            return redirect(url_for("client", name=name))
+        elif source == "delete_button":
+            # delete client's orders
+            client_id = BaseClient.query.filter_by(name=name).first().id
+            orders = Order.query.filter_by(client_id=client_id).all()
+            for order in orders:
+                order.delete()
 
-    elif source in ["new_client", "edit_client"]:
-        destination = "view_client.html"
-        message = ''
+            delete_client(name)
+            return redirect(url_for("index"))
+        else:
+            if source == "new_client":
+                client_type = int(request.form.get("client_type"))
 
-        if source == "new_client":
-            client_type = int(request.form.get("client_type"))
-            message = "Client added to the database"
+            elif source == "edit_client":
+                old_name = request.form.get("old_name")
+                client_type = BaseClient.query.filter_by(
+                    name=old_name).first().client_type
 
-        elif source == "edit_client":
-            old_name = request.form.get("old_name")
-            client_type = BaseClient.query.filter_by(
-                name=old_name).first().client_type
-            message = "Client details updated"
-
-        # add client to db using appropriate function
-        init_dict[client_type](request)
-        return redirect(url_for("client") + name)
-
-    elif source == "delete_button":
-        # delete client's orders
-        client_id = BaseClient.query.filter_by(name=name).first().id
-        orders = Order.query.filter_by(client_id=client_id).all()
-        for order in orders:
-            order.delete()
-
-        delete_client(name)
-        return redirect(url_for("index"))
-
-    elif source == "edit_button":
-        message = ''
-        destination = "edit_client.html"
+            # add client to db using appropriate function
+            init_dict[client_type](request)
+            return redirect(url_for("client", name=name))
 
     client_data = get_client(name)
     if client_data is None:
         return apology("Could not retrieve client with name {}".format(name))
 
-    return render_template(destination, client_data=client_data, message=message, css_class=css_class)
+    return render_template(destination, client_data=client_data, css_class=css_class)
 
 
-@app.route("/salad_service_card/", methods=["POST"])
-@app.route("/salad_service_card/<name>", methods=["GET"])
+@app.route("/salad_service_card/", methods=["GET", "POST"])
 @login_required
 def salad_service_card(name=None):
     if request.method == "POST":
         name = request.form.get("name")
-        return redirect(url_for("salad_service_card") + name)
-    client_data = get_client(name)
-    if not client_data["client_type"] == 1:
-        return redirect(url_for('index'))
-    return render_template("salad_service_card.html", client_data=client_data)
+        return redirect(url_for("salad_service_card", name=name))
+    else:
+        name = request.args.get("name")
+        client_data = get_client(name)
+        if client_data["client_type"] == 1:
+            return render_template("salad_service_card.html", client_data=client_data)
+        else:
+            return redirect(url_for('index'))
 
 
 @app.route("/new_order", methods=["GET"])
@@ -215,7 +197,7 @@ def order(order_id=None):
                 if not price:
                     price = dish.price
                 order_item = OrderItem(order_id, quantity, dish.id, price)
-        return redirect(url_for("order") + str(order.id))
+        return redirect(url_for('order', order_id=order.id))
     try:
         return render_template("order.html", id=order_id, order_details=order.list())
     except:
@@ -235,10 +217,13 @@ def delete_order(order_id=None):
 @app.route("/orders/", methods=["GET", "POST"])
 @login_required
 def view_orders():
-    if request.method == "GET":
-        orders = Order.query.order_by(Order.date.desc()).all()
-    else:
-        orders = filter_orders(request)
+    if request.method == "POST":
+        filter_cat = request.form.get("filter_cat")
+        filter_query = request.form.get("filter_query")
+        time = request.form.get("time")
+        return redirect(url_for('view_orders', filter=filter_cat, query=filter_query, time=time))
+
+    orders = filter_orders(request)
 
     formatted_orders = []
     for order in orders:

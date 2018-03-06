@@ -77,9 +77,9 @@ class Order(db.Model):
 
 
 def filter_orders(request):
-    filter_cat = request.form.get("filter_cat")
-    filter_query = request.form.get("filter_query")
-    time = request.form.get("time")
+    filter_cat = request.args.get('filter', default="client")
+    filter_query = request.args.get('query', default="")
+    time = request.args.get('time', default="all_time")
     now = datetime.now().date()
     time_dict = {"past_day": now, "past_week": now - timedelta(weeks=1),
                  "past_month": now - timedelta(weeks=4), "all_time": None}
