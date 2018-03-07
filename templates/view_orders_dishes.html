@@ -60,7 +60,7 @@
     <tbody>
       {% for order in orders[0] %}
       {% for item in order[1] %}
-      {% if not query or item[1] == query %}
+      {% if not query or item[1].lower() == query.lower() %}
       <tr>
         <td>{{order[0][1][1]}}</td>
         <td>{{order[0][1][0]}}</td>
