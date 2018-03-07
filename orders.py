@@ -56,7 +56,10 @@ class Order(db.Model):
     def contains(self, dish_id):
         order_items = OrderItem.query.filter_by(order_id=self.id)
         matching_order_items = order_items.filter_by(dish_id=dish_id).all()
-        return len(matching_order_items)
+        total = 0
+        for item in matching_order_items:
+            total += item.count
+        return total
 
     def list(self):
         orders = OrderItem.query.filter_by(order_id=self.id).all()
