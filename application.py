@@ -217,23 +217,30 @@ def delete_order(order_id=None):
 @app.route("/orders/", methods=["GET", "POST"])
 @login_required
 def view_orders():
+    dest_dict = {"client": "view_orders.html", "dish": "view_orders_dishes.html"}
+    destination = dest_dict[request.args.get('filter', default='client')]
+    filter_query = request.args.get('query', default=request.form.get("filter_query"))
     if request.method == "POST":
         filter_cat = request.form.get("filter_cat")
-        filter_query = request.form.get("filter_query")
         time = request.form.get("time")
         return redirect(url_for('view_orders', filter=filter_cat, query=filter_query, time=time))
 
     orders = filter_orders(request)
 
-    formatted_orders = []
-    for order in orders:
-        client_name = BaseClient.query.get(order.client_id).name
-        total = usd(order.total())
-        date = format_date_time(order.date)
-        order_id = order.id
-        formatted_orders.append([date, client_name, total, order_id])
+    if destination == "view_orders.html":
+        formatted_orders = []
+        for order in orders:
+            client_name = BaseClient.query.get(order.client_id).name
+            total = usd(order.total())
+            date = format_date_time(order.date)
+            order_id = order.id
+            formatted_orders.append([date, client_name, total, order_id])
+    elif destination == "view_orders_dishes.html":
+        formatted_orders = [[], orders[1]]
+        for order in orders[0]:
+            formatted_orders[0].append(order.list())
 
-    return render_template("view_orders.html", orders=formatted_orders)
+    return render_template(destination, orders=formatted_orders, query=filter_query)
 
 
 @app.route("/login", methods=["GET", "POST"])

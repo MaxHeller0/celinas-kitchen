@@ -53,6 +53,11 @@ class Order(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def contains(self, dish_id):
+        order_items = OrderItem.query.filter_by(order_id=self.id)
+        matching_order_items = order_items.filter_by(dish_id=dish_id).all()
+        return len(matching_order_items)
+
     def list(self):
         orders = OrderItem.query.filter_by(order_id=self.id).all()
         t = [[], [], []]
@@ -61,6 +66,8 @@ class Order(db.Model):
         else:
             t[0].append("Order Details: {}, {}".format(BaseClient.query.get(
                 self.client_id).name, format_date_time(self.date)))
+            t[0].append([BaseClient.query.get(self.client_id).name,
+                         format_date_time(self.date)])
             total = 0
             for row in orders:
                 t[1].append(row.list())
@@ -78,20 +85,31 @@ class Order(db.Model):
 
 def filter_orders(request):
     filter_cat = request.args.get('filter', default="client")
-    filter_query = request.args.get('query', default="")
+    query = request.args.get('query', default="")
     time = request.args.get('time', default="all_time")
     now = datetime.now().date()
     time_dict = {"past_day": now, "past_week": now - timedelta(weeks=1),
                  "past_month": now - timedelta(weeks=4), "all_time": None}
     past_time = time_dict[time]
-    try:
-        if filter_cat == "client":
-            client_id = BaseClient.query.filter_by(name=filter_query).first().id
-            orders = Order.query.filter_by(client_id=client_id).order_by(Order.date.desc())
-    except:
-        orders = Order.query
+
+    orders = Order.query.order_by(Order.date.desc())
     if past_time:
         orders = orders.filter(Order.date > past_time)
-    orders = orders.order_by(Order.date.desc()).all()
 
-    return orders
+    if filter_cat == "client":
+        client = BaseClient.query.filter_by(name=query).first()
+        if client:
+            orders = orders.filter_by(client_id=client.id)
+        return orders.all()
+    elif filter_cat == "dish":
+        if query:
+            dish = Recipe.query.filter_by(name=query).first()
+            if dish:
+                filtered_orders = [[], 0]
+                for order in orders:
+                    num_dishes = order.contains(dish.id)
+                    if num_dishes > 0:
+                        filtered_orders[0].append(order)
+                        filtered_orders[1] += num_dishes
+                return filtered_orders
+        return [orders.all(), 0]
