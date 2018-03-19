@@ -58,13 +58,13 @@
         </tr>
       </thread>
     <tbody>
-      {% for order in orders[0] %}
-      {% for item in order[1] %}
-      {% if not query or item[1].lower() == query.lower() %}
+      {% for order in orders['orders'] %}
+      {% for item in order['items'] %}
+      {% if not query or item['name'].lower() == query.lower() %}
       <tr>
-        <td>{{order[0][1][1]}}</td>
-        <td>{{order[0][1][0]}}</td>
-        <td>{{item[0]}}</td>
+        <td>{{order['date']}}</td>
+        <td>{{order['name']}}</td>
+        <td>{{item['count']}}</td>
       </tr>
       {% endif %}
       {% endfor %}
@@ -73,7 +73,7 @@
       <tr>
         <td></td>
         <td>Total</td>
-        <td>{{orders[1]}}</td>
+        <td>{{orders['total']}}</td>
       </tr>
       {% endif %}
     </tbody>

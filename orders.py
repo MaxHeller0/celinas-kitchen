@@ -24,10 +24,10 @@ class OrderItem(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def list(self):
+    def details(self):
         dish = Recipe.query.get(self.dish_id)
-        return [self.count, dish.name, usd(self.price),
-                usd(self.price * self.count), self.id]
+        return {'count': self.count, 'name': dish.name, 'unit_price': usd(self.price),
+                'price': usd(self.price * self.count), 'id': self.id}
 
     def delete(self):
         db.session.delete(self)
@@ -40,17 +40,17 @@ class Order(db.Model):
     client_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime(timezone=True))
 
+    def __init__(self, name):
+        self.client_id = BaseClient.query.filter_by(name=name).first().id
+        self.date = datetime.now()
+        db.session.add(self)
+        db.session.commit()
+
     def delete(self):
         order_items = OrderItem.query.filter_by(order_id=self.id).all()
         for item in order_items:
             db.session.delete(item)
         db.session.delete(self)
-        db.session.commit()
-
-    def __init__(self, name):
-        self.client_id = BaseClient.query.filter_by(name=name).first().id
-        self.date = datetime.now()
-        db.session.add(self)
         db.session.commit()
 
     def contains(self, dish_id):
@@ -61,21 +61,22 @@ class Order(db.Model):
             total += item.count
         return total
 
-    def list(self):
-        orders = OrderItem.query.filter_by(order_id=self.id).all()
-        t = [[], [], []]
-        if len(orders) == 0:
-            t[0].append("Add the first item below")
+    def details(self):
+        items = OrderItem.query.filter_by(order_id=self.id).all()
+        t = {}
+        if len(items) == 0:
+            t['description'] = "Add the first item below"
         else:
-            t[0].append("Order Details: {}, {}".format(BaseClient.query.get(
-                self.client_id).name, format_date_time(self.date)))
-            t[0].append([BaseClient.query.get(self.client_id).name,
-                         format_date_time(self.date)])
+            t['description'] = "Order Details: {}, {}".format(BaseClient.query.get(
+                self.client_id).name, format_date_time(self.date))
+            t['name'] = BaseClient.query.get(self.client_id).name
+            t['date'] = format_date_time(self.date)
             total = 0
-            for row in orders:
-                t[1].append(row.list())
-                total += row.count * row.price
-            t[2].append(usd(total))
+            t['items'] = []
+            for item in items:
+                t['items'].append(item.details())
+                total += item.count * item.price
+            t['total'] = total
         return t
 
     def total(self):
@@ -84,6 +85,9 @@ class Order(db.Model):
         for row in orders:
             total += row.count * row.price
         return total
+
+    def total_with_tax(self):
+        return self.total() * 1.08
 
 
 def filter_orders(request):
@@ -108,11 +112,11 @@ def filter_orders(request):
         if query:
             dish = Recipe.query.filter_by(name=query).first()
             if dish:
-                filtered_orders = [[], 0]
+                filtered_orders = {'orders': [], 'total': 0}
                 for order in orders:
                     num_dishes = order.contains(dish.id)
                     if num_dishes > 0:
-                        filtered_orders[0].append(order)
-                        filtered_orders[1] += num_dishes
+                        filtered_orders['orders'].append(order)
+                        filtered_orders['total'] += num_dishes
                 return filtered_orders
-        return [orders.all(), 0]
+        return {'orders': orders.all(), 'total': 0}

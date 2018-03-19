@@ -6,7 +6,7 @@
 
 {% block main %}
   <h1>
-    {{ order_details[0][0] }}
+    {{order['description']}}
   </h1>
   <table>
      <thread>
@@ -19,14 +19,14 @@
         </tr>
       </thread>
     <tbody>
-      {% for row in order_details[1] %}
+      {% for item in order['items'] %}
       <tr>
-        <td>{{row[0]}}</td>
-        <td>{{row[1]}}</td>
-        <td>{{row[2]}}</td>
-        <td>{{row[3]}}</td>
+        <td>{{item['count']}}</td>
+        <td>{{item['name']}}</td>
+        <td>{{item['unit_price']}}</td>
+        <td>{{item['price']}}</td>
         <form action="{{url_for('order', order_id=id)}}" method="POST">
-          <td><button class="btn btn-default" name="delete" value="{{row[4]}}" type="submit">Delete</button></td>
+          <td><button class="btn btn-default" name="delete" value="{{item['id']}}" type="submit">Delete</button></td>
         </form>
       </tr>
       {% endfor %}
@@ -51,8 +51,22 @@
       <tr>
         <td></td>
         <td></td>
+        <td>Subtotal</td>
+        <td>{{order['total']|usd}}</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td>Tax</td>
+        <td>{{(order['total'] * 0.08)|usd}}</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
         <th scope="row">Total</th>
-        <td>{{ order_details[2][0] }}</td>
+        <td>{{(order['total'] * 1.08)|usd}}</td>
         <td></td>
       </tr>
     </tbody>

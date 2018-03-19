@@ -62,15 +62,15 @@
     <tbody>
       {% for order in orders %}
         <tr>
-          <td>{{order[0]}}</td>
-          <td>{{order[1]}}</td>
-          <td>{{order[2]}}</td>
-          <form action="{{url_for('order', order_id=order[3])}}">
+          <td>{{order['date']}}</td>
+          <td>{{order['name']}}</td>
+          <td>{{order['total']}}</td>
+          <form action="{{url_for('order', order_id=order['id'])}}">
             <td>
               <button class="btn btn-default btn-sm" type="submit">View</button>
             </td>
           </form>
-          <form action="{{url_for('delete_order', order_id=order[3])}}">
+          <form action="{{url_for('delete_order', order_id=order['id'])}}">
             <td>
               <button class="btn btn-default btn-sm" type="submit">Delete</button>
             </td>
