@@ -20,9 +20,9 @@
         <div class="input-group-addon">Query:</div>
         <div class="input-group">
           {% if query %}
-          <input type="text" list="recipes" name="filter_query" class="form-control" value="{{query}}" placeholder="Dish Name">
+          <input type="text" list="recipes" name="filter_query" class="form-control" value="{{query}}" placeholder="Dish Name" required="required">
           {% else %}
-          <input type="text" list="recipes" name="filter_query" class="form-control" placeholder="Dish Name">
+          <input type="text" list="recipes" name="filter_query" class="form-control" placeholder="Dish Name" required="required">
           {% endif %}
           <datalist name="recipes" id="recipes">
             {% if recipes %}
@@ -72,8 +72,8 @@
       {% if query %}
       <tr>
         <td></td>
-        <td>Total</td>
-        <td>{{orders['total']}}</td>
+        <th scope="row">Total</th>
+        <th scope="row">{{orders['total']}}</th>
       </tr>
       {% endif %}
     </tbody>

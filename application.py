@@ -189,11 +189,15 @@ def order(order_id=None):
         if to_delete:
             OrderItem.query.get(to_delete).delete()
         else:
+            paid = request.form.get("paid")
+            if paid:
+                order.update_paid(paid)
+
             dish_name = request.form.get("name")
             dish = Recipe.query.filter_by(name=dish_name).first()
-            quantity = request.form.get("quantity")
-            price = request.form.get("price")
             if dish:
+                quantity = request.form.get("quantity")
+                price = request.form.get("price")
                 if not price:
                     price = dish.price
                 order_item = OrderItem(order_id, quantity, dish.id, price)
@@ -231,12 +235,7 @@ def view_orders():
     if destination == "view_orders.html":
         formatted_orders = []
         for order in orders:
-            client_name = BaseClient.query.get(order.client_id).name
-            total = usd(order.total_with_tax())
-            date = format_date_time(order.date)
-            order_id = order.id
-            formatted_orders.append({"date": date, "id": order_id,
-                                     "name": client_name, "total": total})
+            formatted_orders.append(order.details())
     elif destination == "view_orders_dishes.html":
         formatted_orders = {'orders': [], 'total': orders['total']}
         for order in orders['orders']:

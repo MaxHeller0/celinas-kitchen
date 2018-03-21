@@ -55,6 +55,7 @@
         <th scope="col">Date</th>
         <th scope="col">Client</th>
         <th scope="col">Total</th>
+        <th scope="col">Owed</th>
         <th scope="col"></th>
         <th scope="col"></th>
       </tr>
@@ -64,7 +65,8 @@
         <tr>
           <td>{{order['date']}}</td>
           <td>{{order['name']}}</td>
-          <td>{{order['total']}}</td>
+          <td>{{order['total']|usd}}</td>
+          <td>{{order['owed']|usd}}</td>
           <form action="{{url_for('order', order_id=order['id'])}}">
             <td>
               <button class="btn btn-default btn-sm" type="submit">View</button>

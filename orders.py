@@ -39,6 +39,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     client_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime(timezone=True))
+    paid = db.Column(db.Float, default=0)
 
     def __init__(self, name):
         self.client_id = BaseClient.query.filter_by(name=name).first().id
@@ -61,33 +62,33 @@ class Order(db.Model):
             total += item.count
         return total
 
-    def details(self):
+    def details(self, tax=.08):
         items = OrderItem.query.filter_by(order_id=self.id).all()
         t = {}
+        t['id'] = self.id
+        t['name'] = BaseClient.query.get(self.client_id).name
+        t['date'] = format_date_time(self.date)
+        t['subtotal'] = 0
+        t['items'] = []
+
         if len(items) == 0:
             t['description'] = "Add the first item below"
         else:
             t['description'] = "Order Details: {}, {}".format(BaseClient.query.get(
                 self.client_id).name, format_date_time(self.date))
-            t['name'] = BaseClient.query.get(self.client_id).name
-            t['date'] = format_date_time(self.date)
-            total = 0
-            t['items'] = []
             for item in items:
                 t['items'].append(item.details())
-                total += item.count * item.price
-            t['total'] = total
+                t['subtotal'] += item.count * item.price
+
+        t['tax'] = t['subtotal'] * tax
+        t['total'] = t['subtotal'] + t['tax']
+        t['paid'] = self.paid
+        t['owed'] = t['total'] - t['paid']
         return t
 
-    def total(self):
-        orders = OrderItem.query.filter_by(order_id=self.id).all()
-        total = 0
-        for row in orders:
-            total += row.count * row.price
-        return total
-
-    def total_with_tax(self):
-        return self.total() * 1.08
+    def update_paid(self, paid):
+        self.paid = paid
+        db.session.commit()
 
 
 def filter_orders(request):

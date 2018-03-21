@@ -32,7 +32,7 @@
       {% endfor %}
       <tr>
         <form action="{{url_for('order', order_id=id)}}" method="POST">
-          <td><input class="form-control" type="number" min="1" name="quantity" value="1"></td>
+          <td><input class="form-control" type="number" min="1" name="quantity" value="1" required="required"></td>
           <td>
             <input class="form-control" list="recipes" name="name" placeholder="Recipe Name" autofocus="True">
             <datalist name="recipes" id="recipes">
@@ -52,21 +52,37 @@
         <td></td>
         <td></td>
         <td>Subtotal</td>
-        <td>{{order['total']|usd}}</td>
+        <td>{{order['subtotal']|usd}}</td>
         <td></td>
       </tr>
       <tr>
         <td></td>
         <td></td>
         <td>Tax</td>
-        <td>{{(order['total'] * 0.08)|usd}}</td>
+        <td>{{order['tax']|usd}}</td>
         <td></td>
       </tr>
       <tr>
         <td></td>
         <td></td>
         <th scope="row">Total</th>
-        <td>{{(order['total'] * 1.08)|usd}}</td>
+        <td>{{order['total']|usd}}</td>
+        <td></td>
+      </tr>
+      <tr>
+        <form action="{{url_for('order', order_id=id)}}" method="POST">
+          <td></td>
+          <td></td>
+          <td>Amount Paid</td>
+          <td><input class="form-control" type="number" step=".01" min="0" max="{{order['total']}}" name="paid"  value="{{order['paid']}}" placeholder="Amount Paid" required="required"></td>
+          <td><button class="btn btn-default" type="submit">Update</button></td>
+        </form>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <th scope="row">Owed</th>
+        <td>{{order['owed']|usd}}</td>
         <td></td>
       </tr>
     </tbody>
