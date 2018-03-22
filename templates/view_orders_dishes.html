@@ -20,9 +20,9 @@
         <div class="input-group-addon">Query:</div>
         <div class="input-group">
           {% if query %}
-          <input type="text" list="recipes" name="filter_query" class="form-control" value="{{query}}" placeholder="Dish Name" required="required">
+          <input type="text" list="recipes" name="filter_query" class="form-control" value="{{query}}" placeholder="Dish Name">
           {% else %}
-          <input type="text" list="recipes" name="filter_query" class="form-control" placeholder="Dish Name" required="required">
+          <input type="text" list="recipes" name="filter_query" class="form-control" placeholder="Dish Name">
           {% endif %}
           <datalist name="recipes" id="recipes">
             {% if recipes %}

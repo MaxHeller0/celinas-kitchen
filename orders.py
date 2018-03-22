@@ -39,13 +39,33 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     client_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime(timezone=True))
-    paid = db.Column(db.Float, default=0)
+    subtotal = db.Column(db.Float(precision=2), default=0)
+    paid = db.Column(db.Float(precision=2), default=0)
+    owed = db.Column(db.Float(precision=2), default=0)
+    tax_rate = db.Column(db.Float, default=.08)
 
     def __init__(self, name):
-        self.client_id = BaseClient.query.filter_by(name=name).first().id
+        client = BaseClient.query.filter_by(name=name).first()
+        self.client_id = client.id
+        if client.tax_exempt:
+            self.tax_rate = 0
         self.date = datetime.now()
         db.session.add(self)
         db.session.commit()
+
+    def add_item(self, item):
+        self.subtotal += item.count * item.price
+        self.update_owed()
+        db.session.commit()
+
+    def remove_item(self, item):
+        self.subtotal -= item.count * item.price
+        self.update_owed()
+        item.delete()
+
+    def update_owed(self):
+        self.owed = round(
+            self.subtotal * (self.tax_rate + 1) - float(self.paid), 2)
 
     def delete(self):
         order_items = OrderItem.query.filter_by(order_id=self.id).all()
@@ -62,38 +82,37 @@ class Order(db.Model):
             total += item.count
         return total
 
-    def details(self, tax=.08):
+    def items(self):
         items = OrderItem.query.filter_by(order_id=self.id).all()
-        t = {}
-        t['id'] = self.id
-        t['name'] = BaseClient.query.get(self.client_id).name
-        t['date'] = format_date_time(self.date)
-        t['subtotal'] = 0
-        t['items'] = []
+        client = BaseClient.query.get(self.client_id)
+        order_dict = {'items': []}
 
         if len(items) == 0:
-            t['description'] = "Add the first item below"
+            order_dict['description'] = "Add the first item below"
         else:
-            t['description'] = "Order Details: {}, {}".format(BaseClient.query.get(
-                self.client_id).name, format_date_time(self.date))
+            order_dict['description'] = "Order Details: {}, {}".format(
+                client.name, format_date_time(self.date))
             for item in items:
-                t['items'].append(item.details())
-                t['subtotal'] += item.count * item.price
+                order_dict['items'].append(item.details())
+        return order_dict
 
-        t['tax'] = t['subtotal'] * tax
-        t['total'] = t['subtotal'] + t['tax']
-        t['paid'] = self.paid
-        t['owed'] = t['total'] - t['paid']
-        return t
+    def details(self):
+        client = BaseClient.query.get(self.client_id)
+        return {'id': self.id, 'name': client.name, 'date': format_date_time(self.date),
+                'subtotal': self.subtotal, 'tax': self.subtotal * self.tax_rate,
+                'total': round(self.subtotal * (self.tax_rate + 1), 2),
+                'paid': self.paid, 'owed': self.owed}
 
     def update_paid(self, paid):
         self.paid = paid
+        self.update_owed()
         db.session.commit()
 
 
 def filter_orders(request):
     filter_cat = request.args.get('filter', default="client")
     query = request.args.get('query', default="")
+    payment = request.args.get('payment', default="all")
     time = request.args.get('time', default="all_time")
     now = datetime.now().date()
     time_dict = {"past_day": now, "past_week": now - timedelta(weeks=1),
@@ -108,6 +127,15 @@ def filter_orders(request):
         client = BaseClient.query.filter_by(name=query).first()
         if client:
             orders = orders.filter_by(client_id=client.id)
+
+        if payment == "partial":
+            orders = orders.filter(Order.paid > 0)
+            orders = orders.filter(Order.owed > 0)
+        elif payment == "full":
+            orders = orders.filter(Order.owed == 0)
+        elif payment == "unpaid":
+            orders = orders.filter(Order.paid == 0)
+
         return orders.all()
     elif filter_cat == "dish":
         if query:

@@ -187,7 +187,7 @@ def order(order_id=None):
     if request.method == "POST":
         to_delete = request.form.get("delete")
         if to_delete:
-            OrderItem.query.get(to_delete).delete()
+            order.remove_item(OrderItem.query.get(to_delete))
         else:
             paid = request.form.get("paid")
             if paid:
@@ -200,10 +200,10 @@ def order(order_id=None):
                 price = request.form.get("price")
                 if not price:
                     price = dish.price
-                order_item = OrderItem(order_id, quantity, dish.id, price)
+                order.add_item(OrderItem(order_id, quantity, dish.id, price))
         return redirect(url_for('order', order_id=order.id))
     try:
-        return render_template("order.html", id=order_id, order=order.details())
+        return render_template("order.html", id=order_id, order={**order.details(), **order.items()})
     except:
         return redirect(url_for("index"))
 
@@ -224,11 +224,13 @@ def view_orders():
     dest_dict = {"client": "view_orders.html",
                  "dish": "view_orders_dishes.html"}
     destination = dest_dict[request.args.get('filter', default='client')]
-    filter_query = request.args.get('query', default=request.form.get("filter_query"))
+    filter_query = request.args.get(
+        'query', default=request.form.get("filter_query"))
     if request.method == "POST":
         filter_cat = request.form.get("filter_cat")
         time = request.form.get("time")
-        return redirect(url_for('view_orders', filter=filter_cat, query=filter_query, time=time))
+        payment = request.form.get("payment")
+        return redirect(url_for('view_orders', filter=filter_cat, query=filter_query, time=time, payment=payment))
 
     orders = filter_orders(request)
 
@@ -239,7 +241,8 @@ def view_orders():
     elif destination == "view_orders_dishes.html":
         formatted_orders = {'orders': [], 'total': orders['total']}
         for order in orders['orders']:
-            formatted_orders['orders'].append(order.details())
+            formatted_orders['orders'].append(
+                {**order.details(), **order.items()})
 
     return render_template(destination, orders=formatted_orders, query=filter_query)
 

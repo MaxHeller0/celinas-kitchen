@@ -47,6 +47,7 @@ class BaseClient(db.Model):
     allergies = db.Column(db.Text)
     general_notes = db.Column(db.Text)
     dietary_preferences = db.Column(db.Text)
+    tax_exempt = db.Column(db.Boolean, default=True)
 
     def __init__(self, request, client_type=0):
         self.name = request.form.get("name")
@@ -57,6 +58,7 @@ class BaseClient(db.Model):
         self.allergies = request.form.get("allergies").lower()
         self.general_notes = request.form.get("general_notes")
         self.dietary_preferences = request.form.get("dietary_preferences")
+        self.tax_exempt = force_num(request.form.get("tax_exempt"))
 
     def update(self, request):
         self.__init__(request, self.client_type)
