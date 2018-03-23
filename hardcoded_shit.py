@@ -41,7 +41,5 @@ try:
         db=os.environ["RDS_DB_NAME"])
 except:
     # connect to testing db
-    db_config = "mysql+mysqldb://{username}:{password}@{server}:{port}/{db}".format(
-        username="admin", password="jOKb7lRRps&smt1bPeW!$",
-        server="celinas-kitchen-testing.czfoxvxyu3gn.us-east-2.rds.amazonaws.com",
-        port="3306", db="ebdb")
+    db_config = "mysql+mysqldb://admin:jOKb7lRRps&smt1bPeW!$@{server}:3306/ebdb".format(
+        server="celinas-kitchen-testing.czfoxvxyu3gn.us-east-2.rds.amazonaws.com")

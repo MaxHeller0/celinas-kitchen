@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import text
+from sqlalchemy import text, FetchedValue
 
 from clients import BaseClient
 from db_config import db
@@ -12,22 +12,23 @@ class OrderItem(db.Model):
     __tablename__ = "order_items"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     order_id = db.Column(db.Integer, nullable=False)
-    count = db.Column(db.Integer, nullable=False)
     dish_id = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float(precision=2), nullable=False)
+    count = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Float(precision=2), nullable=False)
+    price = db.Column(db.Float(precision=2), nullable=False, server_default=FetchedValue())
 
-    def __init__(self, order_id, count, dish_id, price):
+    def __init__(self, order_id, count, dish_id, unit_price):
         self.order_id = order_id
         self.count = count
         self.dish_id = dish_id
-        self.price = price
+        self.unit_price = unit_price
         db.session.add(self)
         db.session.commit()
 
     def details(self):
         dish = Recipe.query.get(self.dish_id)
-        return {'count': self.count, 'name': dish.name, 'unit_price': usd(self.price),
-                'price': usd(self.price * self.count), 'id': self.id}
+        return {'count': self.count, 'name': dish.name, 'unit_price': usd(self.unit_price),
+                'price': usd(self.price), 'id': self.id}
 
     def delete(self):
         db.session.delete(self)
@@ -39,10 +40,12 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     client_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime(timezone=True))
-    subtotal = db.Column(db.Float(precision=2), default=0)
-    paid = db.Column(db.Float(precision=2), default=0)
-    owed = db.Column(db.Float(precision=2), default=0)
     tax_rate = db.Column(db.Float, default=.08)
+    subtotal = db.Column(db.Float(precision=2), default=0)
+    tax = db.Column(db.Float(precision=2), server_default=FetchedValue())
+    total = db.Column(db.Float(precision=2), server_default=FetchedValue())
+    paid = db.Column(db.Float(precision=2), default=0)
+    owed = db.Column(db.Float(precision=2), server_default=FetchedValue())
 
     def __init__(self, name):
         client = BaseClient.query.filter_by(name=name).first()
@@ -52,20 +55,6 @@ class Order(db.Model):
         self.date = datetime.now()
         db.session.add(self)
         db.session.commit()
-
-    def add_item(self, item):
-        self.subtotal += item.count * item.price
-        self.update_owed()
-        db.session.commit()
-
-    def remove_item(self, item):
-        self.subtotal -= item.count * item.price
-        self.update_owed()
-        item.delete()
-
-    def update_owed(self):
-        self.owed = round(
-            self.subtotal * (self.tax_rate + 1) - float(self.paid), 2)
 
     def delete(self):
         order_items = OrderItem.query.filter_by(order_id=self.id).all()
@@ -77,10 +66,7 @@ class Order(db.Model):
     def contains(self, dish_id):
         order_items = OrderItem.query.filter_by(order_id=self.id)
         matching_order_items = order_items.filter_by(dish_id=dish_id).all()
-        total = 0
-        for item in matching_order_items:
-            total += item.count
-        return total
+        return sum(item.count for item in matching_order_items)
 
     def items(self):
         items = OrderItem.query.filter_by(order_id=self.id).all()
@@ -99,14 +85,8 @@ class Order(db.Model):
     def details(self):
         client = BaseClient.query.get(self.client_id)
         return {'id': self.id, 'name': client.name, 'date': format_date_time(self.date),
-                'subtotal': self.subtotal, 'tax': self.subtotal * self.tax_rate,
-                'total': round(self.subtotal * (self.tax_rate + 1), 2),
+                'subtotal': self.subtotal, 'tax': self.tax, 'total': self.total,
                 'paid': self.paid, 'owed': self.owed}
-
-    def update_paid(self, paid):
-        self.paid = paid
-        self.update_owed()
-        db.session.commit()
 
 
 def filter_orders(request):

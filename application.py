@@ -187,11 +187,14 @@ def order(order_id=None):
     if request.method == "POST":
         to_delete = request.form.get("delete")
         if to_delete:
-            order.remove_item(OrderItem.query.get(to_delete))
+            item = OrderItem.query.get(to_delete)
+            order.subtotal -= item.price
+            item.delete()
         else:
             paid = request.form.get("paid")
             if paid:
-                order.update_paid(paid)
+                order.paid = paid
+                db.session.commit()
 
             dish_name = request.form.get("name")
             dish = Recipe.query.filter_by(name=dish_name).first()
@@ -200,7 +203,9 @@ def order(order_id=None):
                 price = request.form.get("price")
                 if not price:
                     price = dish.price
-                order.add_item(OrderItem(order_id, quantity, dish.id, price))
+                item = OrderItem(order_id, quantity, dish.id, price)
+                order.subtotal += item.price
+                db.session.commit()
         return redirect(url_for('order', order_id=order.id))
     try:
         return render_template("order.html", id=order_id, order={**order.details(), **order.items()})
