@@ -19,17 +19,15 @@
 
 
       var updateFilterForm = function() {
-
-        var data = {{ dropdown_data|tojson|safe }};
         var key = $("#filter").val();
         var vals = [];
 
         switch(key) {
           case 'client':
-            vals = data.clients;
+            vals = client_names;
             break;
           case 'dish':
-            vals = data.recipes;
+            vals = dish_names;
             break;
         }
 

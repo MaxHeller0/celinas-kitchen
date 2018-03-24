@@ -34,11 +34,11 @@
         <form action="{{url_for('order', order_id=id)}}" method="POST">
           <td><input class="form-control" type="number" min="1" name="quantity" value="1" required="required"></td>
           <td>
-            <input class="form-control" list="recipes" name="name" placeholder="Recipe Name" autofocus="True">
-            <datalist name="recipes" id="recipes">
-              {% if recipes %}
-              {% for recipe in recipes %}
-                <option value="{{recipe.name|title}}">
+            <input class="form-control" list="dishes" name="name" placeholder="Dish Name" autofocus="True">
+            <datalist name="dishes" id="dishes">
+              {% if dishes %}
+              {% for dish in dishes %}
+                <option value="{{dish.name|title}}">
               {% endfor %}
               {% endif %}
             </datalist>
