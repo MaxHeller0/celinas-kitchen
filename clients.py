@@ -47,7 +47,6 @@ class BaseClient(db.Model):
     allergies = db.Column(db.Text)
     general_notes = db.Column(db.Text)
     dietary_preferences = db.Column(db.Text)
-    tax_exempt = db.Column(db.Boolean, default=True)
 
     def __init__(self, request, client_type=0):
         self.name = request.form.get("name")
@@ -58,7 +57,6 @@ class BaseClient(db.Model):
         self.allergies = request.form.get("allergies").lower()
         self.general_notes = request.form.get("general_notes")
         self.dietary_preferences = request.form.get("dietary_preferences")
-        self.tax_exempt = force_num(request.form.get("tax_exempt"))
 
     def update(self, request):
         self.__init__(request, self.client_type)
@@ -141,6 +139,41 @@ def standing_order_client(request):
     db.session.commit()
 
 
+class CateringClient(db.Model):
+    __tablename__ = "catering"
+    id = db.Column(db.Integer, primary_key=True)
+    tax_exempt = db.Column(db.Boolean, default=False)
+    contact = db.Column(db.String(100))
+    contact_phone = db.Column(db.String(10))
+    contact_email = db.Column(db.Text)
+
+    def __init__(self, request, client_id):
+        self.id = client_id
+        self.tax_exempt = force_num(request.form.get("tax_exempt"))
+        self.contact = request.form.get("contact")
+        self.contact_phone = format_phone(request.form.get("contact_phone"))
+        self.contact_email = request.form.get("contact_email")
+
+
+    def update(self, request):
+        self.__init__(request, self.id)
+
+    def to_dict(self):
+        return dict((key, value) for key, value in self.__dict__.items()
+                    if not callable(value) and not key.startswith('_'))
+
+
+def catering_client(request):
+    client_id = base_client(request, 2)
+    client = CateringClient.query.get(client_id)
+    if client:
+        client.update(request)
+    else:
+        client = CateringClient(request, client_id)
+        db.session.add(client)
+    db.session.commit()
+
+
 def delete_client(name):
     table_names = {0: "clients", 1: "standing_order"}
     client_id = BaseClient.query.filter_by(name=name).first().id
@@ -159,7 +192,7 @@ def get_client(name):
     Input: name
     Returns: associated client details as a sorted dictionary, or None
     """
-    table_names = {0: "clients", 1: "standing_order"}
+    table_names = {0: "clients", 1: "standing_order", 2: "catering"}
     try:
         t = text("SELECT * FROM clients WHERE name LIKE :name")
         client = db.engine.execute(t, name=name).first()
@@ -173,5 +206,5 @@ def get_client(name):
         return None
 
 
-init_dict = {0: base_client, 1: standing_order_client}
+init_dict = {0: base_client, 1: standing_order_client, 2: catering_client}
 client_types = sort_dict(client_types, dict_name="client_types")
