@@ -75,7 +75,7 @@ def dish(name=None):
             return redirect(url_for('dish', name=name, dest="edit"))
         elif source == "save_button" and name:
             dish = new_dish(request)
-            dish_names.append(request.form.get("old_name"))
+            dish_names.remove(request.form.get("old_name"))
             dish_names.append(name)
         return redirect(url_for('dish', name=name))
 
@@ -163,7 +163,7 @@ def salad_service_card(name=None):
     else:
         name = request.args.get("name")
         client_data = get_client(name)
-        if client_data["client_type"] == 1:
+        if client_data["client_type"] == 2:
             return render_template("salad_service_card.html", client_data=client_data)
         else:
             return redirect(url_for('index'))

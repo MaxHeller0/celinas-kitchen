@@ -40,23 +40,13 @@ class BaseClient(db.Model):
     __tablename__ = "clients"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
-    phone = db.Column(db.String(10))
     client_type = db.Column(db.Integer)
-    address = db.Column(db.Text)
-    delivery = db.Column(db.Boolean, default=False)
-    allergies = db.Column(db.Text)
     general_notes = db.Column(db.Text)
-    dietary_preferences = db.Column(db.Text)
 
     def __init__(self, request, client_type=0):
         self.name = request.form.get("name")
-        self.phone = format_phone(request.form.get("phone"))
         self.client_type = client_type
-        self.address = request.form.get("address").lower()
-        self.delivery = force_num(request.form.get("delivery"))
-        self.allergies = request.form.get("allergies").lower()
         self.general_notes = request.form.get("general_notes")
-        self.dietary_preferences = request.form.get("dietary_preferences")
 
     def update(self, request):
         self.__init__(request, self.client_type)
@@ -81,9 +71,50 @@ def base_client(request, client_type=0):
     return client.id
 
 
+class ALaCarteClient(db.Model):
+    __tablename__ = "a_la_carte"
+    id = db.Column(db.Integer, primary_key=True)
+    phone = db.Column(db.String(10))
+    address = db.Column(db.Text)
+    delivery = db.Column(db.Boolean, default=False)
+    allergies = db.Column(db.Text)
+    dietary_preferences = db.Column(db.Text)
+
+    def __init__(self, request, client_id):
+        self.id = client_id
+        self.phone = format_phone(request.form.get("phone"))
+        self.address = request.form.get("address").lower()
+        self.delivery = force_num(request.form.get("delivery"))
+        self.allergies = request.form.get("allergies").lower()
+        self.dietary_preferences = request.form.get("dietary_preferences")
+
+    def update(self, request):
+        self.__init__(request, self.id)
+
+    def to_dict(self):
+        return dict((key, value) for key, value in self.__dict__.items()
+                    if not callable(value) and not key.startswith('_'))
+
+
+def a_la_carte_client(request):
+    client_id = base_client(request, 1)
+    client = ALaCarteClient.query.get(client_id)
+    if client:
+        client.update(request)
+    else:
+        client = ALaCarteClient(request, client_id)
+        db.session.add(client)
+    db.session.commit()
+
+
 class StandingOrderClient(db.Model):
     __tablename__ = "standing_order"
     id = db.Column(db.Integer, primary_key=True)
+    phone = db.Column(db.String(10))
+    address = db.Column(db.Text)
+    delivery = db.Column(db.Boolean, default=False)
+    allergies = db.Column(db.Text)
+    dietary_preferences = db.Column(db.Text)
     protein = db.Column(db.Text)
     salad_dislikes = db.Column(db.Text)
     salad_loves = db.Column(db.Text)
@@ -102,6 +133,11 @@ class StandingOrderClient(db.Model):
 
     def __init__(self, request, client_id):
         self.id = client_id
+        self.phone = format_phone(request.form.get("phone"))
+        self.address = request.form.get("address").lower()
+        self.delivery = force_num(request.form.get("delivery"))
+        self.allergies = request.form.get("allergies").lower()
+        self.dietary_preferences = request.form.get("dietary_preferences")
         self.protein = request.form.get("protein").lower()
         self.salad_dislikes = request.form.get("salad_dislikes").lower()
         self.salad_loves = request.form.get("salad_loves").lower()
@@ -129,7 +165,7 @@ class StandingOrderClient(db.Model):
 
 
 def standing_order_client(request):
-    client_id = base_client(request, 1)
+    client_id = base_client(request, 2)
     client = StandingOrderClient.query.get(client_id)
     if client:
         client.update(request)
@@ -142,6 +178,8 @@ def standing_order_client(request):
 class CateringClient(db.Model):
     __tablename__ = "catering"
     id = db.Column(db.Integer, primary_key=True)
+    address = db.Column(db.Text)
+    delivery = db.Column(db.Boolean, default=False)
     tax_exempt = db.Column(db.Boolean, default=False)
     contact = db.Column(db.String(100))
     contact_phone = db.Column(db.String(10))
@@ -149,6 +187,8 @@ class CateringClient(db.Model):
 
     def __init__(self, request, client_id):
         self.id = client_id
+        self.address = request.form.get("address").lower()
+        self.delivery = force_num(request.form.get("delivery"))
         self.tax_exempt = force_num(request.form.get("tax_exempt"))
         self.contact = request.form.get("contact")
         self.contact_phone = format_phone(request.form.get("contact_phone"))
@@ -164,7 +204,7 @@ class CateringClient(db.Model):
 
 
 def catering_client(request):
-    client_id = base_client(request, 2)
+    client_id = base_client(request, 3)
     client = CateringClient.query.get(client_id)
     if client:
         client.update(request)
@@ -192,7 +232,7 @@ def get_client(name):
     Input: name
     Returns: associated client details as a sorted dictionary, or None
     """
-    table_names = {0: "clients", 1: "standing_order", 2: "catering"}
+    table_names = {0: "clients", 1: "a_la_carte", 2: "standing_order", 3: "catering"}
     try:
         t = text("SELECT * FROM clients WHERE name LIKE :name")
         client = db.engine.execute(t, name=name).first()
@@ -206,5 +246,5 @@ def get_client(name):
         return None
 
 
-init_dict = {0: base_client, 1: standing_order_client, 2: catering_client}
+init_dict = {0: base_client, 1: a_la_carte_client, 2: standing_order_client, 3: catering_client}
 client_types = sort_dict(client_types, dict_name="client_types")

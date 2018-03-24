@@ -50,8 +50,9 @@ class Order(db.Model):
     def __init__(self, name):
         client = BaseClient.query.filter_by(name=name).first()
         self.client_id = client.id
-        if client.tax_exempt:
-            self.tax_rate = 0
+        if client.client_type == 2:
+            if client.tax_exempt:
+                self.tax_rate = 0
         self.date = datetime.now()
         db.session.add(self)
         db.session.commit()
