@@ -63,7 +63,7 @@ class BaseClient(db.Model):
     def update(self, request):
         self.__init__(request, self.client_type)
 
-    def toDict(self):
+    def to_dict(self):
         return dict((key, value) for key, value in self.__dict__.items()
                     if not callable(value) and not key.startswith('_'))
 

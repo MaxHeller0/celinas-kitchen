@@ -28,6 +28,10 @@ class Recipe(db.Model):
         db.session.delete(recipe)
         db.session.commit()
 
+    @staticmethod
+    def toList():
+        return Recipe.query(Recipe.name)
+
 
 def new_recipe(request):
     name = request.form.get("name")

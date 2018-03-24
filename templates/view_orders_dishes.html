@@ -5,31 +5,49 @@
 {% endblock %}
 
 {% block main %}
+  <script>
+    $(function(ready) {
+      var injectData = function() {
+      var data = {{ dropdown_data|tojson|safe }};
+      var key = $("#filter_cat").val();
+      var vals = [];
+
+      switch(key) {
+        case 'client':
+          vals = data.clients;
+          break;
+        case 'dish':
+          vals = data.recipes;
+          break;
+      }
+
+        var $filterQueryList = $("#filter_query_list");
+        $filterQueryList.empty();
+        $.each(vals, function(index, value) {
+          $filterQueryList.append("<option value=\"" + value + "\">");
+        });
+      }
+      $(document).ready(injectData);
+      $("#filter_cat").change(injectData);
+    });
+  </script>
   <form class="form-inline" action="{{url_for('view_orders')}}" method="POST">
     <div class="form-group overflow">
       <div class="input-group side_by_side">
         <div class="input-group-addon">Filter by</div>
         <div class="input-group">
-          <select class="form-control" name="filter_cat">
-            <option value="client">Client</option>
-            <option selected="selected" value="dish">Dish</option>
+          <select class="form-control" name="filter_cat" id="filter_cat">
+            <option selected="selected" value="client">Client</option>
+            <option value="dish">Dish</option>
           </select>
         </div>
       </div>
       <div class="input-group side_by_side">
         <div class="input-group-addon">Query:</div>
         <div class="input-group">
-          {% if query %}
-          <input type="text" list="recipes" name="filter_query" class="form-control" value="{{query}}" placeholder="Dish Name">
-          {% else %}
-          <input type="text" list="recipes" name="filter_query" class="form-control" placeholder="Dish Name">
-          {% endif %}
-          <datalist name="recipes" id="recipes">
-            {% if recipes %}
-              {% for recipe in recipes %}
-                <option value="{{recipe.name}}">
-              {% endfor %}
-            {% endif %}
+          <input type="text" list="filter_query_list" name="filter_query" class="form-control" placeholder="Query"
+                 {% if query %} value="{{query}}" {% endif %}>
+          <datalist name="dropdown_data" id="filter_query_list">
           </datalist>
         </div>
       </div>
@@ -41,6 +59,17 @@
             <option value="past_week">Past Week</option>
             <option value="past_month">Past Month</option>
             <option selected="selected" value="all_time">All Time</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group side_by_side">
+        <div class="input-group-addon">Payment</div>
+        <div class="input-group">
+          <select class="form-control" name="payment">
+            <option selected="selected" value="all">All</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="partial">Partially Paid</option>
+            <option value="full">Fully Paid</option>
           </select>
         </div>
       </div>

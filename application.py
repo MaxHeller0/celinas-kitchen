@@ -237,7 +237,18 @@ def view_orders():
         payment = request.form.get("payment")
         return redirect(url_for('view_orders', filter=filter_cat, query=filter_query, time=time, payment=payment))
 
+    def get_dropdown_data():
+        dropdown_data = {"clients": [], "recipes": []}
+        clients= BaseClient.query.order_by(BaseClient.name).all()
+        recipes = Recipe.query.all()
+        for client in clients:
+            dropdown_data["clients"].append(client.name)
+        for recipe in recipes:
+            dropdown_data["recipes"].append(recipe.name)
+        return dropdown_data
+
     orders = filter_orders(request)
+    dropdown_data = get_dropdown_data()
 
     if destination == "view_orders.html":
         formatted_orders = []
@@ -249,7 +260,7 @@ def view_orders():
             formatted_orders['orders'].append(
                 {**order.details(), **order.items()})
 
-    return render_template(destination, orders=formatted_orders, query=filter_query)
+    return render_template(destination, orders=formatted_orders, query=filter_query, dropdown_data=dropdown_data)
 
 
 @app.route("/login", methods=["GET", "POST"])
