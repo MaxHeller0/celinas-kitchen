@@ -90,7 +90,7 @@ class Order(db.Model):
 
 
 def filter_orders(request):
-    filter_cat = request.args.get('filter', default="client")
+    filter = request.args.get('filter', default="client")
     query = request.args.get('query', default="")
     payment = request.args.get('payment', default="all")
     time = request.args.get('time', default="all_time")
@@ -100,14 +100,15 @@ def filter_orders(request):
     past_time = time_dict[time]
 
     orders = Order.query.order_by(Order.date.desc())
+
     if past_time:
         orders = orders.filter(Order.date > past_time)
 
-    if filter_cat == "client":
+    if filter == "client":
         client = BaseClient.query.filter_by(name=query).first()
         if client:
             orders = orders.filter_by(client_id=client.id)
-
+        
         if payment == "partial":
             orders = orders.filter(Order.paid > 0)
             orders = orders.filter(Order.owed > 0)
@@ -117,7 +118,7 @@ def filter_orders(request):
             orders = orders.filter(Order.paid == 0)
 
         return orders.all()
-    elif filter_cat == "dish":
+    elif filter == "dish":
         if query:
             dish = Recipe.query.filter_by(name=query).first()
             if dish:

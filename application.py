@@ -226,16 +226,14 @@ def delete_order(order_id=None):
 @app.route("/orders/", methods=["GET", "POST"])
 @login_required
 def view_orders():
-    dest_dict = {"client": "view_orders.html",
-                 "dish": "view_orders_dishes.html"}
-    destination = dest_dict[request.args.get('filter', default='client')]
-    filter_query = request.args.get(
-        'query', default=request.form.get("filter_query"))
+    filter = request.args.get('filter', default='client')
+    query = request.args.get(
+        'query', default=request.form.get("query"))
     if request.method == "POST":
-        filter_cat = request.form.get("filter_cat")
+        filter = request.form.get("filter")
         time = request.form.get("time")
         payment = request.form.get("payment")
-        return redirect(url_for('view_orders', filter=filter_cat, query=filter_query, time=time, payment=payment))
+        return redirect(url_for('view_orders', filter=filter, query=query, time=time, payment=payment))
 
     def get_dropdown_data():
         dropdown_data = {"clients": [], "recipes": []}
@@ -250,17 +248,17 @@ def view_orders():
     orders = filter_orders(request)
     dropdown_data = get_dropdown_data()
 
-    if destination == "view_orders.html":
+    if filter == "client":
         formatted_orders = []
         for order in orders:
             formatted_orders.append(order.details())
-    elif destination == "view_orders_dishes.html":
+    elif filter == "dish":
         formatted_orders = {'orders': [], 'total': orders['total']}
         for order in orders['orders']:
             formatted_orders['orders'].append(
                 merge_dicts(order.details(), order.items()))
 
-    return render_template(destination, orders=formatted_orders, query=filter_query, dropdown_data=dropdown_data)
+    return render_template("view_orders.html", orders=formatted_orders, query=query, filter=filter, dropdown_data=dropdown_data)
 
 
 @app.route("/login", methods=["GET", "POST"])
