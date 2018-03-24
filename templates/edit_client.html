@@ -23,12 +23,11 @@
                     Name:
                     <input class="form-control" type="text" name="name" value="{{client_data['name']}}" required><br>
                 </div>
-            {% elif attribute == "phone" %}
-                <div class="form-group">
-                    Phone:
-                    <input class="form-control" type="text" name="phone" value="{{client_data['phone']|view_format_value}}"
-                           pattern="[(]*[0-9]{3}[)]*[ -]*[0-9]{3}[ -]*[0-9]{4}[ ]*"><br>
-                </div>
+        {% elif attribute in ["phone", "contact_phone"] %}
+        <div class="form-group">
+            {{ attribute|format_key }}:
+            <input class="form-control" type="text" name="{{ attribute }}" pattern="[(]*[0-9]{3}[)]*[ -]*[0-9]{3}[ -]*[0-9]{4}[ ]*"><br>
+        </div>
             {% elif css_class[attribute] == "default_text" %}
             <div class="form-group">
               {{attribute|format_key}}:
