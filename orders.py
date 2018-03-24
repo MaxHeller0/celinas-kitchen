@@ -5,7 +5,7 @@ from sqlalchemy import text, FetchedValue
 from clients import BaseClient
 from db_config import db
 from formatting_helpers import format_date_time, usd
-from recipes import Recipe
+from dishs import Dish
 
 
 class OrderItem(db.Model):
@@ -26,7 +26,7 @@ class OrderItem(db.Model):
         db.session.commit()
 
     def details(self):
-        dish = Recipe.query.get(self.dish_id)
+        dish = Dish.query.get(self.dish_id)
         return {'count': self.count, 'name': dish.name, 'unit_price': usd(self.unit_price),
                 'price': usd(self.price), 'id': self.id}
 
@@ -121,7 +121,7 @@ def filter_orders(request):
         return orders.all()
     elif filter == "dish":
         if query:
-            dish = Recipe.query.filter_by(name=query).first()
+            dish = Dish.query.filter_by(name=query).first()
             if dish:
                 filtered_orders = {'orders': [], 'total': 0}
                 for order in orders:

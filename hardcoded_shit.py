@@ -1,6 +1,6 @@
 import os
 
-client_types = {"Base": 0, "Standing Order": 1, "Catering": 2}
+client_types = {"Base": 0, "A La Carte": 1, "Standing Order": 2, "Catering": 3}
 client_attribute_order = ["id", "client_type", "name", "phone", "address",
                           "delivery", "hash", "tax_exempt", "tax_exempt", "contact",
                           "contact_phone", "contact_email", "weekly_money", "monday_salads",
@@ -10,22 +10,28 @@ client_attribute_order = ["id", "client_type", "name", "phone", "address",
                           "salad_loves", "hotplate_likes", "hotplate_dislikes",
                           "hotplate_loves", "general_notes", "salad_notes",
                           "hotplate_notes"]
-client_type_order = ["Base", "Standing Order", "Catering"]
+client_type_order = ["Base", "A La Carte", "Standing Order", "Catering"]
 client_attributes = {}
-client_attributes[0] = sorted(["name", "phone",
-                               "address", "delivery",
-                               "allergies", "general_notes", "dietary_preferences"],
+client_attributes[0] = sorted(["name", "phone", "general_notes"
+                               ],
                               key=lambda x: client_attribute_order.index(x))
 client_attributes[1] = sorted(client_attributes[0]
-                              + ["weekly_money", "monday_salads", "thursday_salads",
+                              + ["address", "delivery",
+                                 "allergies", "dietary_preferences"],
+                              key=lambda x: client_attribute_order.index(x))
+client_attributes[2] = sorted(client_attributes[0]
+                              + ["address", "delivery",
+                                 "allergies", "dietary_preferences",
+                                 "weekly_money", "monday_salads", "thursday_salads",
                                  "salad_dressings", "protein", "salad_dislikes",
                                  "salad_loves", "salad_notes", "hotplate_likes",
                                  "hotplate_dislikes", "hotplate_loves",
                                  "hotplate_notes", "monday_hotplates",
                                  "tuesday_hotplates", "thursday_hotplates"],
                               key=lambda x: client_attribute_order.index(x))
-client_attributes[2] = sorted(client_attributes[0]
-                              + ["tax_exempt", "contact", "contact_phone", "contact_email"],
+client_attributes[3] = sorted(client_attributes[0]
+                              + ["address", "delivery",
+                                 "tax_exempt", "contact", "contact_phone", "contact_email"],
                               key=lambda x: client_attribute_order.index(x))
 input_types = {
     "default_text": ["address", "monday_salads", "thursday_salads",

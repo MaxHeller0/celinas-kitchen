@@ -77,22 +77,22 @@
                   </ul>
                 </li>
                 <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Recipes
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dishs
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">
-                    <form action="{{ url_for('recipe') }}" method="GET" class="navbar-form navbar-left">
+                    <form action="{{ url_for('dish') }}" method="GET" class="navbar-form navbar-left">
                       <div class="form-group">
-                        <button class="btn btn-default" type="submit">New Recipe</button>
+                        <button class="btn btn-default" type="submit">New Dish</button>
                       </div>
                     </form>
-                    <form action="{{ url_for('recipe') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
+                    <form action="{{ url_for('dish') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
                       <div class="form-group">
-                        <input class="form-control" list="recipes" name="name" placeholder="Recipe Name">
-                        <datalist name="recipes" id="recipes">
-                          {% if recipes %}
-                            {% for recipe in recipes %}
-                              <option value="{{recipe.name}}">
+                        <input class="form-control" list="dishs" name="name" placeholder="Dish Name">
+                        <datalist name="dishs" id="dishs">
+                          {% if dishs %}
+                            {% for dish in dishs %}
+                              <option value="{{dish.name}}">
                             {% endfor %}
                           {% endif %}
                         </datalist>

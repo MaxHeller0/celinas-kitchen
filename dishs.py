@@ -4,8 +4,8 @@ from db_config import db
 from formatting_helpers import force_num
 
 
-class Recipe(db.Model):
-    __tablename__ = "recipes"
+class Dish(db.Model):
+    __tablename__ = "dishs"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)
     description = db.Column(db.Text)
@@ -24,24 +24,24 @@ class Recipe(db.Model):
         self.__init__(request)
 
     def delete(name):
-        recipe = Recipe.query.filter_by(name=name).first()
-        db.session.delete(recipe)
+        dish = Dish.query.filter_by(name=name).first()
+        db.session.delete(dish)
         db.session.commit()
 
     @staticmethod
     def toList():
-        return Recipe.query(Recipe.name)
+        return Dish.query(Dish.name)
 
 
-def new_recipe(request):
+def new_dish(request):
     name = request.form.get("name")
     old_name = request.form.get("old_name")
 
-    recipe = Recipe.query.filter_by(name=old_name).first()
-    if recipe:
-        recipe.update(request)
+    dish = Dish.query.filter_by(name=old_name).first()
+    if dish:
+        dish.update(request)
     else:
-        recipe = Recipe(request)
-        db.session.add(recipe)
+        dish = Dish(request)
+        db.session.add(dish)
     db.session.commit()
-    return recipe
+    return dish

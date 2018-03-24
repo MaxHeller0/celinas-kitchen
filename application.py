@@ -10,7 +10,7 @@ from formatting_helpers import (capitalize, css_class, format_bool,
 from hardcoded_shit import client_attributes, client_types, db_config
 from helpers import apology, login_required, root_login_required
 from orders import Order, OrderItem, filter_orders
-from recipes import Recipe, new_recipe
+from dishs import Dish, new_dish
 
 # configure application
 application = Flask(__name__)
@@ -50,7 +50,7 @@ def inject_navbar_data():
     return dict(client_types=client_types,
                 client_name_list=BaseClient.query.order_by(
                     BaseClient.name).all(),
-                recipes=Recipe.query.order_by(Recipe.name).all())
+                dishs=Dish.query.order_by(Dish.name).all())
 
 
 @app.route("/")
@@ -61,27 +61,27 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/recipe/", methods=["GET", "POST"])
+@app.route("/dish/", methods=["GET", "POST"])
 @login_required
-def recipe(name=None):
-    dest_dict = {"view": "view_recipe.html", "edit": "edit_recipe.html"}
+def dish(name=None):
+    dest_dict = {"view": "view_dish.html", "edit": "edit_dish.html"}
     destination = dest_dict[request.args.get('dest', default='view')]
     if request.method == "GET":
         name = request.args.get("name")
         if not name:
-            return render_template("edit_recipe.html", recipe=None)
+            return render_template("edit_dish.html", dish=None)
     else:
         name = request.form.get("name")
         source = request.form.get("source")
         if source == "edit_button":
-            return redirect(url_for('recipe', name=name, dest="edit"))
+            return redirect(url_for('dish', name=name, dest="edit"))
         elif source == "save_button" and name:
-            recipe = new_recipe(request)
-        return redirect(url_for('recipe', name=name))
+            dish = new_dish(request)
+        return redirect(url_for('dish', name=name))
 
-    recipe = Recipe.query.filter_by(name=name).first()
-    if recipe:
-        return render_template(destination, recipe=recipe)
+    dish = Dish.query.filter_by(name=name).first()
+    if dish:
+        return render_template(destination, dish=dish)
     else:
         return redirect(url_for('index'))
 
@@ -160,7 +160,7 @@ def salad_service_card(name=None):
     else:
         name = request.args.get("name")
         client_data = get_client(name)
-        if client_data["client_type"] == 1:
+        if client_data["client_type"] == 2:
             return render_template("salad_service_card.html", client_data=client_data)
         else:
             return redirect(url_for('index'))
@@ -197,7 +197,7 @@ def order(order_id=None):
                 db.session.commit()
 
             dish_name = request.form.get("name")
-            dish = Recipe.query.filter_by(name=dish_name).first()
+            dish = Dish.query.filter_by(name=dish_name).first()
             if dish:
                 quantity = request.form.get("quantity")
                 price = request.form.get("price")
@@ -236,13 +236,13 @@ def view_orders():
         return redirect(url_for('view_orders', filter=filter, query=query, time=time, payment=payment))
 
     def get_dropdown_data():
-        dropdown_data = {"clients": [], "recipes": []}
+        dropdown_data = {"clients": [], "dishs": []}
         clients= BaseClient.query.order_by(BaseClient.name).all()
-        recipes = Recipe.query.all()
+        dishs = Dish.query.all()
         for client in clients:
             dropdown_data["clients"].append(client.name)
-        for recipe in recipes:
-            dropdown_data["recipes"].append(recipe.name)
+        for dish in dishs:
+            dropdown_data["dishs"].append(dish.name)
         return dropdown_data
 
     orders = filter_orders(request)
