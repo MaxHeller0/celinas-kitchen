@@ -106,4 +106,17 @@ def invert_dict(dictionary):
     return result
 
 
+def merge_dicts(*dict_args):
+    """
+    Given any number of dicts, shallow copy and merge into a new dict,
+    precedence goes to key value pairs in latter dicts.
+    Credit goes to Aaron Hall of stackoverflow:
+    https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
+    """
+    result = {}
+    for dictionary in dict_args:
+        result.update(dictionary)
+    return result
+
+
 css_class = invert_dict(input_types)
