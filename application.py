@@ -6,7 +6,7 @@ from clients import Admin, BaseClient, delete_client, get_client, init_dict
 from db_config import db
 from formatting_helpers import (capitalize, css_class, format_bool,
                                 format_date_time, format_key, format_value,
-                                title, usd, view_format_value)
+                                title, usd, view_format_value, merge_dicts)
 from hardcoded_shit import client_attributes, client_types, db_config
 from helpers import apology, login_required, root_login_required
 from orders import Order, OrderItem, filter_orders
@@ -208,7 +208,7 @@ def order(order_id=None):
                 db.session.commit()
         return redirect(url_for('order', order_id=order.id))
     try:
-        return render_template("order.html", id=order_id, order={**order.details(), **order.items()})
+        return render_template("order.html", id=order_id, order=merge_dicts(order.details(), order.items()))
     except:
         return redirect(url_for("index"))
 
@@ -247,7 +247,7 @@ def view_orders():
         formatted_orders = {'orders': [], 'total': orders['total']}
         for order in orders['orders']:
             formatted_orders['orders'].append(
-                {**order.details(), **order.items()})
+                merge_dicts(order.details(), order.items()))
 
     return render_template(destination, orders=formatted_orders, query=filter_query)
 
