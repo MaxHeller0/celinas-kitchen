@@ -5,14 +5,30 @@
 {% endblock %}
 
 {% block main %}
+  <script>
+    $(function(ready) {
+      $("#dish_name").change(function() {
+        {% if not dish %}
+        if ({{dish_names|safe}}.indexOf($(this).val()) != -1) {
+          alert("Dish already exists in database!");
+          $(this).val("");
+        }
+        {% endif %}
+      });
+    });
+  </script>
   <h1>
+    {% if dish %}
     Dish Editing
+    {% else %}
+    New Dish
+    {% endif %}
   </h1>
   <form action="{{ url_for('dish') }}" method="POST">
     <fieldset>
       <div class="form-group">
         Dish Name:
-        <input class="form-control" type="text" name="name" value="{{dish.name}}" required/>
+        <input id="dish_name" class="form-control" type="text" name="name" value="{{dish.name}}" required/>
       </div>
       <div class="form-group">
         Base Price:
@@ -24,7 +40,6 @@
       </div>
       <div class="form-group">
         <button name="source" value="save_button" class="btn btn-default" type="submit">Save</button>
-        <!-- <button name="source" value="delete_button" class="btn btn-default" type="submit">Delete</button> -->
       </div>
     </fieldset>
     <input type="hidden" name="old_name" value="{{dish.name}}"/>

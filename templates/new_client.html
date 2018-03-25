@@ -5,13 +5,23 @@
 {% endblock %}
 
 {% block main %}
+  <script>
+  $(function(ready) {
+    $("#client_name").change(function() {
+      if ({{client_names|safe}}.indexOf($(this).val()) != -1) {
+        alert("Client already exists in database!");
+        $(this).val("");
+      }
+    });
+  });
+  </script>
   <form action="{{ url_for('client') }}" method="POST">
     <fieldset>
       {% for attribute in attributes %}
         {% if attribute == "name" %}
           <div class="form-group">
               Name:
-              <input class="form-control" type="text" name="name" required><br>
+              <input id="client_name" class="form-control" type="text" name="name" required><br>
           </div>
         {% elif attribute in ["phone", "contact_phone"] %}
           <div class="form-group">
