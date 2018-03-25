@@ -1,9 +1,134 @@
+from datetime import datetime, timedelta
+
+from flask_sqlalchemy import SQLAlchemy
 from passlib.apps import custom_app_context as pwd_context
-from sqlalchemy import text
+from sqlalchemy import FetchedValue, text
 
 from db_config import db
-from formatting_helpers import force_num, format_phone, sort_dict
+from formatting_helpers import (force_num, format_datetime, format_phone,
+                                sort_dict, usd)
 from hardcoded_shit import client_types
+
+
+class Dish(db.Model):
+    __tablename__ = "dishes"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    description = db.Column(db.Text)
+    price = db.Column(db.Float(precision=2))
+    order_items = db.relationship("OrderItem", backref="dish")
+
+    def __init__(self, request):
+        self.name = request.form.get("name")
+        self.description = request.form.get("description")
+        self.price = force_num(request.form.get("price"), "float")
+
+    def __repr__(self):
+        return "{name}: {description}".format(name=self.name,
+                                              description=self.description)
+
+    def update(self, request):
+        self.__init__(request)
+
+
+def new_dish(request):
+    name = request.form.get("name")
+    old_name = request.form.get("old_name")
+
+    dish = Dish.query.filter_by(name=old_name).first()
+    if dish:
+        dish.update(request)
+    else:
+        dish = Dish(request)
+        db.session.add(dish)
+    db.session.commit()
+    return dish
+
+
+class OrderItem(db.Model):
+    __tablename__ = "order_items"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    order_id = db.Column(db.Integer, db.ForeignKey(
+        "orders.id"), nullable=False)
+    dish_id = db.Column(db.Integer, db.ForeignKey("dishes.id"), nullable=False)
+    count = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Float(precision=2), nullable=False)
+    price = db.Column(db.Float(precision=2), nullable=False,
+                      server_default=FetchedValue())
+
+    def __init__(self, order_id, count, dish_id, unit_price):
+        self.order_id = order_id
+        self.count = count
+        self.dish_id = dish_id
+        self.unit_price = unit_price
+        db.session.add(self)
+        db.session.commit()
+
+
+class Order(db.Model):
+    __tablename__ = "orders"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    client_id = db.Column(db.Integer, db.ForeignKey(
+        "clients.id"), nullable=False)
+    date = db.Column(db.DateTime(timezone=True))
+    tax_rate = db.Column(db.Float, default=.08)
+    subtotal = db.Column(db.Float(precision=2), default=0)
+    tax = db.Column(db.Float(precision=2), server_default=FetchedValue())
+    total = db.Column(db.Float(precision=2), server_default=FetchedValue())
+    paid = db.Column(db.Float(precision=2), default=0)
+    owed = db.Column(db.Float(precision=2), server_default=FetchedValue())
+    order_items = db.relationship("OrderItem", backref="order")
+
+    def __init__(self, name):
+        client = BaseClient.query.filter_by(name=name).first()
+        self.client_id = client.id
+        if client.client_type == 2:
+            if client.tax_exempt:
+                self.tax_rate = 0
+        self.date = datetime.now()
+        db.session.add(self)
+        db.session.commit()
+
+    def contains(self, dish_id):
+        order_items = OrderItem.query.filter_by(order_id=self.id)
+        matching_order_items = order_items.filter_by(dish_id=dish_id).all()
+        return sum(item.count for item in matching_order_items)
+
+
+def filter_orders(request):
+    filter = request.args.get('filter', default="client")
+    query = request.args.get('query', default="")
+    payment = request.args.get('payment', default="all")
+    time = request.args.get('time', default="all_time")
+    now = datetime.now().date()
+    time_dict = {"past_day": now, "past_week": now - timedelta(weeks=1),
+                 "past_month": now - timedelta(weeks=4), "all_time": 0}
+    past_time = time_dict[time]
+
+    if filter == "client":
+        orders = Order.query.filter(Order.date > past_time).order_by(Order.date.desc())
+
+        client = BaseClient.query.filter_by(name=query).first()
+        if client:
+            orders = orders.with_parent(client)
+
+        if payment == "full":
+            orders = orders.filter(Order.owed == 0)
+        elif payment == "unpaid":
+            orders = orders.filter(Order.owed != 0)
+
+        return orders.all()
+    elif filter == "dish":
+        if query:
+            dish = Dish.query.filter_by(name=query).first()
+            if dish:
+                items = OrderItem.query.join(OrderItem.order).filter(
+                    Order.date > past_time).with_parent(dish).order_by(
+                    Order.date.desc()).all()
+                total = sum(item.count for item in items)
+                return {'items': items, 'total': total}
+        else:
+            return None
 
 
 class Admin(db.Model):
@@ -42,6 +167,7 @@ class BaseClient(db.Model):
     name = db.Column(db.String(100), unique=True)
     client_type = db.Column(db.Integer)
     general_notes = db.Column(db.Text)
+    orders = db.relationship("Order", backref="client")
 
     def __init__(self, request, client_type=0):
         self.name = request.form.get("name")
@@ -194,7 +320,6 @@ class CateringClient(db.Model):
         self.contact_phone = format_phone(request.form.get("contact_phone"))
         self.contact_email = request.form.get("contact_email")
 
-
     def update(self, request):
         self.__init__(request, self.id)
 
@@ -232,7 +357,8 @@ def get_client(name):
     Input: name
     Returns: associated client details as a sorted dictionary, or None
     """
-    table_names = {0: "clients", 1: "a_la_carte", 2: "standing_order", 3: "catering"}
+    table_names = {0: "clients", 1: "a_la_carte",
+                   2: "standing_order", 3: "catering"}
     try:
         t = text("SELECT * FROM clients WHERE name LIKE :name")
         client = db.engine.execute(t, name=name).first()
@@ -246,5 +372,6 @@ def get_client(name):
         return None
 
 
-init_dict = {0: base_client, 1: a_la_carte_client, 2: standing_order_client, 3: catering_client}
+init_dict = {0: base_client, 1: a_la_carte_client,
+             2: standing_order_client, 3: catering_client}
 client_types = sort_dict(client_types, dict_name="client_types")

@@ -70,7 +70,7 @@ def force_num(string, output="int"):
         return 0
 
 
-def format_date_time(datetime):
+def format_datetime(datetime):
     t = str(datetime)
     return "{}/{} at {}".format(t[5:7], t[8:10], t[11:16])
 

@@ -2,15 +2,14 @@ from datetime import datetime, timedelta
 
 from flask import Flask, redirect, render_template, request, session, url_for
 
-from clients import Admin, BaseClient, delete_client, get_client, init_dict
+from classes import (Admin, BaseClient, Dish, Order, OrderItem, delete_client,
+                     filter_orders, get_client, init_dict, new_dish)
 from db_config import db
-from dishes import Dish, new_dish
 from formatting_helpers import (capitalize, css_class, format_bool,
-                                format_date_time, format_key, format_value,
+                                format_datetime, format_key, format_value,
                                 merge_dicts, title, usd, view_format_value)
 from hardcoded_shit import client_attributes, client_types, db_config
 from helpers import apology, login_required, root_login_required
-from orders import Order, OrderItem, filter_orders
 
 # configure application
 application = Flask(__name__)
@@ -34,6 +33,7 @@ app.jinja_env.filters["view_format_value"] = view_format_value
 app.jinja_env.filters["format_key"] = format_key
 app.jinja_env.filters["format_bool"] = format_bool
 app.jinja_env.filters["usd"] = usd
+app.jinja_env.filters["format_datetime"] = format_datetime
 
 # ensure responses aren't cached
 if app.config["DEBUG"]:
@@ -77,6 +77,7 @@ def dish(name=None):
             dish = new_dish(request)
             dish_names.remove(request.form.get("old_name"))
             dish_names.append(name)
+            dish_names.sort()
         return redirect(url_for('dish', name=name))
 
     dish = Dish.query.filter_by(name=name).first()
@@ -123,23 +124,20 @@ def client(name=None):
         elif source == "view_button":
             return redirect(url_for("client", name=name))
         elif source == "delete_button":
-            # delete client's orders
-            client_id = BaseClient.query.filter_by(name=name).first().id
-            orders = Order.query.filter_by(client_id=client_id).all()
-            for order in orders:
-                order.delete()
-
             delete_client(name)
+            client_names.remove(name)
             return redirect(url_for("index"))
         else:
             if source == "new_client":
                 client_names.append(name)
+                client_names.sort()
                 client_type = int(request.form.get("client_type"))
 
             elif source == "edit_client":
                 old_name = request.form.get("old_name")
                 client_names.remove(old_name)
                 client_names.append(name)
+                client_names.sort()
                 client_type = BaseClient.query.filter_by(
                     name=old_name).first().client_type
 
@@ -192,7 +190,8 @@ def order(order_id=None):
         if to_delete:
             item = OrderItem.query.get(to_delete)
             order.subtotal -= item.price
-            item.delete()
+            db.session.delete(item)
+            db.session.commit()
         else:
             paid = request.form.get("paid")
             if paid:
@@ -211,7 +210,7 @@ def order(order_id=None):
                 db.session.commit()
         return redirect(url_for('order', order_id=order.id))
     try:
-        return render_template("order.html", id=order_id, order=merge_dicts(order.details(), order.items()))
+        return render_template("order.html", id=order_id, order=order, items=order.order_items)
     except:
         return redirect(url_for("index"))
 
@@ -220,8 +219,8 @@ def order(order_id=None):
 @login_required
 def delete_order(order_id=None):
     if order_id:
-        order = Order.query.get(order_id)
-        order.delete()
+        db.session.delete(Order.query.get(order_id))
+        db.session.commit()
         return redirect(url_for("view_orders"))
     return redirect(url_for("index"))
 
@@ -230,27 +229,16 @@ def delete_order(order_id=None):
 @login_required
 def view_orders():
     filter = request.args.get('filter', default='client')
-    query = request.args.get(
-        'query', default=request.form.get("query"))
+    query = request.args.get('query', default=request.form.get("query"))
     if request.method == "POST":
         filter = request.form.get("filter")
-        time = request.form.get("time")
+        time = request.form.get("time", default="past_week")
         payment = request.form.get("payment")
         return redirect(url_for('view_orders', filter=filter, query=query, time=time, payment=payment))
 
-    orders = filter_orders(request)
+    filter_results = filter_orders(request)
 
-    if filter == "client":
-        formatted_orders = []
-        for order in orders:
-            formatted_orders.append(order.details())
-    elif filter == "dish":
-        formatted_orders = {'orders': [], 'total': orders['total']}
-        for order in orders['orders']:
-            formatted_orders['orders'].append(
-                merge_dicts(order.details(), order.items()))
-
-    return render_template("view_orders.html", orders=formatted_orders, query=query, filter=filter)
+    return render_template("view_orders.html", filter_results=filter_results, query=query, filter=filter)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -340,11 +328,10 @@ def register():
 
 with app.app_context():
     db.init_app(app)
-    db.create_all()
 
     client_names, dish_names = [], []
     clients = BaseClient.query.order_by(BaseClient.name).all()
-    dishes = Dish.query.order_by(BaseClient.name).all()
+    dishes = Dish.query.order_by(Dish.name).all()
     for client in clients:
         client_names.append(client.name)
     for dish in dishes:
@@ -353,3 +340,4 @@ with app.app_context():
 # run the program
 if __name__ == "__main__":
     app.run()
+    db.create_all()
