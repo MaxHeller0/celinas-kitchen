@@ -51,6 +51,10 @@ def inject_navbar_data():
                 dish_names=dish_names)
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return apology("404: Page Not Found"), 404
+
 @app.route("/")
 def index():
     return render_template("index.html")
