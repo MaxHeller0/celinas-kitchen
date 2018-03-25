@@ -53,9 +53,6 @@ def inject_navbar_data():
 
 @app.route("/")
 def index():
-    """
-    Renders home page
-    """
     return render_template("index.html")
 
 
@@ -64,18 +61,20 @@ def index():
 def dish(name=None):
     dest_dict = {"view": "view_dish.html", "edit": "edit_dish.html"}
     destination = dest_dict[request.args.get('dest', default='view')]
+    name = request.args.get("name", default=request.form.get("name"))
+
     if request.method == "GET":
-        name = request.args.get("name")
         if not name:
             return render_template("edit_dish.html", dish=None)
     else:
-        name = request.form.get("name")
         source = request.form.get("source")
         if source == "edit_button":
             return redirect(url_for('dish', name=name, dest="edit"))
         elif source == "save_button" and name:
             dish = new_dish(request)
-            dish_names.remove(request.form.get("old_name"))
+            old_name = request.form.get("old_name")
+            if old_name:
+                dish_names.remove(old_name)
             dish_names.append(name)
             dish_names.sort()
         return redirect(url_for('dish', name=name))
