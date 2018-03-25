@@ -2,15 +2,14 @@ from datetime import datetime, timedelta
 
 from flask import Flask, redirect, render_template, request, session, url_for
 
-from clients import Admin, BaseClient, delete_client, get_client, init_dict
+from classes import (Admin, BaseClient, Dish, Order, OrderItem, delete_client,
+                     filter_orders, get_client, init_dict, new_dish)
 from db_config import db
 from formatting_helpers import (capitalize, css_class, format_bool,
-                                format_date_time, format_key, format_value,
-                                title, usd, view_format_value, merge_dicts)
+                                format_datetime, format_key, format_value,
+                                merge_dicts, title, usd, view_format_value)
 from hardcoded_shit import client_attributes, client_types, db_config
 from helpers import apology, login_required, root_login_required
-from orders import Order, OrderItem, filter_orders
-from recipes import Recipe, new_recipe
 
 # configure application
 application = Flask(__name__)
@@ -34,6 +33,7 @@ app.jinja_env.filters["view_format_value"] = view_format_value
 app.jinja_env.filters["format_key"] = format_key
 app.jinja_env.filters["format_bool"] = format_bool
 app.jinja_env.filters["usd"] = usd
+app.jinja_env.filters["format_datetime"] = format_datetime
 
 # ensure responses aren't cached
 if app.config["DEBUG"]:
@@ -47,10 +47,8 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def inject_navbar_data():
-    return dict(client_types=client_types,
-                client_name_list=BaseClient.query.order_by(
-                    BaseClient.name).all(),
-                recipes=Recipe.query.order_by(Recipe.name).all())
+    return dict(client_types=client_types, client_names=client_names,
+                dish_names=dish_names)
 
 
 @app.route("/")
@@ -61,27 +59,30 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/recipe/", methods=["GET", "POST"])
+@app.route("/dish/", methods=["GET", "POST"])
 @login_required
-def recipe(name=None):
-    dest_dict = {"view": "view_recipe.html", "edit": "edit_recipe.html"}
+def dish(name=None):
+    dest_dict = {"view": "view_dish.html", "edit": "edit_dish.html"}
     destination = dest_dict[request.args.get('dest', default='view')]
     if request.method == "GET":
         name = request.args.get("name")
         if not name:
-            return render_template("edit_recipe.html", recipe=None)
+            return render_template("edit_dish.html", dish=None)
     else:
         name = request.form.get("name")
         source = request.form.get("source")
         if source == "edit_button":
-            return redirect(url_for('recipe', name=name, dest="edit"))
+            return redirect(url_for('dish', name=name, dest="edit"))
         elif source == "save_button" and name:
-            recipe = new_recipe(request)
-        return redirect(url_for('recipe', name=name))
+            dish = new_dish(request)
+            dish_names.remove(request.form.get("old_name"))
+            dish_names.append(name)
+            dish_names.sort()
+        return redirect(url_for('dish', name=name))
 
-    recipe = Recipe.query.filter_by(name=name).first()
-    if recipe:
-        return render_template(destination, recipe=recipe)
+    dish = Dish.query.filter_by(name=name).first()
+    if dish:
+        return render_template(destination, dish=dish)
     else:
         return redirect(url_for('index'))
 
@@ -123,20 +124,20 @@ def client(name=None):
         elif source == "view_button":
             return redirect(url_for("client", name=name))
         elif source == "delete_button":
-            # delete client's orders
-            client_id = BaseClient.query.filter_by(name=name).first().id
-            orders = Order.query.filter_by(client_id=client_id).all()
-            for order in orders:
-                order.delete()
-
             delete_client(name)
+            client_names.remove(name)
             return redirect(url_for("index"))
         else:
             if source == "new_client":
+                client_names.append(name)
+                client_names.sort()
                 client_type = int(request.form.get("client_type"))
 
             elif source == "edit_client":
                 old_name = request.form.get("old_name")
+                client_names.remove(old_name)
+                client_names.append(name)
+                client_names.sort()
                 client_type = BaseClient.query.filter_by(
                     name=old_name).first().client_type
 
@@ -160,7 +161,7 @@ def salad_service_card(name=None):
     else:
         name = request.args.get("name")
         client_data = get_client(name)
-        if client_data["client_type"] == 1:
+        if client_data["client_type"] == 2:
             return render_template("salad_service_card.html", client_data=client_data)
         else:
             return redirect(url_for('index'))
@@ -189,7 +190,8 @@ def order(order_id=None):
         if to_delete:
             item = OrderItem.query.get(to_delete)
             order.subtotal -= item.price
-            item.delete()
+            db.session.delete(item)
+            db.session.commit()
         else:
             paid = request.form.get("paid")
             if paid:
@@ -197,7 +199,7 @@ def order(order_id=None):
                 db.session.commit()
 
             dish_name = request.form.get("name")
-            dish = Recipe.query.filter_by(name=dish_name).first()
+            dish = Dish.query.filter_by(name=dish_name).first()
             if dish:
                 quantity = request.form.get("quantity")
                 price = request.form.get("price")
@@ -208,7 +210,7 @@ def order(order_id=None):
                 db.session.commit()
         return redirect(url_for('order', order_id=order.id))
     try:
-        return render_template("order.html", id=order_id, order=merge_dicts(order.details(), order.items()))
+        return render_template("order.html", id=order_id, order=order, items=order.order_items)
     except:
         return redirect(url_for("index"))
 
@@ -217,8 +219,8 @@ def order(order_id=None):
 @login_required
 def delete_order(order_id=None):
     if order_id:
-        order = Order.query.get(order_id)
-        order.delete()
+        db.session.delete(Order.query.get(order_id))
+        db.session.commit()
         return redirect(url_for("view_orders"))
     return redirect(url_for("index"))
 
@@ -227,38 +229,16 @@ def delete_order(order_id=None):
 @login_required
 def view_orders():
     filter = request.args.get('filter', default='client')
-    query = request.args.get(
-        'query', default=request.form.get("query"))
+    query = request.args.get('query', default=request.form.get("query"))
     if request.method == "POST":
         filter = request.form.get("filter")
-        time = request.form.get("time")
+        time = request.form.get("time", default="past_week")
         payment = request.form.get("payment")
         return redirect(url_for('view_orders', filter=filter, query=query, time=time, payment=payment))
 
-    def get_dropdown_data():
-        dropdown_data = {"clients": [], "recipes": []}
-        clients= BaseClient.query.order_by(BaseClient.name).all()
-        recipes = Recipe.query.all()
-        for client in clients:
-            dropdown_data["clients"].append(client.name)
-        for recipe in recipes:
-            dropdown_data["recipes"].append(recipe.name)
-        return dropdown_data
+    filter_results = filter_orders(request)
 
-    orders = filter_orders(request)
-    dropdown_data = get_dropdown_data()
-
-    if filter == "client":
-        formatted_orders = []
-        for order in orders:
-            formatted_orders.append(order.details())
-    elif filter == "dish":
-        formatted_orders = {'orders': [], 'total': orders['total']}
-        for order in orders['orders']:
-            formatted_orders['orders'].append(
-                merge_dicts(order.details(), order.items()))
-
-    return render_template("view_orders.html", orders=formatted_orders, query=query, filter=filter, dropdown_data=dropdown_data)
+    return render_template("view_orders.html", filter_results=filter_results, query=query, filter=filter)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -348,8 +328,16 @@ def register():
 
 with app.app_context():
     db.init_app(app)
-    db.create_all()
+
+    client_names, dish_names = [], []
+    clients = BaseClient.query.order_by(BaseClient.name).all()
+    dishes = Dish.query.order_by(Dish.name).all()
+    for client in clients:
+        client_names.append(client.name)
+    for dish in dishes:
+        dish_names.append(dish.name)
 
 # run the program
 if __name__ == "__main__":
     app.run()
+    db.create_all()

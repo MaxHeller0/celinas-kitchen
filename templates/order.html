@@ -6,7 +6,7 @@
 
 {% block main %}
   <h1>
-    {{order['description']}}
+    Order Details: {{order.client.name}}, {{order.date|format_datetime}}
   </h1>
   <table>
      <thread>
@@ -19,14 +19,14 @@
         </tr>
       </thread>
     <tbody>
-      {% for item in order['items'] %}
+      {% for item in items %}
       <tr>
-        <td>{{item['count']}}</td>
-        <td>{{item['name']}}</td>
-        <td>{{item['unit_price']}}</td>
-        <td>{{item['price']}}</td>
+        <td>{{item.count}}</td>
+        <td>{{item.dish.name}}</td>
+        <td>{{item.unit_price|usd}}</td>
+        <td>{{item.price|usd}}</td>
         <form action="{{url_for('order', order_id=id)}}" method="POST">
-          <td><button class="btn btn-default" name="delete" value="{{item['id']}}" type="submit">Delete</button></td>
+          <td><button class="btn btn-default" name="delete" value="{{item.id}}" type="submit">Delete</button></td>
         </form>
       </tr>
       {% endfor %}
@@ -34,11 +34,11 @@
         <form action="{{url_for('order', order_id=id)}}" method="POST">
           <td><input class="form-control" type="number" min="1" name="quantity" value="1" required="required"></td>
           <td>
-            <input class="form-control" list="recipes" name="name" placeholder="Recipe Name" autofocus="True">
-            <datalist name="recipes" id="recipes">
-              {% if recipes %}
-              {% for recipe in recipes %}
-                <option value="{{recipe.name|title}}">
+            <input class="form-control" list="dishes" name="name" placeholder="Dish Name" autofocus="True">
+            <datalist name="dishes" id="dishes">
+              {% if dishes %}
+              {% for dish in dishes %}
+                <option value="{{dish.name|title}}">
               {% endfor %}
               {% endif %}
             </datalist>
@@ -52,21 +52,21 @@
         <td></td>
         <td></td>
         <td>Subtotal</td>
-        <td>{{order['subtotal']|usd}}</td>
+        <td>{{order.subtotal|usd}}</td>
         <td></td>
       </tr>
       <tr>
         <td></td>
         <td></td>
         <td>Tax</td>
-        <td>{{order['tax']|usd}}</td>
+        <td>{{order.tax|usd}}</td>
         <td></td>
       </tr>
       <tr>
         <td></td>
         <td></td>
         <th scope="row">Total</th>
-        <td>{{order['total']|usd}}</td>
+        <td>{{order.total|usd}}</td>
         <td></td>
       </tr>
       <tr>
@@ -74,7 +74,7 @@
           <td></td>
           <td></td>
           <td>Amount Paid</td>
-          <td><input class="form-control" type="number" step=".01" min="0" max="{{order['total']}}" name="paid"  value="{{order['paid']}}" placeholder="Amount Paid" required="required"></td>
+          <td><input class="form-control" type="number" step=".01" min="0" max="{{order.total}}" name="paid"  value="{{order.paid}}" placeholder="Amount Paid" required="required"></td>
           <td><button class="btn btn-default" type="submit">Update</button></td>
         </form>
       </tr>
@@ -82,7 +82,7 @@
         <td></td>
         <td></td>
         <th scope="row">Owed</th>
-        <td>{{order['owed']|usd}}</td>
+        <td>{{order.owed|usd}}</td>
         <td></td>
       </tr>
     </tbody>
