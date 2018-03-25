@@ -65,6 +65,7 @@ def dish(name=None):
 
     if request.method == "GET":
         if not name:
+            # Creating a dish
             return render_template("edit_dish.html", dish=None)
     else:
         source = request.form.get("source")
@@ -93,14 +94,15 @@ def new_client():
     Renders client creation page
     pass in list of required attributes for the client type from the client_attributes dictionary
     """
+    client_type = request.args.get("client_type", type=int, default=request.form.get("client_type"))
     if request.method == "POST":
-        client_type = request.form.get("client_type")
         return redirect(url_for("new_client", client_type=client_type))
+    elif client_type in client_types.values():
+        return render_template("new_client.html",
+                               client_type=client_type, css_class=css_class,
+                               attributes=client_attributes[client_type])
     else:
-        client_type = request.args.get("client_type", type=int)
-    if client_type not in client_types.values():
         return redirect(url_for("index"))
-    return render_template("new_client.html", client_type=client_type, attributes=client_attributes[client_type], css_class=css_class)
 
 
 @app.route("/client/", methods=["GET", "POST"])
