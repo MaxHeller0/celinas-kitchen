@@ -72,7 +72,7 @@ def force_num(string, output="int"):
 
 def format_datetime(datetime):
     t = str(datetime)
-    return "{}/{} at {}".format(t[5:7], t[8:10], t[11:16])
+    return "{}/{}/{} at {}".format(t[5:7], t[8:10], t[0:4],t[11:16])
 
 
 def format_phone(string):
