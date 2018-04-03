@@ -7,8 +7,8 @@ from classes import (Admin, BaseClient, Dish, Order, OrderItem, delete_client,
 from db_config import db
 from formatting_helpers import (capitalize, css_class, format_bool,
                                 format_datetime, format_key, format_value,
-                                merge_dicts, title, usd, view_format_value)
-from hardcoded_shit import client_attributes, client_types, db_config
+                                merge_dicts, title, usd, view_format_value, inverted_client_attributes)
+from hardcoded_shit import client_attributes, client_types, db_config, client_attribute_order
 from helpers import apology, login_required, root_login_required
 
 # configure application
@@ -104,7 +104,7 @@ def new_client():
     elif client_type in client_types.values():
         return render_template("new_client.html",
                                client_type=client_type, css_class=css_class,
-                               attributes=client_attributes[client_type])
+                               inverted_client_attributes=inverted_client_attributes, attributes=client_attribute_order)
     else:
         return redirect(url_for("index"))
 

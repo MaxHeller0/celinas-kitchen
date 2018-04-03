@@ -2,7 +2,7 @@ import re
 from collections import OrderedDict
 
 from hardcoded_shit import (client_attribute_order, client_type_order,
-                            input_types)
+                            input_types, client_attributes)
 
 
 def title(val):
@@ -102,7 +102,10 @@ def invert_dict(dictionary):
     result = {}
     for key in dictionary:
         for value in dictionary[key]:
-            result[value] = key
+            try:
+                result[value] += " " + key
+            except:
+                result[value] = key
     return result
 
 
@@ -120,3 +123,4 @@ def merge_dicts(*dict_args):
 
 
 css_class = invert_dict(input_types)
+inverted_client_attributes = invert_dict(client_attributes)

@@ -1,8 +1,9 @@
 import os
+# from formatting_helpers import invert_dict
 
 client_types = {"Base": 0, "A La Carte": 1, "Standing Order": 2, "Catering": 3}
 client_attribute_order = ["id", "client_type", "name", "phone", "address",
-                          "delivery", "hash", "tax_exempt", "tax_exempt", "contact",
+                          "delivery", "hash", "tax_exempt", "contact",
                           "contact_phone", "contact_email", "weekly_money", "monday_salads",
                           "thursday_salads", "salad_dressings", "monday_hotplates",
                           "tuesday_hotplates", "thursday_hotplates", "allergies",
@@ -12,14 +13,14 @@ client_attribute_order = ["id", "client_type", "name", "phone", "address",
                           "hotplate_notes"]
 client_type_order = ["Base", "A La Carte", "Standing Order", "Catering"]
 client_attributes = {}
-client_attributes[0] = sorted(["name", "phone", "general_notes"
+client_attributes["base"] = sorted(["name", "phone", "general_notes"
                                ],
                               key=lambda x: client_attribute_order.index(x))
-client_attributes[1] = sorted(client_attributes[0]
+client_attributes["a_la_carte"] = sorted(client_attributes["base"]
                               + ["address", "delivery",
                                  "allergies", "dietary_preferences"],
                               key=lambda x: client_attribute_order.index(x))
-client_attributes[2] = sorted(client_attributes[0]
+client_attributes["standing_order"] = sorted(client_attributes["base"]
                               + ["address", "delivery",
                                  "allergies", "dietary_preferences",
                                  "weekly_money", "monday_salads", "thursday_salads",
@@ -29,10 +30,20 @@ client_attributes[2] = sorted(client_attributes[0]
                                  "hotplate_notes", "monday_hotplates",
                                  "tuesday_hotplates", "thursday_hotplates"],
                               key=lambda x: client_attribute_order.index(x))
-client_attributes[3] = sorted(client_attributes[0]
+client_attributes["catering"] = sorted(client_attributes["base"]
                               + ["address", "delivery",
                                  "tax_exempt", "contact", "contact_phone", "contact_email"],
                               key=lambda x: client_attribute_order.index(x))
+# inverted_client_attributes = invert_dict({ "base": ["name", "phone", "general_notes"],
+#                                            "a_la_carte": ["address", "delivery", "allergies", "dietary_preferences"],
+#                                            "standing_order": ["weekly_money", "monday_salads", "thursday_salads",
+#                                                               "salad_dressings", "protein", "salad_dislikes",
+#                                                               "salad_loves", "salad_notes", "hotplate_likes",
+#                                                               "hotplate_dislikes", "hotplate_loves",
+#                                                               "hotplate_notes", "monday_hotplates",
+#                                                               "tuesday_hotplates", "thursday_hotplates"]
+#                                            "catering": []
+# })
 input_types = {
     "default_text": ["address", "monday_salads", "thursday_salads",
                      "monday_hotplates", "tuesday_hotplates", "thursday_hotplates", "contact",
