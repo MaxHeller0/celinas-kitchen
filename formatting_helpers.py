@@ -102,6 +102,14 @@ def invert_dict(dictionary):
     result = {}
     for key in dictionary:
         for value in dictionary[key]:
+            result[value] = key
+    return result
+
+
+def smart_invert_dict(dictionary):
+    result = {}
+    for key in dictionary:
+        for value in dictionary[key]:
             try:
                 result[value] += " " + key
             except:
