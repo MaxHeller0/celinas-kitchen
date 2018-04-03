@@ -1,5 +1,4 @@
 import os
-# from formatting_helpers import invert_dict
 
 client_types = {"Base": 0, "A La Carte": 1, "Standing Order": 2, "Catering": 3}
 client_attribute_order = ["id", "client_type", "name", "phone", "address",
@@ -34,16 +33,6 @@ client_attributes["catering"] = sorted(client_attributes["base"]
                               + ["address", "delivery",
                                  "tax_exempt", "contact", "contact_phone", "contact_email"],
                               key=lambda x: client_attribute_order.index(x))
-# inverted_client_attributes = invert_dict({ "base": ["name", "phone", "general_notes"],
-#                                            "a_la_carte": ["address", "delivery", "allergies", "dietary_preferences"],
-#                                            "standing_order": ["weekly_money", "monday_salads", "thursday_salads",
-#                                                               "salad_dressings", "protein", "salad_dislikes",
-#                                                               "salad_loves", "salad_notes", "hotplate_likes",
-#                                                               "hotplate_dislikes", "hotplate_loves",
-#                                                               "hotplate_notes", "monday_hotplates",
-#                                                               "tuesday_hotplates", "thursday_hotplates"]
-#                                            "catering": []
-# })
 input_types = {
     "default_text": ["address", "monday_salads", "thursday_salads",
                      "monday_hotplates", "tuesday_hotplates", "thursday_hotplates", "contact",

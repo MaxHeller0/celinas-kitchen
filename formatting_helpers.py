@@ -107,6 +107,11 @@ def invert_dict(dictionary):
 
 
 def smart_invert_dict(dictionary):
+    """
+    Handles non-unique values in a way that makes multiple html classes easy
+    :param dictionary:
+    :return dictionary:
+    """
     result = {}
     for key in dictionary:
         for value in dictionary[key]:
@@ -131,4 +136,4 @@ def merge_dicts(*dict_args):
 
 
 css_class = invert_dict(input_types)
-inverted_client_attributes = invert_dict(client_attributes)
+inverted_client_attributes = smart_invert_dict(client_attributes)
