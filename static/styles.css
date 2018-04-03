@@ -101,7 +101,3 @@ main td, th {
 .overflow {
   overflow: auto;
 }
-
-input:invalid {
-  border: 2px solid red;
-}

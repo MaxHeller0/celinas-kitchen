@@ -47,31 +47,29 @@
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">
-                    <form action="{{ url_for('new_client') }}" method="POST" class="navbar-form navbar-left">
-                      <div class="form-group">
-                        <h5>
-                          New Client
-                        </h5>
-                        {% for type in client_types %}
-                          <label><input type="radio" name="client_type" value="{{client_types[type]}}">{{ type }}</label><br>
-                        {% endfor %}
-                      </div>
-                      <div class="form-group">
-                        <button class="btn btn-default" name="source" value="new_client" type="submit">Create</button>
-                      </div>
-                    </form>
+                    <script>
+                      $(function(ready) {
+                        $("#new_client").click(function(event) {
+                          if ({{CLIENT_NAMES|safe}}.indexOf($("#client_name").val()) != -1) {
+                            alert("Client already exists in database!");
+                            event.preventDefault();
+                          }
+                        });
+                      });
+                    </script>
                     <form action="{{ url_for('client') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
                       <div class="form-group">
-                        <input class="form-control" list="client_names" name="name" placeholder="Client Name">
-                        <datalist name="client_names" id="client_names">
-                          {% if client_names %}
-                            {% for name in client_names %}
+                        <input list="client_names" id="client_name" class="form-control" name="name" placeholder="Client Name" required="required">
+                        <datalist id="client_names">
+                          {% if CLIENT_NAMES %}
+                            {% for name in CLIENT_NAMES %}
                               <option value="{{name}}">
                             {% endfor %}
                           {% endif %}
                         </datalist>
                         <button name="source" value="view_button" class="btn btn-default" type="submit">View</button>
                         <button name="source" value="edit_button" class="btn btn-default" type="submit">Edit</button>
+                        <button id="new_client" formaction="/new_client/" class="btn btn-default" type="submit">New</button>
                       </div>
                     </form>
                   </ul>
@@ -81,23 +79,29 @@
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">
-                    <form action="{{ url_for('dish') }}" method="GET" class="navbar-form navbar-left">
-                      <div class="form-group">
-                        <button class="btn btn-default" type="submit">New Dish</button>
-                      </div>
-                    </form>
+                    <script>
+                      $(function(ready) {
+                        $("#new_dish").click(function(event) {
+                          if ({{DISH_NAMES|safe}}.indexOf($("#dish_name").val()) != -1) {
+                            alert("Dish already exists in database!");
+                            event.preventDefault();
+                          }
+                        });
+                      });
+                    </script>
                     <form action="{{ url_for('dish') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
                       <div class="form-group">
-                        <input class="form-control" list="dishes" name="name" placeholder="Dish Name">
-                        <datalist name="dishes" id="dishes">
-                          {% if dish_names %}
-                            {% for name in dish_names %}
+                        <input id="dish_name" class="form-control" list="dishes" name="name" placeholder="Dish Name" required="required">
+                        <datalist id="dishes">
+                          {% if DISH_NAMES %}
+                            {% for name in DISH_NAMES %}
                               <option value="{{name}}">
                             {% endfor %}
                           {% endif %}
                         </datalist>
                         <button name="source" value="view_button" class="btn btn-default" type="submit">View</button>
                         <button name="source" value="edit_button" class="btn btn-default" type="submit">Edit</button>
+                        <button id="new_dish" name="source" value="new_button" class="btn btn-default" type="submit">New</button>
                       </div>
                     </form>
                   </ul>

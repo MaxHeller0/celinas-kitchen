@@ -7,7 +7,7 @@ from sqlalchemy import FetchedValue, text
 from db_config import db
 from formatting_helpers import (force_num, format_datetime, format_phone,
                                 sort_dict, usd)
-from hardcoded_shit import client_types
+from hardcoded_shit import CLIENT_TYPES
 
 
 class Dish(db.Model):
@@ -82,9 +82,9 @@ class Order(db.Model):
     def __init__(self, name):
         client = BaseClient.query.filter_by(name=name).first()
         self.client_id = client.id
-        if client.client_type == 3:
-            if client.tax_exempt:
-                self.tax_rate = 0
+        # if client.client_type == 3:
+        #     if client.tax_exempt:
+        #         self.tax_rate = 0
         self.date = datetime.now()
         db.session.add(self)
         db.session.commit()
@@ -165,21 +165,15 @@ class BaseClient(db.Model):
     __tablename__ = "clients"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
-    client_type = db.Column(db.Integer)
     general_notes = db.Column(db.Text)
     orders = db.relationship("Order", backref="client")
+    a_la_carte = db.relationship("ALaCarteClient", backref="base", uselist=False)
+    standing_order = db.relationship("StandingOrderClient", backref="base", uselist=False)
+    catering = db.relationship("CateringClient", backref="base", uselist=False)
 
-    def __init__(self, request, client_type=0):
+    def __init__(self, request):
         self.name = request.form.get("name")
-        self.client_type = client_type
         self.general_notes = request.form.get("general_notes")
-
-    def update(self, request):
-        self.__init__(request, self.client_type)
-
-    def to_dict(self):
-        return dict((key, value) for key, value in self.__dict__.items()
-                    if not callable(value) and not key.startswith('_'))
 
 
 def base_client(request, client_type=0):
@@ -199,7 +193,7 @@ def base_client(request, client_type=0):
 
 class ALaCarteClient(db.Model):
     __tablename__ = "a_la_carte"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
     phone = db.Column(db.String(10))
     address = db.Column(db.Text)
     delivery = db.Column(db.Boolean, default=False)
@@ -235,7 +229,7 @@ def a_la_carte_client(request):
 
 class StandingOrderClient(db.Model):
     __tablename__ = "standing_order"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
     phone = db.Column(db.String(10))
     address = db.Column(db.Text)
     delivery = db.Column(db.Boolean, default=False)
@@ -303,7 +297,7 @@ def standing_order_client(request):
 
 class CateringClient(db.Model):
     __tablename__ = "catering"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
     address = db.Column(db.Text)
     delivery = db.Column(db.Boolean, default=False)
     tax_exempt = db.Column(db.Boolean, default=False)
@@ -374,4 +368,4 @@ def get_client(name):
 
 init_dict = {0: base_client, 1: a_la_carte_client,
              2: standing_order_client, 3: catering_client}
-client_types = sort_dict(client_types, dict_name="client_types")
+CLIENT_TYPES = sort_dict(CLIENT_TYPES, dict_name="CLIENT_TYPES")

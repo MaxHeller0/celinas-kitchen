@@ -93,7 +93,7 @@ def sort_dict(unsorted_dict, dict_name):
     if dict_name == "client_attributes":
         return OrderedDict(sorted(unsorted_dict.items(),
                                   key=lambda i: client_attribute_order.index(i[0])))
-    elif dict_name == "client_types":
+    elif dict_name == "CLIENT_TYPES":
         return OrderedDict(sorted(unsorted_dict.items(),
                                   key=lambda i: client_type_order.index(i[0])))
 
