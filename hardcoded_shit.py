@@ -1,6 +1,6 @@
 import os
 
-client_types = {"Base": 0, "A La Carte": 1, "Standing Order": 2, "Catering": 3}
+CLIENT_TYPES = {"Base": 0, "A La Carte": 1, "Standing Order": 2, "Catering": 3}
 client_attribute_order = ["id", "client_type", "name", "phone", "address",
                           "delivery", "hash", "tax_exempt", "contact",
                           "contact_phone", "contact_email", "weekly_money", "monday_salads",

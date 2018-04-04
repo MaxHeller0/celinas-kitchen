@@ -8,7 +8,7 @@ from db_config import db
 from formatting_helpers import (capitalize, css_class, format_bool,
                                 format_datetime, format_key, format_value,
                                 merge_dicts, title, usd, view_format_value, inverted_client_attributes)
-from hardcoded_shit import client_attributes, client_types, db_config, client_attribute_order
+from hardcoded_shit import client_attributes, CLIENT_TYPES, db_config, client_attribute_order
 from helpers import apology, login_required, root_login_required
 
 # configure application
@@ -47,58 +47,24 @@ if app.config["DEBUG"]:
 
 @app.context_processor
 def inject_navbar_data():
-    return dict(client_types=client_types, client_names=client_names,
-                dish_names=dish_names)
+    return dict(CLIENT_TYPES=CLIENT_TYPES, CLIENT_NAMES=CLIENT_NAMES,
+                DISH_NAMES=DISH_NAMES)
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     return apology("404: Page Not Found"), 404
 
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
-@app.route("/dish/", methods=["GET", "POST"])
-@login_required
-def dish(name=None):
-    dest_dict = {"view": "view_dish.html", "edit": "edit_dish.html"}
-    destination = dest_dict[request.args.get('dest', default='view')]
-    name = request.args.get("name", default=request.form.get("name"))
-
-    if request.method == "GET":
-        if not name:
-            # Creating a dish
-            return render_template("edit_dish.html", dish=None)
-    else:
-        source = request.form.get("source")
-        if source == "edit_button":
-            return redirect(url_for('dish', name=name, dest="edit"))
-        elif source == "save_button" and name:
-            dish = new_dish(request)
-            old_name = request.form.get("old_name")
-            if old_name:
-                dish_names.remove(old_name)
-            dish_names.append(name)
-            dish_names.sort()
-        return redirect(url_for('dish', name=name))
-
-    dish = Dish.query.filter_by(name=name).first()
-    if dish:
-        return render_template(destination, dish=dish)
-    else:
-        return redirect(url_for('index'))
-
-
 @app.route("/new_client/", methods=["GET", "POST"])
 @login_required
 def new_client():
-    """
-    Renders client creation page
-    pass in list of required attributes for the client type from the client_attributes dictionary
-    """
-    client_type = request.args.get("client_type", type=int, default=request.form.get("client_type"))
+    name = request.args.get("name", default=request.form.get("name"))
     if request.method == "POST":
         return redirect(url_for("new_client", client_type=client_type))
     elif client_type in client_types.values():
@@ -106,16 +72,12 @@ def new_client():
                                client_type=client_type, css_class=css_class,
                                inverted_client_attributes=inverted_client_attributes, attributes=client_attribute_order)
     else:
-        return redirect(url_for("index"))
+        return render_template("new_client.html", css_class=css_class, client_attributes=client_attributes)
 
 
 @app.route("/client/", methods=["GET", "POST"])
 @login_required
 def client(name=None):
-    """
-    Renders a page to edit or view client details
-    pass in existing details so that users can build off of them
-    """
     dest_dict = {"view": "view_client.html", "edit": "edit_client.html"}
     destination = dest_dict[request.args.get('dest', default='view')]
     if request.method == "GET":
@@ -130,19 +92,19 @@ def client(name=None):
             return redirect(url_for("client", name=name))
         elif source == "delete_button":
             delete_client(name)
-            client_names.remove(name)
+            CLIENT_NAMES.remove(name)
             return redirect(url_for("index"))
         else:
             if source == "new_client":
-                client_names.append(name)
-                client_names.sort()
+                CLIENT_NAMES.append(name)
+                CLIENT_NAMES.sort()
                 client_type = int(request.form.get("client_type"))
 
             elif source == "edit_client":
                 old_name = request.form.get("old_name")
-                client_names.remove(old_name)
-                client_names.append(name)
-                client_names.sort()
+                CLIENT_NAMES.remove(old_name)
+                CLIENT_NAMES.append(name)
+                CLIENT_NAMES.sort()
                 client_type = BaseClient.query.filter_by(
                     name=old_name).first().client_type
 
@@ -168,6 +130,34 @@ def salad_service_card(name=None):
         client_data = get_client(name)
         if client_data["client_type"] == 2:
             return render_template("salad_service_card.html", client_data=client_data)
+        else:
+            return redirect(url_for('index'))
+
+
+@app.route("/dish/", methods=["GET", "POST"])
+@login_required
+def dish(name=None):
+    dest_dict = {"view": "view_dish.html", "edit": "edit_dish.html"}
+    destination = dest_dict[request.args.get('dest', default='view')]
+    name = request.args.get("name", default=request.form.get("name"))
+
+    if request.method == "POST":
+        source = request.form.get("source")
+
+        if source in ["new_button", "edit_button"]:
+            return redirect(url_for('dish', name=name, dest="edit"))
+        elif source == "save_button":
+            dish = new_dish(request)
+            old_name = request.form.get("old_name")
+            if old_name:
+                DISH_NAMES.remove(old_name)
+            DISH_NAMES.append(name)
+            DISH_NAMES.sort()
+        return redirect(url_for('dish', name=name))
+    else:
+        dish = Dish.query.filter_by(name=name).first()
+        if dish:
+            return render_template(destination, dish=dish, name=name)
         else:
             return redirect(url_for('index'))
 
@@ -334,13 +324,13 @@ def register():
 with app.app_context():
     db.init_app(app)
 
-    client_names, dish_names = [], []
+    CLIENT_NAMES, DISH_NAMES = [], []
     clients = BaseClient.query.order_by(BaseClient.name).all()
     dishes = Dish.query.order_by(Dish.name).all()
     for client in clients:
-        client_names.append(client.name)
+        CLIENT_NAMES.append(client.name)
     for dish in dishes:
-        dish_names.append(dish.name)
+        DISH_NAMES.append(dish.name)
 
 # run the program
 if __name__ == "__main__":

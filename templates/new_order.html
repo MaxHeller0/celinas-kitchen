@@ -9,8 +9,8 @@
     <div class="form-group">
       <input class="form-control" list="client_names" name="name" placeholder="Client Name" id="name">
       <datalist name="client_names" id="client_names">
-        {% if client_names %}
-          {% for client in client_names %}
+        {% if CLIENT_NAMES %}
+          {% for client in CLIENT_NAMES %}
             <option value="{{client.name}}">
           {% endfor %}
         {% endif %}

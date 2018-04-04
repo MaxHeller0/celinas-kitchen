@@ -34,7 +34,7 @@
         <form action="{{url_for('order', order_id=id)}}" method="POST">
           <td><input class="form-control" type="number" min="1" name="quantity" value="1" required="required"></td>
           <td>
-            <input class="form-control" list="dishes" name="name" placeholder="Dish Name" autofocus="True">
+            <input class="form-control" list="dishes" name="name" placeholder="Dish Name" autofocus="True" required="required">
             <datalist name="dishes" id="dishes">
               {% if dishes %}
               {% for dish in dishes %}
