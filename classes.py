@@ -68,8 +68,7 @@ class OrderItem(db.Model):
 class Order(db.Model):
     __tablename__ = "orders"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    client_id = db.Column(db.Integer, db.ForeignKey(
-        "clients.id"), nullable=False)
+    client_id = db.Column(db.Integer, db.ForeignKey("clients.id"), nullable=False)
     date = db.Column(db.DateTime(timezone=True))
     tax_rate = db.Column(db.Float, default=.08)
     subtotal = db.Column(db.Float(precision=2), default=0)
@@ -77,7 +76,8 @@ class Order(db.Model):
     total = db.Column(db.Float(precision=2), server_default=FetchedValue())
     paid = db.Column(db.Float(precision=2), default=0)
     owed = db.Column(db.Float(precision=2), server_default=FetchedValue())
-    order_items = db.relationship("OrderItem", backref="order")
+    order_items = db.relationship(
+        "OrderItem", backref="order", cascade="all, delete-orphan")
 
     def __init__(self, name):
         client = Client.query.filter_by(name=name).first()
@@ -165,7 +165,8 @@ class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), unique=True)
     general_notes = db.Column(db.Text)
-    orders = db.relationship("Order", backref="client")
+    orders = db.relationship("Order", backref="client",
+                             cascade="all, delete-orphan")
     _a_la_carte = db.relationship(
         "ALaCarteClient", backref="base", uselist=False, cascade="all, delete-orphan")
     _standing_order = db.relationship(
@@ -223,7 +224,8 @@ class ALaCarteClient(db.Model):
 
 class StandingOrderClient(db.Model):
     __tablename__ = "standing_order"
-    client_id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey(
+        "clients.id"), primary_key=True)
     phone = db.Column(db.String(10))
     address = db.Column(db.Text)
     delivery = db.Column(db.Boolean, default=False)
@@ -276,7 +278,8 @@ class StandingOrderClient(db.Model):
 
 class CateringClient(db.Model):
     __tablename__ = "catering"
-    client_id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey(
+        "clients.id"), primary_key=True)
     address = db.Column(db.Text)
     delivery = db.Column(db.Boolean, default=False)
     tax_exempt = db.Column(db.Boolean, default=False)
