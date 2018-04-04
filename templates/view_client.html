@@ -6,11 +6,11 @@
 
 {% block main %}
   <h1>Client Details:
-    {{client_data}}
+    {{client_data["name"]}}
   </h1>
   <p>
     {% for attribute in client_data %}
-      {% if client_data[attribute] and attribute not in ['client_id', 'name'] %}
+      {% if client_data[attribute] and attribute not in ['id', 'client_id', 'name'] %}
         {% if CSS_CLASS[attribute] == "boolean" %}
           <b>{{attribute|format_key}}:</b>
           {{client_data[attribute]|format_bool}}<br><br>

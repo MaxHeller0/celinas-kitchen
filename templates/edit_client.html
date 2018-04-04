@@ -17,7 +17,7 @@
         <input class="form-control" type="text" name="name" value="{{client_data['name']}}"><br>
       </div>
       {% for attribute in client_data %}
-        {% if attribute not in['client_id' 'client_type', 'hash', 'name'] %}
+        {% if attribute not in['id', 'client_id' 'client_type', 'hash', 'name'] %}
           {% if attribute == "name" %}
           <div class="form-group">
               Name:

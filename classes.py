@@ -181,12 +181,21 @@ class Client(db.Model):
         for client_type in client_types:
             INIT_DICT[client_type](request=request, base=self)
 
-    def data_dict(self):
+    def get_sub_clients(self):
         sub_clients = [self._a_la_carte, self._standing_order, self._catering]
+        return [sub for sub in sub_clients if sub is not None]
+
+    def update(self, request):
+        self.name = request.form.get("name")
+        self.general_notes = request.form.get("general_notes")
+
+        for sub_client in self.get_sub_clients():
+            sub_client.update(request)
+
+    def data_dict(self):
         client_data = to_dict(self)
-        for sub_client in sub_clients:
-            if sub_client:
-                client_data = merge_dicts(client_data, to_dict(sub_client))
+        for sub_client in self.get_sub_clients():
+            client_data = merge_dicts(client_data, to_dict(sub_client))
         return sort_dict(client_data, "CLIENT_ATTRIBUTES")
 
 

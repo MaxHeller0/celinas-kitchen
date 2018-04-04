@@ -102,8 +102,9 @@ def client(name=None):
             db.session.commit()
             return redirect(url_for("client", name=name))
         elif source == "edit_client":
-            # TODO update
             old_name = request.form.get("old_name")
+            Client.query.filter_by(name=old_name).first().update(request)
+            db.session.commit()
             CLIENT_NAMES.remove(old_name)
             CLIENT_NAMES.append(name)
             CLIENT_NAMES.sort()
