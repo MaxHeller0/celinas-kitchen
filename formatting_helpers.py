@@ -2,7 +2,7 @@ import re
 from collections import OrderedDict
 
 from hardcoded_shit import (client_attribute_order, client_type_order,
-                            input_types)
+                            input_types, client_attributes)
 
 
 def title(val):
@@ -106,6 +106,22 @@ def invert_dict(dictionary):
     return result
 
 
+def smart_invert_dict(dictionary):
+    """
+    Handles non-unique values in a way that makes multiple html classes easy
+    :param dictionary:
+    :return dictionary:
+    """
+    result = {}
+    for key in dictionary:
+        for value in dictionary[key]:
+            try:
+                result[value] += " " + key
+            except:
+                result[value] = key
+    return result
+
+
 def merge_dicts(*dict_args):
     """
     Given any number of dicts, shallow copy and merge into a new dict,
@@ -120,3 +136,4 @@ def merge_dicts(*dict_args):
 
 
 css_class = invert_dict(input_types)
+inverted_client_attributes = smart_invert_dict(client_attributes)

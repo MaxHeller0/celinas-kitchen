@@ -2,7 +2,7 @@ import os
 
 CLIENT_TYPES = {"Base": 0, "A La Carte": 1, "Standing Order": 2, "Catering": 3}
 client_attribute_order = ["id", "client_type", "name", "phone", "address",
-                          "delivery", "hash", "tax_exempt", "tax_exempt", "contact",
+                          "delivery", "hash", "tax_exempt", "contact",
                           "contact_phone", "contact_email", "weekly_money", "monday_salads",
                           "thursday_salads", "salad_dressings", "monday_hotplates",
                           "tuesday_hotplates", "thursday_hotplates", "allergies",
@@ -12,14 +12,14 @@ client_attribute_order = ["id", "client_type", "name", "phone", "address",
                           "hotplate_notes"]
 client_type_order = ["Base", "A La Carte", "Standing Order", "Catering"]
 client_attributes = {}
-client_attributes[0] = sorted(["name", "phone", "general_notes"
+client_attributes["base"] = sorted(["name", "phone", "general_notes"
                                ],
                               key=lambda x: client_attribute_order.index(x))
-client_attributes[1] = sorted(client_attributes[0]
+client_attributes["a_la_carte"] = sorted(client_attributes["base"]
                               + ["address", "delivery",
                                  "allergies", "dietary_preferences"],
                               key=lambda x: client_attribute_order.index(x))
-client_attributes[2] = sorted(client_attributes[0]
+client_attributes["standing_order"] = sorted(client_attributes["base"]
                               + ["address", "delivery",
                                  "allergies", "dietary_preferences",
                                  "weekly_money", "monday_salads", "thursday_salads",
@@ -29,7 +29,7 @@ client_attributes[2] = sorted(client_attributes[0]
                                  "hotplate_notes", "monday_hotplates",
                                  "tuesday_hotplates", "thursday_hotplates"],
                               key=lambda x: client_attribute_order.index(x))
-client_attributes[3] = sorted(client_attributes[0]
+client_attributes["catering"] = sorted(client_attributes["base"]
                               + ["address", "delivery",
                                  "tax_exempt", "contact", "contact_phone", "contact_email"],
                               key=lambda x: client_attribute_order.index(x))

@@ -1,53 +1,95 @@
 {% extends "layout.html" %}
 
 {% block title %}
-  Add a Client
+Add a Client
 {% endblock %}
 
 {% block main %}
-  <form action="{{ url_for('client') }}" method="POST">
-    <fieldset>
-      {% for attribute in attributes %}
-        {% if attribute == "name" %}
-          <div class="form-group">
-              Name:
-              <input id="client_name" class="form-control" type="text" name="name" required><br>
-          </div>
-        {% elif attribute in ["phone", "contact_phone"] %}
-          <div class="form-group">
-              {{ attribute|format_key }}:
-              <input class="form-control" type="text" name="{{ attribute }}" pattern="[(]*[0-9]{3}[)]*[ -]*[0-9]{3}[ -]*[0-9]{4}[ ]*"><br>
-          </div>
-        {% elif css_class[attribute] == "default_text" %}
-          <div class="form-group">
-            {{attribute|format_key}}:
-            <input class="form-control" type="text" name="{{attribute}}"><br>
-          </div>
-        {% elif css_class[attribute] == "opinion_text" %}
-          <div class="form-group">
-            {{attribute|format_key}}:
-            <textarea class="opinion_text" name="{{attribute}}"></textarea><br>
-          </div>
-        {% elif css_class[attribute] == "note_text" %}
-          <div class="form-group">
-            {{attribute|format_key}}:
-            <textarea class="note_text" name="{{attribute}}"></textarea><br>
-          </div>
-        {% elif css_class[attribute] == "boolean" %}
-          <div class="form-group">
-            {{attribute|format_key}}:
-            <input type="radio" name="{{attribute}}" id="True" value="1">
-            <label for="True">Yes</label>
-            <input type="radio" name="{{attribute}}" id="False" value="0">
-            <label for="False">No</label>
-            <br>
-          </div>
-        {% endif %}
-      {% endfor %}
-      <div class="form-group">
-        <button name="source" value="new_client" class="btn btn-default" type="submit">Create</button>
-      </div>
-      <input type="hidden" name="client_type" value="{{client_type}}">
-    </fieldset>
-  </form>
+<script>
+  $(document).ready(function(){
+    alert("javascript works");
+    alert('{{ inverted_client_attributes|tojson|safe }}');
+    $(".input").css("display", "none");
+  });
+
+  $(function(ready){
+    $("#a_la_carte").click(function(){
+      if ($(this).is(":checked")){
+        $(".a_la_carte").css("display", "block");
+      }
+      else{
+        $(".a_la_carte").css("display", "none");
+      }
+    });
+    $("#standing_order").click(function(){
+      if ($(this).is(":checked")){
+        $(".standing_order").css("display", "block");
+      }
+      else{
+        $(".standing_order").css("display", "none");
+      }
+    });
+    $("#catering").click(function(){
+      if ($(this).is(":checked")){
+        $(".catering").css("display", "block");
+      }
+      else{
+        $(".catering").css("display", "none");
+      }
+    });
+  });
+</script>
+<form action="{{ url_for('client') }}" method="POST">
+  <fieldset>
+    <div class="form-group">
+      Name:
+      <input id="client_name" class="form-control {{ inverted_client_attributes[attribute] }}" type="text" name="name" required><br>
+    </div>
+    <div>
+      Client Type:
+      <input type="checkbox" id="a_la_carte" name="client_types" value="a_la_carte">
+      <label for="a_la_carte">A La Carte</label>
+      <input type="checkbox" id="standing_order" name="client_types" value="standing_order">
+      <label for="standing_order">Standing Order</label>
+      <input type="checkbox" id="catering" name="client_types" value="catering">
+      <label for="catering">Catering</label>
+    </div>
+    {% for attribute in attributes %}
+    {% if attribute in ["phone", "contact_phone"] %}
+    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+      {{ attribute|format_key }}:
+      <input class="form-control" type="text" name="{{ attribute }}" pattern="[(]*[0-9]{3}[)]*[ -]*[0-9]{3}[ -]*[0-9]{4}[ ]*"><br>
+    </div>
+    {% elif css_class[attribute] == "default_text" %}
+    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+      {{attribute|format_key}}:
+      <input class="form-control" type="text" name="{{attribute}}"><br>
+    </div>
+    {% elif css_class[attribute] == "opinion_text" %}
+    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+      {{attribute|format_key}}:
+      <textarea class="opinion_text" name="{{attribute}}"></textarea><br>
+    </div>
+    {% elif css_class[attribute] == "note_text" %}
+    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+      {{attribute|format_key}}:
+      <textarea class="note_text" name="{{attribute}}"></textarea><br>
+    </div>
+    {% elif css_class[attribute] == "boolean" %}
+    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+      {{attribute|format_key}}:
+      <input type="radio" name="{{attribute}}" id="True" value="1">
+      <label for="True">Yes</label>
+      <input type="radio" name="{{attribute}}" id="False" value="0">
+      <label for="False">No</label>
+      <br>
+    </div>
+    {% endif %}
+    {% endfor %}
+    <div class="form-group">
+      <button name="source" value="new_client" class="btn btn-default" type="submit">Create</button>
+    </div>
+    <input type="hidden" name="client_type" value="{{client_type}}">
+  </fieldset>
+</form>
 {% endblock %}
