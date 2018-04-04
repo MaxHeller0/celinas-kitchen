@@ -2,13 +2,15 @@ from datetime import datetime, timedelta
 
 from flask import Flask, redirect, render_template, request, session, url_for
 
-from classes import (Admin, BaseClient, Dish, Order, OrderItem, delete_client,
-                     filter_orders, get_client, init_dict, new_dish)
+from classes import (Admin, Client, Dish, Order, OrderItem, filter_orders,
+                     new_dish)
 from db_config import db
-from formatting_helpers import (capitalize, css_class, format_bool,
-                                format_datetime, format_key, format_value,
-                                merge_dicts, title, usd, view_format_value, inverted_client_attributes)
-from hardcoded_shit import client_attributes, CLIENT_TYPES, db_config, client_attribute_order
+from formatting_helpers import (capitalize, CSS_CLASS, format_bool,
+                                format_datetime, format_key,
+                                INVERTED_CLIENT_ATTRIBUTES, sort_dict, title,
+                                usd, view_format_phone)
+from hardcoded_shit import (CLIENT_ATTRIBUTE_ORDER, CLIENT_ATTRIBUTES,
+                            CLIENT_TYPES, db_config)
 from helpers import apology, login_required, root_login_required
 
 # configure application
@@ -28,8 +30,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 # set up filters for use in displaying text
 app.jinja_env.filters["title"] = title
 app.jinja_env.filters["capitalize"] = capitalize
-app.jinja_env.filters["format_value"] = format_value
-app.jinja_env.filters["view_format_value"] = view_format_value
+app.jinja_env.filters["format_phone"] = view_format_phone
 app.jinja_env.filters["format_key"] = format_key
 app.jinja_env.filters["format_bool"] = format_bool
 app.jinja_env.filters["usd"] = usd
@@ -66,13 +67,12 @@ def index():
 def new_client():
     name = request.args.get("name", default=request.form.get("name"))
     if request.method == "POST":
-        return redirect(url_for("new_client", client_type=client_type))
-    elif client_type in client_types.values():
-        return render_template("new_client.html",
-                               client_type=client_type, css_class=css_class,
-                               inverted_client_attributes=inverted_client_attributes, attributes=client_attribute_order)
+        return redirect(url_for("new_client", name=name))
     else:
-        return render_template("new_client.html", css_class=css_class, client_attributes=client_attributes)
+        return render_template("new_client.html",
+                               INVERTED_CLIENT_ATTRIBUTES=INVERTED_CLIENT_ATTRIBUTES,
+                               attributes=CLIENT_ATTRIBUTE_ORDER,
+                               CSS_CLASS=CSS_CLASS, name=name)
 
 
 @app.route("/client/", methods=["GET", "POST"])
@@ -80,10 +80,9 @@ def new_client():
 def client(name=None):
     dest_dict = {"view": "view_client.html", "edit": "edit_client.html"}
     destination = dest_dict[request.args.get('dest', default='view')]
-    if request.method == "GET":
-        name = request.args.get('name')
-    else:
-        name = request.form.get("name")
+    name = request.form.get("name", default=request.args.get("name"))
+
+    if request.method == "POST":
         source = request.form.get("source")
 
         if destination == "edit_client.html" or source == "edit_button":
@@ -91,37 +90,37 @@ def client(name=None):
         elif source == "view_button":
             return redirect(url_for("client", name=name))
         elif source == "delete_button":
-            delete_client(name)
+            db.session.delete(Client.query.filter_by(name=name).first())
+            db.session.commit()
             CLIENT_NAMES.remove(name)
             return redirect(url_for("index"))
-        else:
-            if source == "new_client":
-                CLIENT_NAMES.append(name)
-                CLIENT_NAMES.sort()
-                client_type = int(request.form.get("client_type"))
-
-            elif source == "edit_client":
-                old_name = request.form.get("old_name")
-                CLIENT_NAMES.remove(old_name)
-                CLIENT_NAMES.append(name)
-                CLIENT_NAMES.sort()
-                client_type = BaseClient.query.filter_by(
-                    name=old_name).first().client_type
-
-            # add client to db using appropriate function
-            init_dict[client_type](request)
+        elif source == "new_client":
+            CLIENT_NAMES.append(name)
+            CLIENT_NAMES.sort()
+            client = Client(request)
+            db.session.add(client)
+            db.session.commit()
+            return redirect(url_for("client", name=name))
+        elif source == "edit_client":
+            # TODO update
+            old_name = request.form.get("old_name")
+            CLIENT_NAMES.remove(old_name)
+            CLIENT_NAMES.append(name)
+            CLIENT_NAMES.sort()
             return redirect(url_for("client", name=name))
 
-    client_data = get_client(name)
-    if client_data is None:
-        return apology("Could not retrieve client with name {}".format(name))
+    client = Client.query.filter_by(name=name).first()
 
-    return render_template(destination, client_data=client_data, css_class=css_class)
+    if not client:
+        return apology("Could not retrieve client with name {}".format(name))
+    else:
+        return render_template(destination, client_data=client.data_dict(), CSS_CLASS=CSS_CLASS)
 
 
 @app.route("/salad_service_card/", methods=["GET", "POST"])
 @login_required
 def salad_service_card(name=None):
+    # TODO Fix
     if request.method == "POST":
         name = request.form.get("name")
         return redirect(url_for("salad_service_card", name=name))
@@ -325,7 +324,7 @@ with app.app_context():
     db.init_app(app)
 
     CLIENT_NAMES, DISH_NAMES = [], []
-    clients = BaseClient.query.order_by(BaseClient.name).all()
+    clients = Client.query.order_by(Client.name).all()
     dishes = Dish.query.order_by(Dish.name).all()
     for client in clients:
         CLIENT_NAMES.append(client.name)

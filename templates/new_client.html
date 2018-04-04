@@ -7,8 +7,6 @@ Add a Client
 {% block main %}
 <script>
   $(document).ready(function(){
-    alert("javascript works");
-    alert('{{ inverted_client_attributes|tojson|safe }}');
     $(".input").css("display", "none");
   });
 
@@ -39,11 +37,11 @@ Add a Client
     });
   });
 </script>
-<form action="{{ url_for('client') }}" method="POST">
+<form action="{{url_for('client')}}" method="POST">
   <fieldset>
     <div class="form-group">
       Name:
-      <input id="client_name" class="form-control {{ inverted_client_attributes[attribute] }}" type="text" name="name" required><br>
+      <input id="client_name" class="form-control {{INVERTED_CLIENT_ATTRIBUTES[attribute]}}" type="text" name="name" value="{{name}}" required="required"><br>
     </div>
     <div>
       Client Type:
@@ -56,27 +54,27 @@ Add a Client
     </div>
     {% for attribute in attributes %}
     {% if attribute in ["phone", "contact_phone"] %}
-    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
-      {{ attribute|format_key }}:
-      <input class="form-control" type="text" name="{{ attribute }}" pattern="[(]*[0-9]{3}[)]*[ -]*[0-9]{3}[ -]*[0-9]{4}[ ]*"><br>
+    <div class="form-group input {{INVERTED_CLIENT_ATTRIBUTES[attribute]}}">
+      {{attribute|format_key}}:
+      <input class="form-control" type="text" name="{{attribute}}" pattern="[(]*[0-9]{3}[)]*[ -]*[0-9]{3}[ -]*[0-9]{4}[ ]*"><br>
     </div>
-    {% elif css_class[attribute] == "default_text" %}
-    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+    {% elif CSS_CLASS[attribute] == "default_text" %}
+    <div class="form-group input {{INVERTED_CLIENT_ATTRIBUTES[attribute]}}">
       {{attribute|format_key}}:
       <input class="form-control" type="text" name="{{attribute}}"><br>
     </div>
-    {% elif css_class[attribute] == "opinion_text" %}
-    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+    {% elif CSS_CLASS[attribute] == "opinion_text" %}
+    <div class="form-group input {{INVERTED_CLIENT_ATTRIBUTES[attribute]}}">
       {{attribute|format_key}}:
       <textarea class="opinion_text" name="{{attribute}}"></textarea><br>
     </div>
-    {% elif css_class[attribute] == "note_text" %}
-    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+    {% elif CSS_CLASS[attribute] == "note_text" %}
+    <div class="form-group input {{INVERTED_CLIENT_ATTRIBUTES[attribute]}}">
       {{attribute|format_key}}:
       <textarea class="note_text" name="{{attribute}}"></textarea><br>
     </div>
-    {% elif css_class[attribute] == "boolean" %}
-    <div class="form-group input {{ inverted_client_attributes[attribute] }}">
+    {% elif CSS_CLASS[attribute] == "boolean" %}
+    <div class="form-group input {{INVERTED_CLIENT_ATTRIBUTES[attribute]}}">
       {{attribute|format_key}}:
       <input type="radio" name="{{attribute}}" id="True" value="1">
       <label for="True">Yes</label>

@@ -6,7 +6,7 @@ from sqlalchemy import FetchedValue, text
 
 from db_config import db
 from formatting_helpers import (force_num, format_datetime, format_phone,
-                                sort_dict, usd)
+                                merge_dicts, sort_dict, to_dict, usd)
 from hardcoded_shit import CLIENT_TYPES
 
 
@@ -80,13 +80,12 @@ class Order(db.Model):
     order_items = db.relationship("OrderItem", backref="order")
 
     def __init__(self, name):
-        client = BaseClient.query.filter_by(name=name).first()
-        self.client_id = client.id
-        # if client.client_type == 3:
-        #     if client.tax_exempt:
-        #         self.tax_rate = 0
+        client = Client.query.filter_by(name=name).first()
+        if client._catering:
+            if client._catering.tax_exempt:
+                self.tax_rate = 0
         self.date = datetime.now()
-        db.session.add(self)
+        client.orders.append(self)
         db.session.commit()
 
     def contains(self, dish_id):
@@ -108,7 +107,7 @@ def filter_orders(request):
     if filter == "client":
         orders = Order.query.filter(Order.date > past_time).order_by(Order.date.desc())
 
-        client = BaseClient.query.filter_by(name=query).first()
+        client = Client.query.filter_by(name=query).first()
         if client:
             orders = orders.with_parent(client)
 
@@ -161,75 +160,61 @@ class Admin(db.Model):
         return admin.id
 
 
-class BaseClient(db.Model):
+class Client(db.Model):
     __tablename__ = "clients"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), unique=True)
     general_notes = db.Column(db.Text)
     orders = db.relationship("Order", backref="client")
-    a_la_carte = db.relationship("ALaCarteClient", backref="base", uselist=False)
-    standing_order = db.relationship("StandingOrderClient", backref="base", uselist=False)
-    catering = db.relationship("CateringClient", backref="base", uselist=False)
+    _a_la_carte = db.relationship(
+        "ALaCarteClient", backref="base", uselist=False, cascade="all, delete-orphan")
+    _standing_order = db.relationship(
+        "StandingOrderClient", backref="base", uselist=False, cascade="all, delete-orphan")
+    _catering = db.relationship(
+        "CateringClient", backref="base", uselist=False, cascade="all, delete-orphan")
 
     def __init__(self, request):
         self.name = request.form.get("name")
         self.general_notes = request.form.get("general_notes")
 
+        client_types = request.form.getlist("client_types")
+        for client_type in client_types:
+            INIT_DICT[client_type](request=request, base=self)
 
-def base_client(request, client_type=0):
-    if request.form.get("source") == "edit_client":
-        name = request.form.get("old_name")
-    else:
-        name = request.form.get("name")
-    client = BaseClient.query.filter_by(name=name).first()
-    if client:
-        client.update(request)
-    else:
-        client = BaseClient(request, client_type)
-        db.session.add(client)
-    db.session.commit()
-    return client.id
+    def data_dict(self):
+        sub_clients = [self._a_la_carte, self._standing_order, self._catering]
+        client_data = to_dict(self)
+        for sub_client in sub_clients:
+            if sub_client:
+                client_data = merge_dicts(client_data, to_dict(sub_client))
+        return sort_dict(client_data, "CLIENT_ATTRIBUTES")
 
 
 class ALaCarteClient(db.Model):
     __tablename__ = "a_la_carte"
-    id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey(
+        "clients.id"), primary_key=True)
     phone = db.Column(db.String(10))
     address = db.Column(db.Text)
     delivery = db.Column(db.Boolean, default=False)
     allergies = db.Column(db.Text)
     dietary_preferences = db.Column(db.Text)
 
-    def __init__(self, request, client_id):
-        self.id = client_id
+    def __init__(self, request, base):
+        self.base = base
         self.phone = format_phone(request.form.get("phone"))
-        self.address = request.form.get("address").lower()
+        self.address = request.form.get("address")
         self.delivery = force_num(request.form.get("delivery"))
-        self.allergies = request.form.get("allergies").lower()
+        self.allergies = request.form.get("allergies")
         self.dietary_preferences = request.form.get("dietary_preferences")
 
     def update(self, request):
-        self.__init__(request, self.id)
-
-    def to_dict(self):
-        return dict((key, value) for key, value in self.__dict__.items()
-                    if not callable(value) and not key.startswith('_'))
-
-
-def a_la_carte_client(request):
-    client_id = base_client(request, 1)
-    client = ALaCarteClient.query.get(client_id)
-    if client:
-        client.update(request)
-    else:
-        client = ALaCarteClient(request, client_id)
-        db.session.add(client)
-    db.session.commit()
+        self.__init__(request, self.base)
 
 
 class StandingOrderClient(db.Model):
     __tablename__ = "standing_order"
-    id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
     phone = db.Column(db.String(10))
     address = db.Column(db.Text)
     delivery = db.Column(db.Boolean, default=False)
@@ -251,10 +236,10 @@ class StandingOrderClient(db.Model):
     salad_notes = db.Column(db.Text)
     hotplate_notes = db.Column(db.Text)
 
-    def __init__(self, request, client_id):
-        self.id = client_id
+    def __init__(self, request, base):
+        self.base = base
         self.phone = format_phone(request.form.get("phone"))
-        self.address = request.form.get("address").lower()
+        self.address = request.form.get("address")
         self.delivery = force_num(request.form.get("delivery"))
         self.allergies = request.form.get("allergies").lower()
         self.dietary_preferences = request.form.get("dietary_preferences")
@@ -277,27 +262,12 @@ class StandingOrderClient(db.Model):
         self.hotplate_notes = request.form.get("hotplate_notes")
 
     def update(self, request):
-        self.__init__(request, self.id)
-
-    def toDict(self):
-        return dict((key, value) for key, value in self.__dict__.items()
-                    if not callable(value) and not key.startswith('_'))
-
-
-def standing_order_client(request):
-    client_id = base_client(request, 2)
-    client = StandingOrderClient.query.get(client_id)
-    if client:
-        client.update(request)
-    else:
-        client = StandingOrderClient(request, client_id)
-        db.session.add(client)
-    db.session.commit()
+        self.__init__(request, self.base)
 
 
 class CateringClient(db.Model):
     __tablename__ = "catering"
-    id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey("clients.id"), primary_key=True)
     address = db.Column(db.Text)
     delivery = db.Column(db.Boolean, default=False)
     tax_exempt = db.Column(db.Boolean, default=False)
@@ -305,9 +275,9 @@ class CateringClient(db.Model):
     contact_phone = db.Column(db.String(10))
     contact_email = db.Column(db.Text)
 
-    def __init__(self, request, client_id):
-        self.id = client_id
-        self.address = request.form.get("address").lower()
+    def __init__(self, request, base):
+        self.base = base
+        self.address = request.form.get("address")
         self.delivery = force_num(request.form.get("delivery"))
         self.tax_exempt = force_num(request.form.get("tax_exempt"))
         self.contact = request.form.get("contact")
@@ -315,57 +285,9 @@ class CateringClient(db.Model):
         self.contact_email = request.form.get("contact_email")
 
     def update(self, request):
-        self.__init__(request, self.id)
-
-    def to_dict(self):
-        return dict((key, value) for key, value in self.__dict__.items()
-                    if not callable(value) and not key.startswith('_'))
+        self.__init__(request, self.base)
 
 
-def catering_client(request):
-    client_id = base_client(request, 3)
-    client = CateringClient.query.get(client_id)
-    if client:
-        client.update(request)
-    else:
-        client = CateringClient(request, client_id)
-        db.session.add(client)
-    db.session.commit()
-
-
-def delete_client(name):
-    table_names = {0: "clients", 1: "standing_order"}
-    client_id = BaseClient.query.filter_by(name=name).first().id
-    client_type = BaseClient.query.get(client_id).client_type
-    t = text("DELETE FROM clients WHERE id=:client_id")
-    db.engine.execute(t, client_id=client_id)
-    if client_type != 0:
-        table = table_names[client_type]
-        t = text("DELETE FROM {table} WHERE id=:client_id".format(table=table))
-        db.engine.execute(t, client_id=client_id)
-    db.session.commit()
-
-
-def get_client(name):
-    """
-    Input: name
-    Returns: associated client details as a sorted dictionary, or None
-    """
-    table_names = {0: "clients", 1: "a_la_carte",
-                   2: "standing_order", 3: "catering"}
-    try:
-        t = text("SELECT * FROM clients WHERE name LIKE :name")
-        client = db.engine.execute(t, name=name).first()
-        if client["client_type"] != 0:
-            table = table_names[client["client_type"]]
-            t = text(
-                "SELECT * FROM {table} JOIN clients ON {table}.id = clients.id WHERE name LIKE :name".format(table=table))
-            client = db.engine.execute(t, name=name).first()
-        return sort_dict(client, "client_attributes")
-    except:
-        return None
-
-
-init_dict = {0: base_client, 1: a_la_carte_client,
-             2: standing_order_client, 3: catering_client}
+INIT_DICT = {"a_la_carte": ALaCarteClient, "catering": CateringClient,
+             "standing_order": StandingOrderClient}
 CLIENT_TYPES = sort_dict(CLIENT_TYPES, dict_name="CLIENT_TYPES")

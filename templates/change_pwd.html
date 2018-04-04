@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block main %}
-  <form action="{{ url_for('change_pwd') }}" method="post">
+  <form action="{{url_for('change_pwd')}}" method="post">
     <fieldset>
       <div class="form-group">
         <input class="form-control" name="password_old" autofocus="autofocus" placeholder="Old Password" type="password"/>

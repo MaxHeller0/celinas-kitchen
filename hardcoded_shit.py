@@ -1,7 +1,7 @@
 import os
 
 CLIENT_TYPES = {"Base": 0, "A La Carte": 1, "Standing Order": 2, "Catering": 3}
-client_attribute_order = ["id", "client_type", "name", "phone", "address",
+CLIENT_ATTRIBUTE_ORDER = ["id", "client_id", "client_type", "name", "phone", "address",
                           "delivery", "hash", "tax_exempt", "contact",
                           "contact_phone", "contact_email", "weekly_money", "monday_salads",
                           "thursday_salads", "salad_dressings", "monday_hotplates",
@@ -10,30 +10,29 @@ client_attribute_order = ["id", "client_type", "name", "phone", "address",
                           "salad_loves", "hotplate_likes", "hotplate_dislikes",
                           "hotplate_loves", "general_notes", "salad_notes",
                           "hotplate_notes"]
-client_type_order = ["Base", "A La Carte", "Standing Order", "Catering"]
-client_attributes = {}
-client_attributes["base"] = sorted(["name", "phone", "general_notes"
-                               ],
-                              key=lambda x: client_attribute_order.index(x))
-client_attributes["a_la_carte"] = sorted(client_attributes["base"]
-                              + ["address", "delivery",
-                                 "allergies", "dietary_preferences"],
-                              key=lambda x: client_attribute_order.index(x))
-client_attributes["standing_order"] = sorted(client_attributes["base"]
-                              + ["address", "delivery",
-                                 "allergies", "dietary_preferences",
-                                 "weekly_money", "monday_salads", "thursday_salads",
-                                 "salad_dressings", "protein", "salad_dislikes",
-                                 "salad_loves", "salad_notes", "hotplate_likes",
-                                 "hotplate_dislikes", "hotplate_loves",
-                                 "hotplate_notes", "monday_hotplates",
-                                 "tuesday_hotplates", "thursday_hotplates"],
-                              key=lambda x: client_attribute_order.index(x))
-client_attributes["catering"] = sorted(client_attributes["base"]
-                              + ["address", "delivery",
-                                 "tax_exempt", "contact", "contact_phone", "contact_email"],
-                              key=lambda x: client_attribute_order.index(x))
-input_types = {
+CLIENT_TYPE_ORDER = ["Base", "A La Carte", "Standing Order", "Catering"]
+CLIENT_ATTRIBUTES = {}
+CLIENT_ATTRIBUTES["base"] = sorted(["name", "phone", "general_notes"],
+                                   key=lambda x: CLIENT_ATTRIBUTE_ORDER.index(x))
+CLIENT_ATTRIBUTES["a_la_carte"] = sorted(CLIENT_ATTRIBUTES["base"]
+                                         + ["address", "delivery",
+                                            "allergies", "dietary_preferences"],
+                                         key=lambda x: CLIENT_ATTRIBUTE_ORDER.index(x))
+CLIENT_ATTRIBUTES["standing_order"] = sorted(CLIENT_ATTRIBUTES["base"]
+                                             + ["address", "delivery",
+                                                "allergies", "dietary_preferences",
+                                                "weekly_money", "monday_salads", "thursday_salads",
+                                                "salad_dressings", "protein", "salad_dislikes",
+                                                "salad_loves", "salad_notes", "hotplate_likes",
+                                                "hotplate_dislikes", "hotplate_loves",
+                                                "hotplate_notes", "monday_hotplates",
+                                                "tuesday_hotplates", "thursday_hotplates"],
+                                             key=lambda x: CLIENT_ATTRIBUTE_ORDER.index(x))
+CLIENT_ATTRIBUTES["catering"] = sorted(CLIENT_ATTRIBUTES["base"]
+                                       + ["address", "delivery",
+                                          "tax_exempt", "contact", "contact_phone", "contact_email"],
+                                       key=lambda x: CLIENT_ATTRIBUTE_ORDER.index(x))
+INPUT_TYPES = {
     "default_text": ["address", "monday_salads", "thursday_salads",
                      "monday_hotplates", "tuesday_hotplates", "thursday_hotplates", "contact",
                      "contact_email"],
@@ -42,7 +41,8 @@ input_types = {
                      "allergies"],
     "note_text": ["general_notes", "salad_notes", "hotplate_notes"],
     "boolean": ["salad_dressings", "delivery", "tax_exempt"],
-    "money": ["weekly_money"]
+    "money": ["weekly_money"],
+    "phone": ["phone", "contact_phone"]
 }
 try:
     # connect to production db if running in AWS

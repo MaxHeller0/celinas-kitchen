@@ -1,8 +1,8 @@
 import re
 from collections import OrderedDict
 
-from hardcoded_shit import (client_attribute_order, client_type_order,
-                            input_types, client_attributes)
+from hardcoded_shit import (CLIENT_ATTRIBUTE_ORDER, CLIENT_ATTRIBUTES,
+                            CLIENT_TYPE_ORDER, INPUT_TYPES)
 
 
 def title(val):
@@ -30,16 +30,11 @@ def format_key(key):
         return " ".join(key.split("_")).title()
 
 
-def format_value(val, pretty_phone=False):
-    try:
-        int(val)
-        if len(val) == 10 and pretty_phone:
-            return "({}) {}-{}".format(val[0:3], val[3:6], val[6:10])
-        return val
-    except:
-        if type(val) == str:
-            return val.title()
-        return val
+def view_format_phone(phone):
+    if len(phone) == 10:
+        return "({}) {}-{}".format(phone[0:3], phone[3:6], phone[6:10])
+    else:
+        return phone
 
 
 def format_bool(val):
@@ -47,10 +42,6 @@ def format_bool(val):
         return "Yes"
     else:
         return "No"
-
-
-def view_format_value(val):
-    return format_value(val, pretty_phone=True)
 
 
 def usd(value):
@@ -72,7 +63,7 @@ def force_num(string, output="int"):
 
 def format_datetime(datetime):
     t = str(datetime)
-    return "{}/{}/{} at {}".format(t[5:7], t[8:10], t[0:4],t[11:16])
+    return "{}/{}/{} at {}".format(t[5:7], t[8:10], t[0:4], t[11:16])
 
 
 def format_phone(string):
@@ -84,18 +75,23 @@ def format_phone(string):
     return result
 
 
+def to_dict(client_obj):
+    return dict((key, value) for key, value in client_obj.__dict__.items()
+                if not callable(value) and not key.startswith('_'))
+
+
 def sort_dict(unsorted_dict, dict_name):
     """
     Credit goes to John La Rooy of stackoverflow:
     stackoverflow.com/questions/12031482/custom-sorting-python-dictionary
     returns a sorted dictionary
     """
-    if dict_name == "client_attributes":
+    if dict_name == "CLIENT_ATTRIBUTES":
         return OrderedDict(sorted(unsorted_dict.items(),
-                                  key=lambda i: client_attribute_order.index(i[0])))
+                                  key=lambda i: CLIENT_ATTRIBUTE_ORDER.index(i[0])))
     elif dict_name == "CLIENT_TYPES":
         return OrderedDict(sorted(unsorted_dict.items(),
-                                  key=lambda i: client_type_order.index(i[0])))
+                                  key=lambda i: CLIENT_TYPE_ORDER.index(i[0])))
 
 
 def invert_dict(dictionary):
@@ -135,5 +131,5 @@ def merge_dicts(*dict_args):
     return result
 
 
-css_class = invert_dict(input_types)
-inverted_client_attributes = smart_invert_dict(client_attributes)
+CSS_CLASS = invert_dict(INPUT_TYPES)
+INVERTED_CLIENT_ATTRIBUTES = smart_invert_dict(CLIENT_ATTRIBUTES)

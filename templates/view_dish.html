@@ -7,15 +7,15 @@
 {% block main %}
   <h1>
     Dish Details:
-    {{ dish.name }}
+    {{dish.name}}
   </h1>
   <p>
     Description:
-    {{ dish.description|capitalize }}<br/>
+    {{dish.description|capitalize}}<br/>
     Base Price:
-    {{ dish.price|usd }}<br/>
+    {{dish.price|usd}}<br/>
   </p>
-  <form action="{{ url_for('dish') }}" method="POST">
+  <form action="{{url_for('dish')}}" method="POST">
     <div class="form-group">
       <button name="source" value="edit_button" class="btn btn-default" type="submit">Edit</button>
     </div>

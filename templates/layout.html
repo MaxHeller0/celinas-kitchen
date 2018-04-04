@@ -11,7 +11,7 @@
     <!-- documentation at http://getbootstrap.com/, alternative themes at https://www.bootstrapcdn.com/bootswatch/ -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
 
-    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet"/>
+    <link href="{{url_for('static', filename='styles.css')}}" rel="stylesheet"/>
 
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -35,7 +35,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('index') }}">
+            <a class="navbar-brand" href="{{url_for('index')}}">
               <span class="red">Celina's Kitchen</span>
             </a>
           </div>
@@ -57,7 +57,7 @@
                         });
                       });
                     </script>
-                    <form action="{{ url_for('client') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
+                    <form action="{{url_for('client')}}" method="POST" autocomplete="false" class="navbar-form navbar-left">
                       <div class="form-group">
                         <input list="client_names" id="client_name" class="form-control" name="name" placeholder="Client Name" required="required">
                         <datalist id="client_names">
@@ -89,7 +89,7 @@
                         });
                       });
                     </script>
-                    <form action="{{ url_for('dish') }}" method="POST" autocomplete="false" class="navbar-form navbar-left">
+                    <form action="{{url_for('dish')}}" method="POST" autocomplete="false" class="navbar-form navbar-left">
                       <div class="form-group">
                         <input id="dish_name" class="form-control" list="dishes" name="name" placeholder="Dish Name" required="required">
                         <datalist id="dishes">
@@ -106,12 +106,12 @@
                     </form>
                   </ul>
                 </li>
-                <form action="{{ url_for('new_order') }}" method="GET" class="navbar-form navbar-left">
+                <form action="{{url_for('new_order')}}" method="GET" class="navbar-form navbar-left">
                   <div class="form-group">
                     <button class="btn btn-default" type="submit">New Order</button>
                   </div>
                 </form>
-                <form action="{{ url_for('view_orders') }}" method="POST" class="navbar-form navbar-left">
+                <form action="{{url_for('view_orders')}}" method="POST" class="navbar-form navbar-left">
                   <div class="form-group">
                     <button class="btn btn-default" type="submit">View Orders</button>
                   </div>
@@ -121,28 +121,28 @@
             {% if session.admin_id == 1 %}
               <ul class="nav navbar-nav navbar-right">
                 <li>
-                  <a href="{{ url_for('register') }}">Register a New Admin</a>
+                  <a href="{{url_for('register')}}">Register a New Admin</a>
                 </li>
                 <li>
-                  <a href="{{ url_for('change_pwd') }}">Change Root Password</a>
+                  <a href="{{url_for('change_pwd')}}">Change Root Password</a>
                 </li>
                 <li>
-                  <a href="{{ url_for('logout') }}">Log Out</a>
+                  <a href="{{url_for('logout')}}">Log Out</a>
                 </li>
               </ul>
             {% elif session.admin_id %}
               <ul class="nav navbar-nav navbar-right">
                 <li>
-                  <a href="{{ url_for('change_pwd') }}">Change Password</a>
+                  <a href="{{url_for('change_pwd')}}">Change Password</a>
                 </li>
                 <li>
-                  <a href="{{ url_for('logout') }}">Log Out</a>
+                  <a href="{{url_for('logout')}}">Log Out</a>
                 </li>
               </ul>
             {% else %}
               <ul class="nav navbar-nav navbar-right">
                 <li>
-                  <a href="{{ url_for('login') }}">Log In</a>
+                  <a href="{{url_for('login')}}">Log In</a>
                 </li>
               </ul>
             {% endif %}
@@ -153,7 +153,7 @@
       {% if get_flashed_messages() %}
         <header>
           <div class="alert alert-info" role="alert">
-            {{ get_flashed_messages() | join(" ") }}
+            {{get_flashed_messages() | join(" ")}}
           </div>
         </header>
       {% endif %}
