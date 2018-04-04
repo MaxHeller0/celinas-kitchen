@@ -121,15 +121,14 @@ def client(name=None):
 @app.route("/salad_service_card/", methods=["GET", "POST"])
 @login_required
 def salad_service_card(name=None):
-    # TODO Fix
     if request.method == "POST":
         name = request.form.get("name")
         return redirect(url_for("salad_service_card", name=name))
     else:
         name = request.args.get("name")
-        client_data = get_client(name)
-        if client_data["client_type"] == 2:
-            return render_template("salad_service_card.html", client_data=client_data)
+        client = Client.query.filter_by(name=name).first()
+        if client._standing_order is not None:
+            return render_template("salad_service_card.html", client_data=client.data_dict())
         else:
             return redirect(url_for('index'))
 
@@ -172,6 +171,7 @@ def new_order():
 @app.route("/order/<order_id>", methods=["GET", "POST"])
 @login_required
 def order(order_id=None):
+    #TODO Find a way to identify what type of order is being created
     if order_id:
         order = Order.query.get(order_id)
     else:

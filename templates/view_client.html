@@ -39,11 +39,12 @@
     </div>
     <input type="hidden" name="name" value="{{client_data['name']}}">
   </form>
-  {% if client_data['client_type'] == 2 %}
+  <!-- {% if client_data["salad_notes"] %} -->
+  <!-- TODO Find a better checking system -->
     <form action="{{url_for('salad_service_card')}}" method="POST">
       <div class="form-group">
         <button name="name" value="{{client_data['name']}}" class="btn btn-default" type="submit"> View salad service card </button>
       </div>
     </form>
-  {% endif %}
+  <!-- {% endif %} -->
 {% endblock %}
